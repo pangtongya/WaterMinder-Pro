@@ -1,0 +1,46 @@
+# WaterMinder-Pro/project.yml
+# XcodeGen 配置文件
+
+name: WaterMinder
+options:
+  bundleIdPrefix: com.pangtong
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+targets:
+  WaterMinder:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: .
+        excludes:
+          - "WaterMinder.xcodeproj"
+          - "project.yml"
+          - "README.md"
+          - "Tests"
+          - ".git"
+          - "WORK_SUMMARY.md"
+          - "CHANGELOG.md"
+          - "*.md"
+    settings:
+      INFOPLIST_FILE: Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder
+      SWIFT_VERSION: "5.0"
+      MARKETING_VERSION: "1.0.0"
+      CURRENT_PROJECT_VERSION: "1"
+      SWIFT_STRICT_CONCURRENCY: "complete"
+      CODE_SIGN_STYLE: Automatic
+    dependencies: []
+  WaterMinderTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Tests
+    settings:
+      INFOPLIST_FILE: Tests/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder.tests
+      SWIFT_VERSION: "5.0"
+    dependencies:
+      - target: WaterMinder

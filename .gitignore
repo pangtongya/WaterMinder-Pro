@@ -1,0 +1,25 @@
+# WaterMinder Pro .gitignore
+
+.DS_Store
+*.xcuserdata
+*.xcworkspace/xcuserdata
+DerivedData/
+build/
+*.log
+WaterMinder.xcodeproj
+WaterMinder.xcworkspace
+
+# CocoaPods
+Pods/
+
+# Swift Package Manager
+.build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code injection
+iOSInjectionProject/
