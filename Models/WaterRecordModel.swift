@@ -6,7 +6,7 @@ import Foundation
 struct WaterRecordModel: Identifiable, Codable, Equatable {
     var id: UUID
     var createdAt: Date
-    var amount: Int // 喝水量（毫升）
+    var amount: Int
     var cupType: CupType
     var note: String?
     
@@ -43,16 +43,25 @@ struct WaterRecordModel: Identifiable, Codable, Equatable {
     }
     
     var timeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: createdAt)
+        Self.timeFormatter.string(from: createdAt)
     }
     
     var dateString: String {
+        Self.dateFormatter.string(from: createdAt)
+    }
+    
+    // MARK: - Static Formatters (避免重复创建)
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+    
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: createdAt)
-    }
+        return formatter
+    }()
 }
 
 // MARK: - CupType Enum
@@ -64,30 +73,30 @@ enum CupType: String, CaseIterable, Codable {
     
     var icon: String {
         switch self {
-        case .small: return "cup.and.saucer.fill"
+        case .small:  return "cup.and.saucer.fill"
         case .medium: return "mug.fill"
-        case .large: return "wineglass.fill"
+        case .large:  return "takeoutbag.and.cup.and.straw.fill"
         case .bottle: return "waterbottle.fill"
         }
     }
     
     var defaultAmount: Int {
         switch self {
-        case .small: return 200
+        case .small:  return 200
         case .medium: return 350
-        case .large: return 500
+        case .large:  return 500
         case .bottle: return 750
         }
     }
     
     var description: String {
-        return "\(rawValue) (\(defaultAmount)ml)"
+        "\(rawValue) (\(defaultAmount)ml)"
     }
 }
 
 // MARK: - Equatable
 extension WaterRecordModel {
     static func == (lhs: WaterRecordModel, rhs: WaterRecordModel) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.amount == rhs.amount && lhs.cupType == rhs.cupType
     }
 }

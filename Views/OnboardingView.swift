@@ -1,5 +1,5 @@
 // OnboardingView.swift
-// 应用引导页面
+// 引导页面 - 5步引导流程
 
 import SwiftUI
 
@@ -14,86 +14,86 @@ struct OnboardingView: View {
     @State private var reminderInterval: Int = 60
     
     var body: some View {
-        VStack {
-            // 页面内容
-            TabView(selection: $currentPage) {
-                WelcomePageView()
-                    .tag(0)
-                
-                GoalSetupPageView(dailyGoal: $dailyGoal)
-                    .tag(1)
-                
-                ReminderSetupPageView(enableReminder: $enableReminder, reminderInterval: $reminderInterval)
-                    .tag(2)
-                
-                HealthIntegrationPageView()
-                    .tag(3)
-                
-                CompletionPageView()
-                    .tag(4)
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .animation(.easeInOut, value: currentPage)
-            
-            // 底部按钮
-            VStack(spacing: 16) {
-                // 页面指示器
-                HStack(spacing: 8) {
-                    ForEach(0..<5) { index in
-                        Circle()
-                            .fill(currentPage == index ? Color.blue : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                
-                // 导航按钮
-                HStack {
-                    if currentPage > 0 {
-                        Button("上一步") {
-                            withAnimation {
-                                currentPage -= 1
-                            }
-                        }
-                        .buttonStyle(SecondaryButtonStyle())
-                    }
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // 页面内容
+                TabView(selection: $currentPage) {
+                    WelcomePage()
+                        .tag(0)
                     
-                    Spacer()
+                    GoalSetupPage(dailyGoal: $dailyGoal)
+                        .tag(1)
                     
-                    if currentPage < 4 {
-                        Button(currentPage == 3 ? "跳过" : "下一步") {
-                            withAnimation {
-                                if currentPage == 3 {
-                                    currentPage = 4
-                                } else {
-                                    currentPage += 1
-                                }
-                            }
-                        }
-                        .buttonStyle(PrimaryButtonStyle())
-                    } else {
-                        Button("开始使用") {
-                            completeOnboarding()
-                        }
-                        .buttonStyle(PrimaryButtonStyle())
-                    }
+                    ReminderSetupPage(enableReminder: $enableReminder, reminderInterval: $reminderInterval)
+                        .tag(2)
+                    
+                    HealthPage()
+                        .tag(3)
+                    
+                    CompletionPage()
+                        .tag(4)
                 }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .animation(.easeInOut, value: currentPage)
+                
+                // 底部导航
+                bottomBar(safeBottom: geometry.safeAreaInsets.bottom)
             }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 32)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .background(Color(.systemBackground))
         }
-        .background(Color(.systemBackground))
         .ignoresSafeArea()
     }
     
-    // MARK: - Private Methods
+    @ViewBuilder
+    private func bottomBar(safeBottom: CGFloat) -> some View {
+        VStack(spacing: 20) {
+            // 指示器
+            HStack(spacing: 8) {
+                ForEach(0..<5) { index in
+                    Capsule()
+                        .fill(currentPage == index ? Color.waterminderPrimary : Color.gray.opacity(0.25))
+                        .frame(width: currentPage == index ? 24 : 8, height: 8)
+                        .animation(.spring(response: 0.4), value: currentPage)
+                }
+            }
+            
+            // 按钮
+            HStack {
+                if currentPage > 0 && currentPage < 4 {
+                    Button("上一步") {
+                        withAnimation { currentPage -= 1 }
+                    }
+                    .buttonStyle(OnboardingSecondaryButtonStyle())
+                }
+                
+                Spacer()
+                
+                if currentPage < 4 {
+                    Button(currentPage == 3 ? "跳过" : "下一步") {
+                        withAnimation {
+                            currentPage = currentPage == 3 ? 4 : currentPage + 1
+                        }
+                    }
+                    .buttonStyle(OnboardingPrimaryButtonStyle())
+                } else {
+                    Button("开始使用") {
+                        completeOnboarding()
+                    }
+                    .buttonStyle(OnboardingPrimaryButtonStyle())
+                }
+            }
+        }
+        .padding(.horizontal, 32)
+        .padding(.bottom, safeBottom + 20)
+        .padding(.top, 16)
+    }
     
     private func completeOnboarding() {
-        // 保存设置
         appState.dailyGoal = dailyGoal
         appState.reminderEnabled = enableReminder
         appState.reminderInterval = reminderInterval
         
-        // 设置提醒
         if enableReminder {
             Task {
                 _ = await notificationManager.requestAuthorization()
@@ -101,7 +101,6 @@ struct OnboardingView: View {
             }
         }
         
-        // 标记引导完成
         appState.hasCompletedOnboarding = true
         appState.save()
         
@@ -110,76 +109,87 @@ struct OnboardingView: View {
     }
 }
 
-// MARK: - Welcome Page
-struct WelcomePageView: View {
+// MARK: - Onboarding Pages
+
+struct WelcomePage: View {
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
             
-            // 应用图标
-            Image(systemName: "drop.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.blue)
+            ZStack {
+                Circle()
+                    .fill(LinearGradient(
+                        colors: [Color.waterminderPrimary, Color.waterminderAccent],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 140, height: 140)
+                
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+            }
             
-            VStack(spacing: 16) {
-                Text("欢迎使用 WaterMinder")
-                    .font(.system(size: 28, weight: .bold))
+            VStack(spacing: 12) {
+                Text("欢迎使用\nWaterMinder")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
                     .multilineTextAlignment(.center)
                 
-                Text("智能喝水提醒，帮您保持健康的水分摄入")
+                Text("智能喝水提醒\n帮您保持健康的水分摄入")
                     .font(.system(size: 16))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
             }
             
             Spacer()
         }
+        .padding(.horizontal, 32)
     }
 }
 
-// MARK: - Goal Setup Page
-struct GoalSetupPageView: View {
+struct GoalSetupPage: View {
     @Binding var dailyGoal: Int
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             Spacer()
             
-            Image(systemName: "target")
-                .font(.system(size: 60))
-                .foregroundColor(.blue)
-            
-            VStack(spacing: 16) {
-                Text("设置每日饮水目标")
-                    .font(.system(size: 24, weight: .semibold))
-                
-                Text("建议每日饮水 \(2000)ml，您可以根据需要调整")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+            ZStack {
+                Circle()
+                    .fill(Color.waterminderPrimary.opacity(0.1))
+                    .frame(width: 110, height: 110)
+                Image(systemName: "target")
+                    .font(.system(size: 44))
+                    .foregroundColor(.waterminderPrimary)
             }
             
-            // 目标选择器
+            VStack(spacing: 8) {
+                Text("设置每日饮水目标")
+                    .font(.system(size: 24, weight: .semibold))
+                Text("建议每日 2000ml，可根据需要调整")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            
             VStack(spacing: 16) {
                 TextField("2000", value: $dailyGoal, formatter: NumberFormatter())
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                    .font(.system(size: 52, weight: .bold, design: .rounded))
                     .multilineTextAlignment(.center)
                     .keyboardType(.numberPad)
                 
-                Text("毫升 (ml)")
-                    .font(.system(size: 16))
+                Text("毫升 / 天")
+                    .font(.system(size: 15))
                     .foregroundColor(.secondary)
                 
-                // 快捷设置
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     ForEach([1500, 2000, 2500, 3000], id: \.self) { goal in
                         Button("\(goal)ml") {
                             dailyGoal = goal
                         }
+                        .font(.system(size: 14, weight: .medium))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(dailyGoal == goal ? Color.blue : Color(.tertiarySystemBackground))
+                        .background(dailyGoal == goal ? Color.waterminderPrimary : Color(.tertiarySystemBackground))
                         .foregroundColor(dailyGoal == goal ? .white : .primary)
                         .cornerRadius(8)
                     }
@@ -192,38 +202,40 @@ struct GoalSetupPageView: View {
     }
 }
 
-// MARK: - Reminder Setup Page
-struct ReminderSetupPageView: View {
+struct ReminderSetupPage: View {
     @Binding var enableReminder: Bool
     @Binding var reminderInterval: Int
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             Spacer()
             
-            Image(systemName: "bell.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.blue)
-            
-            VStack(spacing: 16) {
-                Text("设置喝水提醒")
-                    .font(.system(size: 24, weight: .semibold))
-                
-                Text("开启提醒后，我们会定时提醒您喝水")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+            ZStack {
+                Circle()
+                    .fill(Color.waterminderPrimary.opacity(0.1))
+                    .frame(width: 110, height: 110)
+                Image(systemName: "bell.fill")
+                    .font(.system(size: 44))
+                    .foregroundColor(.waterminderPrimary)
             }
             
-            // 提醒设置
+            VStack(spacing: 8) {
+                Text("设置喝水提醒")
+                    .font(.system(size: 24, weight: .semibold))
+                Text("定时提醒您补充水分")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            
             VStack(spacing: 20) {
                 Toggle("开启提醒", isOn: $enableReminder)
+                    .tint(.waterminderPrimary)
                     .padding(.horizontal, 32)
                 
                 if enableReminder {
                     VStack(spacing: 12) {
                         Text("提醒间隔")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 15, weight: .medium))
                         
                         Picker("间隔", selection: $reminderInterval) {
                             ForEach([30, 45, 60, 90, 120], id: \.self) { interval in
@@ -231,7 +243,7 @@ struct ReminderSetupPageView: View {
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, 24)
                     }
                 }
             }
@@ -241,27 +253,29 @@ struct ReminderSetupPageView: View {
     }
 }
 
-// MARK: - Health Integration Page
-struct HealthIntegrationPageView: View {
+struct HealthPage: View {
     @EnvironmentObject var healthManager: HealthManager
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 28) {
             Spacer()
             
-            Image(systemName: "heart.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.red)
+            ZStack {
+                Circle()
+                    .fill(Color.red.opacity(0.1))
+                    .frame(width: 110, height: 110)
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 44))
+                    .foregroundColor(.red)
+            }
             
-            VStack(spacing: 16) {
+            VStack(spacing: 8) {
                 Text("连接健康App")
                     .font(.system(size: 24, weight: .semibold))
-                
-                Text("将您的喝水记录同步到健康App，获得更全面的健康数据")
+                Text("将喝水记录同步到健康App\n获得更全面的健康数据")
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
             }
             
             Button(action: requestHealthAuthorization) {
@@ -272,14 +286,18 @@ struct HealthIntegrationPageView: View {
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
                 .padding(.horizontal, 32)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
                 .background(Color.red)
-                .cornerRadius(8)
+                .cornerRadius(12)
             }
-            .buttonStyle(PlainButtonStyle())
+            
+            Text("可以稍后在设置中连接")
+                .font(.system(size: 13))
+                .foregroundColor(.secondary)
             
             Spacer()
         }
+        .padding(.horizontal, 32)
     }
     
     private func requestHealthAuthorization() {
@@ -289,21 +307,25 @@ struct HealthIntegrationPageView: View {
     }
 }
 
-// MARK: - Completion Page
-struct CompletionPageView: View {
+struct CompletionPage: View {
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
             
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.green)
+            ZStack {
+                Circle()
+                    .fill(Color.waterminderSuccess.opacity(0.1))
+                    .frame(width: 140, height: 140)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.waterminderSuccess)
+            }
             
-            VStack(spacing: 16) {
-                Text("设置完成！")
-                    .font(.system(size: 28, weight: .bold))
+            VStack(spacing: 12) {
+                Text("一切就绪！")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
                 
-                Text("现在开始您的健康喝水之旅吧！")
+                Text("开始您的健康喝水之旅吧\n每一天都是更好的自己")
                     .font(.system(size: 16))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -311,33 +333,37 @@ struct CompletionPageView: View {
             
             Spacer()
         }
+        .padding(.horizontal, 32)
     }
 }
 
 // MARK: - Button Styles
-struct PrimaryButtonStyle: ButtonStyle {
+
+struct OnboardingPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .semibold))
             .foregroundColor(.white)
-            .padding(.horizontal, 32)
-            .padding(.vertical, 12)
-            .background(Color.blue)
-            .cornerRadius(8)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 14)
+            .background(Color.waterminderPrimary)
+            .cornerRadius(12)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
-struct SecondaryButtonStyle: ButtonStyle {
+struct OnboardingSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .medium))
-            .foregroundColor(.blue)
-            .padding(.horizontal, 32)
-            .padding(.vertical, 12)
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(8)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .foregroundColor(.waterminderPrimary)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 14)
+            .background(Color.waterminderPrimary.opacity(0.1))
+            .cornerRadius(12)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 

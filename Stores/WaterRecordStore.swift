@@ -1,5 +1,5 @@
 // WaterRecordStore.swift
-// 喝水记录数据管理
+// 喝水记录数据管理 - 含连胜计算
 
 import Foundation
 import SwiftUI
@@ -9,6 +9,7 @@ class WaterRecordStore: ObservableObject {
     @Published var items: [WaterRecordModel] = []
     
     private var saveWorkItem: DispatchWorkItem?
+    private var appState: AppState { AppState.shared }
     
     private static let storeURL: URL = {
         FileManager.default
@@ -28,7 +29,7 @@ class WaterRecordStore: ObservableObject {
             cupType: cupType,
             note: note
         )
-        items.insert(record, at: 0) // 新记录插入到开头
+        items.insert(record, at: 0)
         NotificationCenter.default.post(
             name: .init("WaterRecordStoreDidAddRecord"),
             object: record
@@ -75,7 +76,6 @@ class WaterRecordStore: ObservableObject {
     }
     
     var todayProgress: Double {
-        guard let appState = try? getAppState() else { return 0.0 }
         let goal = appState.dailyGoal
         guard goal > 0 else { return 0.0 }
         return min(Double(todayTotalAmount) / Double(goal), 1.0)
@@ -93,12 +93,109 @@ class WaterRecordStore: ObservableObject {
         return total / thisWeekRecords.count
     }
     
-    // MARK: - Helper Methods
+    // MARK: - Streak Calculation
     
-    private func getAppState() throws -> AppState {
-        // 通过 NotificationCenter 或其他方式获取 AppState
-        // 这里简单返回 shared instance
-        AppState.shared
+    /// 当前连续达标天数
+    var currentStreak: Int {
+        calculateCurrentStreak()
+    }
+    
+    /// 历史最长连续达标天数
+    var longestStreak: Int {
+        calculateLongestStreak()
+    }
+    
+    /// 按日分组的总量字典
+    private var dailyTotals: [Date: Int] {
+        let calendar = Calendar.current
+        var totals: [Date: Int] = [:]
+        
+        for record in items {
+            let day = calendar.startOfDay(for: record.createdAt)
+            totals[day, default: 0] += record.amount
+        }
+        return totals
+    }
+    
+    private func calculateCurrentStreak() -> Int {
+        let calendar = Calendar.current
+        let goal = appState.dailyGoal
+        let totals = dailyTotals
+        
+        var streak = 0
+        var checkDate = calendar.startOfDay(for: Date())
+        
+        while true {
+            let dayTotal = totals[checkDate] ?? 0
+            if dayTotal >= goal {
+                streak += 1
+                checkDate = calendar.date(byAdding: .day, value: -1, to: checkDate)!
+            } else {
+                break
+            }
+        }
+        
+        return streak
+    }
+    
+    private func calculateLongestStreak() -> Int {
+        let calendar = Calendar.current
+        let goal = appState.dailyGoal
+        let totals = dailyTotals
+        
+        guard !totals.isEmpty else { return 0 }
+        
+        // 获取所有有记录的日期，排序
+        let sortedDays = totals.keys.sorted(by: >)
+        
+        var longestStreak = 0
+        var currentRun = 0
+        var lastDate: Date?
+        
+        for date in sortedDays {
+            if let last = lastDate {
+                let expectedNextDay = calendar.date(byAdding: .day, value: -1, to: last)!
+                if calendar.isDate(date, inSameDayAs: expectedNextDay) {
+                    // 连续日期
+                    if (totals[date] ?? 0) >= goal {
+                        currentRun += 1
+                    } else {
+                        longestStreak = max(longestStreak, currentRun)
+                        currentRun = 0
+                    }
+                } else {
+                    // 不连续
+                    longestStreak = max(longestStreak, currentRun)
+                    currentRun = (totals[date] ?? 0) >= goal ? 1 : 0
+                }
+            } else {
+                currentRun = (totals[date] ?? 0) >= goal ? 1 : 0
+            }
+            lastDate = date
+        }
+        
+        longestStreak = max(longestStreak, currentRun)
+        return longestStreak
+    }
+    
+    /// 按日期范围获取每日饮水总量
+    func dailyAmounts(from startDate: Date, to endDate: Date) -> [(date: Date, amount: Int)] {
+        let calendar = Calendar.current
+        var result: [(date: Date, amount: Int)] = []
+        
+        var currentDate = calendar.startOfDay(for: startDate)
+        let endDay = calendar.startOfDay(for: endDate)
+        
+        while currentDate <= endDay {
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+            let dayTotal = items
+                .filter { $0.createdAt >= currentDate && $0.createdAt < nextDay }
+                .reduce(0) { $0 + $1.amount }
+            result.append((currentDate, dayTotal))
+            currentDate = nextDay
+        }
+        
+        return result
     }
     
     // MARK: - Persistence

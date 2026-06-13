@@ -1,5 +1,5 @@
 // AppState.swift
-// 全局应用状态
+// 全局应用状态 - 自动保存
 
 import SwiftUI
 import Foundation
@@ -8,11 +8,21 @@ import Foundation
 class AppState: ObservableObject, @preconcurrency Codable {
     static let shared = AppState()
     
-    @Published var hasCompletedOnboarding: Bool = false
-    @Published var dailyGoal: Int = 2000 // 每日目标（毫升）
-    @Published var reminderEnabled: Bool = false
-    @Published var reminderInterval: Int = 60 // 提醒间隔（分钟）
-    @Published var theme: AppTheme = .system
+    @Published var hasCompletedOnboarding: Bool = false {
+        didSet { save() }
+    }
+    @Published var dailyGoal: Int = 2000 {
+        didSet { save() }
+    }
+    @Published var reminderEnabled: Bool = false {
+        didSet { save() }
+    }
+    @Published var reminderInterval: Int = 60 {
+        didSet { save() }
+    }
+    @Published var theme: AppTheme = .system {
+        didSet { save() }
+    }
     
     private var saveWorkItem: DispatchWorkItem?
     
@@ -61,7 +71,7 @@ class AppState: ObservableObject, @preconcurrency Codable {
             self?.performSave()
         }
         saveWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
     }
     
     private func performSave() {
@@ -83,8 +93,7 @@ class AppState: ObservableObject, @preconcurrency Codable {
             reminderInterval = decoded.reminderInterval
             theme = decoded.theme
         } catch {
-            // 首次启动，用默认值
-            print("[AppState] Load error: \(error)")
+            print("[AppState] First launch - using defaults")
         }
     }
 }
@@ -98,8 +107,8 @@ enum AppTheme: String, CaseIterable, Codable {
     var icon: String {
         switch self {
         case .system: return "circle.lefthalf.filled"
-        case .light: return "sun.max.fill"
-        case .dark: return "moon.fill"
+        case .light:  return "sun.max.fill"
+        case .dark:   return "moon.fill"
         }
     }
 }

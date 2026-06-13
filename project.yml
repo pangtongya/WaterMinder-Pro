@@ -7,6 +7,7 @@ options:
   deploymentTarget:
     iOS: "16.0"
   xcodeVersion: "15.0"
+  
 targets:
   WaterMinder:
     type: application
@@ -26,10 +27,32 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder
       SWIFT_VERSION: "5.0"
       MARKETING_VERSION: "1.0.0"
-      CURRENT_PROJECT_VERSION: "1"
+      CURRENT_PROJECT_VERSION: "2"
       SWIFT_STRICT_CONCURRENCY: "complete"
       CODE_SIGN_STYLE: Automatic
-    dependencies: []
+      CODE_SIGN_ENTITLEMENTS: WaterMinder.entitlements
+    dependencies:
+      - target: WaterMinderWidget
+    preBuildScripts:
+      - name: "Update Widget Data"
+        script: |
+          # Widget data will be updated by the app at runtime
+          echo "Widget pre-build step"
+          
+  WaterMinderWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: WaterMinderWidget
+    settings:
+      INFOPLIST_FILE: WaterMinderWidget/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder.widget
+      SWIFT_VERSION: "5.0"
+      MARKETING_VERSION: "1.0.0"
+      CURRENT_PROJECT_VERSION: "2"
+      CODE_SIGN_STYLE: Automatic
+      
   WaterMinderTests:
     type: bundle.unit-test
     platform: iOS

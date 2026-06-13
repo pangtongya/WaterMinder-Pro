@@ -19,31 +19,26 @@ struct WaterMinderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if appState.hasCompletedOnboarding {
-                ContentView()
-                    .environmentObject(appState)
-                    .environmentObject(recordStore)
-                    .environmentObject(notificationManager)
-                    .environmentObject(healthManager)
-                    .preferredColorScheme(colorScheme)
-                    .ignoresSafeArea()
-            } else {
-                OnboardingView()
-                    .environmentObject(appState)
-                    .environmentObject(recordStore)
-                    .environmentObject(notificationManager)
-                    .environmentObject(healthManager)
-                    .preferredColorScheme(colorScheme)
-                    .ignoresSafeArea()
+            Group {
+                if appState.hasCompletedOnboarding {
+                    ContentView()
+                } else {
+                    OnboardingView()
+                }
             }
+            .environmentObject(appState)
+            .environmentObject(recordStore)
+            .environmentObject(notificationManager)
+            .environmentObject(healthManager)
+            .preferredColorScheme(colorScheme)
         }
     }
     
     private var colorScheme: ColorScheme? {
         switch appState.theme {
         case .system: return nil
-        case .light: return .light
-        case .dark: return .dark
+        case .light:  return .light
+        case .dark:   return .dark
         }
     }
 }

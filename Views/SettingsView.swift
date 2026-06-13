@@ -1,149 +1,207 @@
 // SettingsView.swift
-// 设置页面
+// 设置页面 - 目标、提醒、健康、数据
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var recordStore: WaterRecordStore
     @EnvironmentObject var notificationManager: NotificationManager
     @EnvironmentObject var healthManager: HealthManager
     
     @State private var showingResetAlert = false
     @State private var showingHealthAlert = false
+    @State private var healthAuthorized = false
+    @State private var dailyGoalInput: String = ""
+    @State private var showingExporter = false
+    @State private var exportDataString = ""
     
     var body: some View {
-        NavigationView {
-            Form {
-                // 饮水目标设置
-                Section(header: Text("饮水目标")) {
+        Form {
+            // 饮水目标
+            Section {
+                HStack {
+                    Text("每日目标")
+                    Spacer()
+                    TextField("2000", text: $dailyGoalInput)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                        .onSubmit { applyDailyGoal() }
+                    Text("ml")
+                        .foregroundColor(.secondary)
+                }
+                .onAppear {
+                    dailyGoalInput = "\(appState.dailyGoal)"
+                }
+                .onChange(of: appState.dailyGoal) { newValue in
+                    dailyGoalInput = "\(newValue)"
+                }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([1500, 2000, 2500, 3000, 3500], id: \.self) { goal in
+                            Button("\(goal)ml") {
+                                appState.dailyGoal = goal
+                                dailyGoalInput = "\(goal)"
+                            }
+                            .font(.system(size: 13, weight: .medium))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(appState.dailyGoal == goal ? Color.waterminderPrimary : Color(.tertiarySystemBackground))
+                            .foregroundColor(appState.dailyGoal == goal ? .white : .primary)
+                            .cornerRadius(8)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            } header: {
+                Text("饮水目标")
+            } footer: {
+                Text("建议每日饮水 2000ml，可根据个人情况调整")
+            }
+            
+            // 提醒设置
+            Section {
+                Toggle("开启提醒", isOn: $appState.reminderEnabled)
+                    .onChange(of: appState.reminderEnabled) { newValue in
+                        handleReminderToggle(newValue)
+                    }
+                    .tint(.waterminderPrimary)
+                
+                if appState.reminderEnabled {
+                    Picker("提醒间隔", selection: $appState.reminderInterval) {
+                        ForEach([30, 45, 60, 90, 120], id: \.self) { interval in
+                            Text("每 \(interval) 分钟").tag(interval)
+                        }
+                    }
+                    .onChange(of: appState.reminderInterval) { _ in
+                        notificationManager.scheduleWaterReminder(interval: appState.reminderInterval)
+                    }
+                }
+            } header: {
+                Text("提醒设置")
+            } footer: {
+                Text("开启后，应用将按设定间隔发送喝水提醒")
+            }
+            
+            // 健康App集成
+            Section {
+                Button(action: requestHealthAuthorization) {
                     HStack {
-                        Text("每日目标")
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                        Text("连接健康App")
+                            .foregroundColor(.primary)
                         Spacer()
-                        TextField("2000", text: $appState.dailyGoalText)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
-                        Text("ml")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    // 快捷设置按钮
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {                        let quickGoals = [1500, 2000, 2500, 3000]
-                            ForEach(quickGoals, id: \.self) { goal in
-                                Button("\(goal)ml") {
-                                    appState.dailyGoal = goal
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(appState.dailyGoal == goal ? Color.blue : Color(.tertiarySystemBackground))
-                                .foregroundColor(appState.dailyGoal == goal ? .white : .primary)
-                                .cornerRadius(8)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-                
-                // 提醒设置
-                Section(header: Text("提醒设置")) {
-                    Toggle("开启提醒", isOn: $appState.reminderEnabled)
-                        .onChange(of: appState.reminderEnabled) { newValue in
-                            handleReminderToggle(newValue)
-                        }
-                    
-                    if appState.reminderEnabled {
-                        Picker("提醒间隔", selection: $appState.reminderInterval) {
-                            ForEach([30, 45, 60, 90, 120], id: \.self) { interval in
-                                Text("\(interval)分钟").tag(interval)
-                            }
-                        }
-                        .onChange(of: appState.reminderInterval) { _ in
-                            notificationManager.scheduleWaterReminder(interval: appState.reminderInterval)
+                        if healthAuthorized {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        } else {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
                 
-                // 健康App集成
-                Section(header: Text("健康App")) {
-                    Button(action: requestHealthAuthorization) {
+                if healthAuthorized {
+                    Text("已连接，喝水记录将自动同步到健康App")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } header: {
+                Text("健康App")
+            }
+            
+            // 外观设置
+            Section {
+                Picker("主题", selection: $appState.theme) {
+                    ForEach(AppTheme.allCases, id: \.self) { theme in
                         HStack {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.red)
-                            Text("连接健康App")
-                            Spacer()
-                            if healthManager.isAuthorized {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            }
+                            Image(systemName: theme.icon)
+                            Text(theme.rawValue)
                         }
-                    }
-                    
-                    if healthManager.isAuthorized {
-                        Text("已连接，喝水记录将自动同步")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        .tag(theme)
                     }
                 }
-                
-                // 外观设置
-                Section(header: Text("外观")) {
-                    Picker("主题", selection: $appState.theme) {
-                        ForEach(AppTheme.allCases, id: \.self) { theme in
-                            HStack {
-                                Image(systemName: theme.icon)
-                                Text(theme.rawValue)
-                            }
-                            .tag(theme)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                // 数据管理
-                Section(header: Text("数据管理")) {
-                    Button("导出数据") {
-                        exportData()
-                    }
-                    
-                    Button("重置所有数据") {
-                        showingResetAlert = true
-                    }
-                    .foregroundColor(.red)
-                }
-                
-                // 关于
-                Section(header: Text("关于")) {
+                .pickerStyle(.segmented)
+            } header: {
+                Text("外观")
+            }
+            
+            // 数据管理
+            Section {
+                Button(action: exportData) {
                     HStack {
-                        Text("版本")
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Button("隐私政策") {
-                        openPrivacyPolicy()
-                    }
-                    
-                    Button("评价我们") {
-                        rateApp()
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.waterminderPrimary)
+                        Text("导出数据")
+                            .foregroundColor(.primary)
                     }
                 }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("设置")
-            .alert("重置确认", isPresented: $showingResetAlert) {
-                Button("取消", role: .cancel) { }
-                Button("重置", role: .destructive) {
-                    resetAllData()
+                
+                Button(role: .destructive) {
+                    showingResetAlert = true
+                } label: {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("重置所有数据")
+                    }
                 }
-            } message: {
-                Text("此操作将删除所有喝水记录和个人设置，且不可恢复。确定要继续吗？")
+            } header: {
+                Text("数据管理")
             }
+            
+            // 关于
+            Section {
+                HStack {
+                    Text("版本")
+                    Spacer()
+                    Text("1.0.0")
+                        .foregroundColor(.secondary)
+                }
+                
+                Button("隐私政策") {
+                    openPrivacyPolicy()
+                }
+                
+                Button("评价我们") {
+                    rateApp()
+                }
+            } header: {
+                Text("关于")
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("设置")
+        .navigationBarTitleDisplayMode(.large)
+        .alert("重置确认", isPresented: $showingResetAlert) {
+            Button("取消", role: .cancel) { }
+            Button("重置", role: .destructive) {
+                resetAllData()
+            }
+        } message: {
+            Text("此操作将删除所有喝水记录和个人设置，且不可恢复。确定要继续吗？")
+        }
+        .alert("权限提示", isPresented: $showingHealthAlert) {
+            Button("知道了", role: .cancel) { }
+        } message: {
+            Text("请在系统设置中允许 WaterMinder 访问健康数据")
         }
     }
     
     // MARK: - Private Methods
+    
+    private func applyDailyGoal() {
+        if let value = Int(dailyGoalInput), value > 0, value <= 10000 {
+            appState.dailyGoal = value
+        } else {
+            dailyGoalInput = "\(appState.dailyGoal)"
+        }
+    }
     
     private func handleReminderToggle(_ enabled: Bool) {
         if enabled {
@@ -164,59 +222,93 @@ struct SettingsView: View {
     private func requestHealthAuthorization() {
         Task {
             let granted = await healthManager.requestAuthorization()
-            if !granted {
-                showingHealthAlert = true
+            await MainActor.run {
+                healthAuthorized = granted
+                if !granted {
+                    showingHealthAlert = true
+                }
             }
         }
     }
     
     private func exportData() {
-        // TODO: 实现数据导出功能
-        print("[SettingsView] Export data")
-    }
-    
-    private func resetAllData() {
-        // TODO: 实现数据重置功能
-        print("[SettingsView] Reset all data")
-    }
-    
-    private func openPrivacyPolicy() {
-        // TODO: 打开隐私政策页面
-        print("[SettingsView] Open privacy policy")
-    }
-    
-    private func rateApp() {
-        // TODO: 打开App Store评价页面
-        print("[SettingsView] Rate app")
-    }
-}
-
-// MARK: - AppState Extension
-extension AppState {
-    var dailyGoalText: String {
-        get { "\(dailyGoal)" }
-        set {
-            if let value = Int(newValue), value > 0 {
-                dailyGoal = value
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        
+        let exportDict: [String: Any] = [
+            "version": "1.0.0",
+            "exportDate": ISO8601DateFormatter().string(from: Date()),
+            "dailyGoal": appState.dailyGoal,
+            "totalRecords": recordStore.items.count,
+            "currentStreak": recordStore.currentStreak,
+            "longestStreak": recordStore.longestStreak,
+            "records": recordStore.items.map { record in
+                [
+                    "id": record.id.uuidString,
+                    "date": ISO8601DateFormatter().string(from: record.createdAt),
+                    "amount": record.amount,
+                    "cupType": record.cupType.rawValue,
+                    "note": record.note ?? ""
+                ] as [String: Any]
+            }
+        ]
+        
+        if let jsonData = try? JSONSerialization.data(withJSONObject: exportDict, options: .prettyPrinted),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            exportDataString = jsonString
+            
+            // 保存到临时文件用于分享
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("WaterMinder_Export_\(Date().timeIntervalSince1970).json")
+            try? jsonData.write(to: tempURL)
+            
+            let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                rootVC.present(activityVC, animated: true)
             }
         }
     }
-}
-
-// MARK: - HealthManager Extension
-extension HealthManager {
-    var isAuthorized: Bool {
-        // TODO: 实际检查授权状态
-        false
+    
+    private func resetAllData() {
+        recordStore.items.removeAll()
+        recordStore.save()
+        
+        appState.dailyGoal = 2000
+        appState.reminderEnabled = false
+        appState.reminderInterval = 60
+        appState.theme = .system
+        appState.save()
+        
+        notificationManager.cancelWaterReminders()
+        
+        let impact = UIImpactFeedbackGenerator(style: .heavy)
+        impact.impactOccurred()
+    }
+    
+    private func openPrivacyPolicy() {
+        if let url = URL(string: "https://pangtong.github.io/waterminder/privacy") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func rateApp() {
+        // App Store review URL
+        if let url = URL(string: "https://apps.apple.com/app/id0000000000?action=write-review") {
+            UIApplication.shared.open(url)
+        }
     }
 }
 
 // MARK: - Preview
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView()
-            .environmentObject(AppState.shared)
-            .environmentObject(NotificationManager.shared)
-            .environmentObject(HealthManager.shared)
+        NavigationStack {
+            SettingsView()
+                .environmentObject(AppState.shared)
+                .environmentObject(WaterRecordStore())
+                .environmentObject(NotificationManager.shared)
+                .environmentObject(HealthManager.shared)
+        }
     }
 }

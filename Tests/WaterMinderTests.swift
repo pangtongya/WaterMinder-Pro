@@ -66,7 +66,7 @@ final class WaterMinderTests: XCTestCase {
         // 测试杯型图标
         XCTAssertEqual(CupType.small.icon, "cup.and.saucer.fill")
         XCTAssertEqual(CupType.medium.icon, "mug.fill")
-        XCTAssertEqual(CupType.large.icon, "wineglass.fill")
+        XCTAssertEqual(CupType.large.icon, "takeoutbag.and.cup.and.straw.fill")
         XCTAssertEqual(CupType.bottle.icon, "waterbottle.fill")
     }
     

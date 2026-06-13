@@ -39,5 +39,12 @@
 	<string>WaterMinder 需要读取您的健康数据来同步喝水记录</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>WaterMinder 需要写入喝水记录到健康App</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string></string>
+		<key>UIImageName</key>
+		<string></string>
+	</dict>
 </dict>
 </plist>

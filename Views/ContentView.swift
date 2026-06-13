@@ -1,5 +1,5 @@
 // ContentView.swift
-// 根导航视图
+// 根导航 - TabView 主框架
 
 import SwiftUI
 
@@ -21,7 +21,7 @@ struct ContentView: View {
         var icon: String {
             switch self {
             case .home: return "house"
-            case .history: return "list.bullet"
+            case .history: return "calendar"
             case .settings: return "gearshape"
             }
         }
@@ -29,39 +29,50 @@ struct ContentView: View {
         var filledIcon: String {
             switch self {
             case .home: return "house.fill"
-            case .history: return "list.bullet"
+            case .history: return "calendar"
             case .settings: return "gearshape.fill"
             }
         }
     }
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
+        ZStack {
+            TabView(selection: $selectedTab) {
+                NavigationStack {
+                    HomeView()
+                }
                 .tag(Tab.home)
                 .tabItem {
                     Image(systemName: selectedTab == .home ? Tab.home.filledIcon : Tab.home.icon)
                     Text(Tab.home.title)
                 }
-            
-            HistoryView()
+                
+                NavigationStack {
+                    HistoryView()
+                }
                 .tag(Tab.history)
                 .tabItem {
                     Image(systemName: selectedTab == .history ? Tab.history.filledIcon : Tab.history.icon)
                     Text(Tab.history.title)
                 }
-            
-            SettingsView()
+                
+                NavigationStack {
+                    SettingsView()
+                }
                 .tag(Tab.settings)
                 .tabItem {
                     Image(systemName: selectedTab == .settings ? Tab.settings.filledIcon : Tab.settings.icon)
                     Text(Tab.settings.title)
                 }
+            }
+            .tint(.waterminderPrimary)
         }
-        .tint(.blue) // WaterMinder 品牌色
-        .preferredColorScheme(appState.theme == .system ? nil : (appState.theme == .dark ? .dark : .light))
         .onAppear {
             setupNotifications()
+            syncWidgetData()
+        }
+        .onChange(of: recordStore.items.count) { _ in
+            syncWidgetData()
         }
     }
     
@@ -71,6 +82,15 @@ struct ContentView: View {
         if appState.reminderEnabled {
             notificationManager.scheduleWaterReminder(interval: appState.reminderInterval)
         }
+    }
+    
+    private func syncWidgetData() {
+        WidgetDataManager.shared.updateWidgetData(
+            progress: recordStore.todayProgress,
+            totalAmount: recordStore.todayTotalAmount,
+            goal: appState.dailyGoal,
+            streakDays: recordStore.currentStreak
+        )
     }
 }
 
