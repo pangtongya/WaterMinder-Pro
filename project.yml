@@ -22,7 +22,10 @@ targets:
           - ".git"
           - "WORK_SUMMARY.md"
           - "CHANGELOG.md"
+          - "DELIVERY.md"
           - "*.md"
+          - "build"
+          - "DerivedData"
     settings:
       INFOPLIST_FILE: Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder

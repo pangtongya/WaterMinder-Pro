@@ -26,6 +26,7 @@ struct WaterMinderApp: App {
                     .environmentObject(notificationManager)
                     .environmentObject(healthManager)
                     .preferredColorScheme(colorScheme)
+                    .ignoresSafeArea()
             } else {
                 OnboardingView()
                     .environmentObject(appState)
@@ -33,6 +34,7 @@ struct WaterMinderApp: App {
                     .environmentObject(notificationManager)
                     .environmentObject(healthManager)
                     .preferredColorScheme(colorScheme)
+                    .ignoresSafeArea()
             }
         }
     }

@@ -82,6 +82,7 @@ struct OnboardingView: View {
             .padding(.bottom, 32)
         }
         .background(Color(.systemBackground))
+        .ignoresSafeArea()
     }
     
     // MARK: - Private Methods
@@ -95,7 +96,7 @@ struct OnboardingView: View {
         // 设置提醒
         if enableReminder {
             Task {
-                await notificationManager.requestAuthorization()
+                _ = await notificationManager.requestAuthorization()
                 notificationManager.scheduleWaterReminder(interval: reminderInterval)
             }
         }
@@ -275,6 +276,7 @@ struct HealthIntegrationPageView: View {
                 .background(Color.red)
                 .cornerRadius(8)
             }
+            .buttonStyle(PlainButtonStyle())
             
             Spacer()
         }
@@ -282,7 +284,7 @@ struct HealthIntegrationPageView: View {
     
     private func requestHealthAuthorization() {
         Task {
-            await healthManager.requestAuthorization()
+            _ = await healthManager.requestAuthorization()
         }
     }
 }
