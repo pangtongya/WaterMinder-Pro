@@ -30,7 +30,7 @@ struct Provider: TimelineProvider {
             streakDays: streakDays
         )
         
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
@@ -71,7 +71,6 @@ struct WaterMinderWidgetEntryView: View {
             Color(.systemBackground)
             
             VStack(spacing: 8) {
-                // 进度环
                 ZStack {
                     Circle()
                         .stroke(Color(.systemGray5), lineWidth: 8)
@@ -114,7 +113,6 @@ struct WaterMinderWidgetEntryView: View {
             Color(.systemBackground)
             
             HStack(spacing: 16) {
-                // 进度环
                 ZStack {
                     Circle()
                         .stroke(Color(.systemGray5), lineWidth: 10)
@@ -250,13 +248,16 @@ struct WaterMinderWidget: Widget {
 // MARK: - Preview
 struct WaterMinderWidget_Previews: PreviewProvider {
     static var previews: some View {
-        WaterMinderWidgetEntryView(entry: SimpleEntry(
-            date: Date(),
-            progress: 0.65,
-            totalAmount: 1300,
-            goal: 2000,
-            streakDays: 5
-        ))
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
+        Group {
+            WaterMinderWidgetEntryView(entry: SimpleEntry(
+                date: Date(), progress: 0.65, totalAmount: 1300, goal: 2000, streakDays: 5
+            ))
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            
+            WaterMinderWidgetEntryView(entry: SimpleEntry(
+                date: Date(), progress: 0.65, totalAmount: 1300, goal: 2000, streakDays: 5
+            ))
+            .previewContext(WidgetPreviewContext(family: .systemMedium))
+        }
     }
 }
