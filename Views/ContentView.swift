@@ -9,7 +9,7 @@ struct ContentView: View {
     @EnvironmentObject var notificationManager: NotificationManager
     @EnvironmentObject var healthManager: HealthManager
     
-    @State private var selectedTab: Tab = .home
+    @State private var selectedTab: Tab = .home // 恢复默认首页
     
     enum Tab: String, CaseIterable {
         case home = "首页"
@@ -70,6 +70,7 @@ struct ContentView: View {
         .onAppear {
             setupNotifications()
             syncWidgetData()
+            setupInitialTab()
         }
         .onChange(of: recordStore.items.count) { _ in
             syncWidgetData()
@@ -91,6 +92,21 @@ struct ContentView: View {
             goal: appState.dailyGoal,
             streakDays: recordStore.currentStreak
         )
+    }
+    
+    private func setupInitialTab() {
+        // 检查 Launch Arguments (用于截图等自动化场景)
+        if let initialTab = CommandLine.arguments.first(where: { $0.hasPrefix("-initialTab=") }) {
+            let value = String(initialTab.dropFirst(12)) // 去掉 "-initialTab="
+            switch value.lowercased() {
+            case "history", "记录":
+                withAnimation(.easeInOut(duration: 0.3)) { selectedTab = .history }
+            case "settings", "设置":
+                withAnimation(.easeInOut(duration: 0.3)) { selectedTab = .settings }
+            default:
+                break
+            }
+        }
     }
 }
 
