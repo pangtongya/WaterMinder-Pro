@@ -64,32 +64,52 @@ struct ProgressSection: View {
         VStack(spacing: 0) {
             // 进度环
             ZStack {
+                // 外层发光效果
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color.cyan.opacity(0.15),
+                                Color.clear
+                            ]),
+                            center: .center,
+                            startRadius: 50,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 200, height: 200)
+
                 // 背景环
                 Circle()
-                    .stroke(Color(.systemGray5), lineWidth: 16)
-                    .frame(width: 180, height: 180)
-                
+                    .stroke(Color(.systemGray6).opacity(0.5), lineWidth: 18)
+                    .frame(width: 190, height: 190)
+
                 // 进度环
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(
                         LinearGradient(
-                            gradient: Gradient(colors: [.cyan, .blue]),
-                            startPoint: .bottomLeading,
-                            endPoint: .topTrailing
+                            gradient: Gradient(colors: [
+                                Color(red: 0.02, green: 0.71, blue: 0.83), // Teal
+                                Color(red: 0.00, green: 0.48, blue: 0.83)   // Blue
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 18, lineCap: .round)
                     )
-                    .frame(width: 180, height: 180)
+                    .frame(width: 190, height: 190)
                     .rotationEffect(.degrees(-90))
-                    .animation(.easeInOut(duration: 1.0), value: progress)
-                
+                    .animation(.spring(response: 0.8, dampingFraction: 0.7), value: progress)
+                    .shadow(color: Color.cyan.opacity(progress * 0.5), radius: progress * 15)
+
                 // 中心文字
                 VStack(spacing: 2) {
                     Text("\(totalAmount)")
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
-                    
+                        .contentTransition(.numericText())
+
                     Text("/ \(goal) ml")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
@@ -244,17 +264,38 @@ struct TodayRecordsView: View {
             .padding(.bottom, 8)
             
             if recordStore.todayRecords.isEmpty {
-                VStack(spacing: 10) {
-                    Image(systemName: "drop")
-                        .font(.system(size: 28))
-                        .foregroundColor(.waterminderSecondary.opacity(0.4))
-                    Text("今天还没记录喝水\n点击上方按钮开始吧")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
+                VStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.cyan.opacity(0.12),
+                                        Color.cyan.opacity(0.03)
+                                    ]),
+                                    center: .center,
+                                    startRadius: 20,
+                                    endRadius: 50
+                                )
+                            )
+                            .frame(width: 80, height: 80)
+
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.cyan)
+                    }
+
+                    VStack(spacing: 4) {
+                        Text("今天还没记录喝水")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.primary)
+                        Text("点击上方按钮，开始健康饮水之旅 💧")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 30)
+                .padding(.vertical, 36)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(recordStore.todayRecords.enumerated()), id: \.element.id) { index, record in
