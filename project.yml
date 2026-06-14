@@ -31,6 +31,7 @@ targets:
       SWIFT_STRICT_CONCURRENCY: "minimal"
       CODE_SIGN_STYLE: Automatic
       CODE_SIGN_ENTITLEMENTS: WaterMinder.entitlements
+      DEVELOPMENT_TEAM: "A9BU96SR38"
     preBuildScripts:
       - name: "Update Widget Data"
         script: |
