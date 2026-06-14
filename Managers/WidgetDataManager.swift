@@ -7,7 +7,7 @@ import WidgetKit
 final class WidgetDataManager {
     static let shared = WidgetDataManager()
     
-    private let defaults = UserDefaults(suiteName: "group.com.pangtong.waterminder")
+    private let defaults = UserDefaults(suiteName: "group.pangtong.WaterMinder")
     
     private init() {}
     

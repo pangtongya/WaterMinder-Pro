@@ -54,6 +54,7 @@ targets:
       CURRENT_PROJECT_VERSION: "2"
       CODE_SIGN_STYLE: Automatic
       CODE_SIGN_ENTITLEMENTS: WaterMinderWidget.entitlements
+      DEVELOPMENT_TEAM: "A9BU96SR38"
       SWIFT_STRICT_CONCURRENCY: "minimal"
       
   WaterMinderTests:
