@@ -73,7 +73,11 @@ struct ProgressSection: View {
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(
-                        Color.progressColor(progress),
+                        LinearGradient(
+                            gradient: Gradient(colors: [.cyan, .blue]),
+                            startPoint: .bottomLeading,
+                            endPoint: .topTrailing
+                        ),
                         style: StrokeStyle(lineWidth: 16, lineCap: .round)
                     )
                     .frame(width: 180, height: 180)
