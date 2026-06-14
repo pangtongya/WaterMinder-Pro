@@ -11,7 +11,7 @@ class WaterRecordStore: ObservableObject {
     private var saveWorkItem: DispatchWorkItem?
     private var appState: AppState { AppState.shared }
     
-    private static let storeURL: URL = {
+    nonisolated private static let storeURL: URL = {
         FileManager.default
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("water_records.json")
@@ -202,14 +202,16 @@ class WaterRecordStore: ObservableObject {
     
     func save() {
         saveWorkItem?.cancel()
+        // 快照当前数据，避免在并发块中捕获 self
+        let itemsSnapshot = items
         let workItem = DispatchWorkItem { [weak self] in
-            self?.performSave()
+            self?.performSave(items: itemsSnapshot)
         }
         saveWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: workItem)
     }
-    
-    private func performSave() {
+
+    private func performSave(items: [WaterRecordModel]) {
         do {
             let data = try JSONEncoder().encode(items)
             try data.write(to: Self.storeURL)
@@ -217,15 +219,13 @@ class WaterRecordStore: ObservableObject {
             print("[WaterRecordStore] Save error: \(error)")
         }
     }
-    
+
     private func load() {
-        Task.detached(priority: .background) { [weak self] in
+        Task { @MainActor in
             do {
                 let data = try Data(contentsOf: Self.storeURL)
-                let items = try JSONDecoder().decode([WaterRecordModel].self, from: data)
-                await MainActor.run {
-                    self?.items = items
-                }
+                let decodedItems = try JSONDecoder().decode([WaterRecordModel].self, from: data)
+                self.items = decodedItems
             } catch {
                 print("[WaterRecordStore] Load error: \(error)")
             }
