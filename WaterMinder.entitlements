@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.pangtong.WaterMinder</string>
+		<string>group.com.pangtong.waterminder</string>
 	</array>
 </dict>
 </plist>

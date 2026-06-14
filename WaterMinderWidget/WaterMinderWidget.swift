@@ -16,7 +16,7 @@ struct Provider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        let defaults = UserDefaults(suiteName: "group.pangtong.WaterMinder")
+        let defaults = UserDefaults(suiteName: "group.com.pangtong.waterminder")
         let progress = defaults?.double(forKey: "todayProgress") ?? 0.0
         let totalAmount = defaults?.integer(forKey: "todayTotalAmount") ?? 0
         let goal = defaults?.integer(forKey: "dailyGoal") ?? 2000
