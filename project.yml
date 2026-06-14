@@ -53,6 +53,7 @@ targets:
       CURRENT_PROJECT_VERSION: "2"
       CODE_SIGN_STYLE: Automatic
       CODE_SIGN_ENTITLEMENTS: WaterMinderWidget.entitlements
+      SWIFT_STRICT_CONCURRENCY: "minimal"
       
   WaterMinderTests:
     type: bundle.unit-test
