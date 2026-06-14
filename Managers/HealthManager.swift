@@ -14,6 +14,12 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
     
     // MARK: - Public Methods
     
+    var isAuthorized: Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        let status = healthStore.authorizationStatus(for: HKObjectType.quantityType(forIdentifier: .dietaryWater)!)
+        return status == .sharingAuthorized
+    }
+    
     func requestAuthorization() async -> Bool {
         guard HKHealthStore.isHealthDataAvailable() else {
             print("[HealthManager] Health data not available")

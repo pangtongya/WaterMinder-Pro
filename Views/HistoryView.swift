@@ -11,6 +11,7 @@ struct HistoryView: View {
     @State private var selectedDate = Date()
     @State private var selectedPeriod: Period = .week
     @State private var editingRecord: WaterRecordModel?
+    @State private var showingAnalysisReport = false
     
     enum Period: String, CaseIterable {
         case week = "本周"
@@ -116,9 +117,25 @@ struct HistoryView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("喝水记录")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: showAnalysisReport) {
+                    Image(systemName: "chart.bar.fill")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAnalysisReport) {
+            AnalysisReportView()
+        }
         .sheet(item: $editingRecord) { record in
             EditRecordView(record: record)
         }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func showAnalysisReport() {
+        showingAnalysisReport = true
     }
     
     // MARK: - Streak Card
@@ -384,6 +401,160 @@ struct EditRecordView: View {
         impactFeedback.impactOccurred()
         
         dismiss()
+    }
+}
+
+// MARK: - Analysis Report View
+struct AnalysisReportView: View {
+    @EnvironmentObject var recordStore: WaterRecordStore
+    @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // 本周摘要
+                    reportSection(title: "本周饮水摘要", icon: "drop.fill", color: .waterminderPrimary) {
+                        VStack(spacing: 12) {
+                            reportRow(label: "平均每日饮水量", value: "\(recordStore.thisWeekAverage) ml")
+                            reportRow(label: "达标天数", value: "\(goalMetDaysThisWeek) 天")
+                            reportRow(label: "最佳饮水日", value: "\(bestDayThisWeek) ml")
+                            reportRow(label: "总记录次数", value: "\(recordStore.thisWeekRecords.count) 次")
+                        }
+                    }
+                    
+                    // 建议
+                    reportSection(title: "个性化建议", icon: "lightbulb.fill", color: .waterminderAccent) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(suggestions, id: \.self) { suggestion in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.waterminderSuccess)
+                                    Text(suggestion)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 本月趋势
+                    reportSection(title: "本月趋势", icon: "chart.line.uptrend.xyaxis", color: .waterminderSecondary) {
+                        VStack(spacing: 12) {
+                            reportRow(label: "本月平均饮水量", value: "\(monthlyAverage) ml")
+                            reportRow(label: "本月达标率", value: String(format: "%.1f%%", goalMetRateThisMonth * 100))
+                        }
+                    }
+                }
+                .padding(.top, 4)
+            }
+            .scrollIndicators(.hidden)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("饮水分析报告")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var goalMetDaysThisWeek: Int {
+        let calendar = Calendar.current
+        let today = Date()
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+        let dailyTotals = recordStore.dailyAmounts(from: weekAgo, to: today)
+        return dailyTotals.filter { $0.amount >= appState.dailyGoal }.count
+    }
+    
+    private var bestDayThisWeek: Int {
+        let calendar = Calendar.current
+        let today = Date()
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+        let dailyTotals = recordStore.dailyAmounts(from: weekAgo, to: today)
+        return dailyTotals.map { $0.amount }.max() ?? 0
+    }
+    
+    private var monthlyAverage: Int {
+        let calendar = Calendar.current
+        let today = Date()
+        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
+        let dailyTotals = recordStore.dailyAmounts(from: monthAgo, to: today)
+        guard !dailyTotals.isEmpty else { return 0 }
+        let total = dailyTotals.reduce(0) { $0 + $1.amount }
+        return total / dailyTotals.count
+    }
+    
+    private var goalMetRateThisMonth: Double {
+        let calendar = Calendar.current
+        let today = Date()
+        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
+        let dailyTotals = recordStore.dailyAmounts(from: monthAgo, to: today)
+        guard !dailyTotals.isEmpty else { return 0 }
+        let goalMetDays = dailyTotals.filter { $0.amount >= appState.dailyGoal }.count
+        return Double(goalMetDays) / Double(dailyTotals.count)
+    }
+    
+    private var suggestions: [String] {
+        var result: [String] = []
+        let average = recordStore.thisWeekAverage
+        let goal = appState.dailyGoal
+        
+        if average < goal {
+            result.append("您本周平均饮水量为\(average)ml，低于目标\(goal)ml。建议增加饮水量，保持健康！")
+        } else {
+            result.append("恭喜！您本周平均饮水量为\(average)ml，已达到目标\(goal)ml。请继续保持！")
+        }
+        
+        if goalMetDaysThisWeek < 3 {
+            result.append("您本周只有\(goalMetDaysThisWeek)天达标，建议设置提醒，帮助您养成喝水习惯。")
+        }
+        
+        if recordStore.currentStreak == 0 {
+            result.append("您目前没有连胜记录，从今天开始，争取连续达标7天吧！")
+        } else if recordStore.currentStreak >= 7 {
+            result.append("太棒了！您已连续达标\(recordStore.currentStreak)天，继续保持这个好习惯！")
+        }
+        
+        return result
+    }
+    
+    // MARK: - Helper Views
+    
+    private func reportSection<Content: View>(title: String, icon: String, color: Color, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(color)
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+            }
+            
+            content()
+        }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+        .padding(.horizontal, 16)
+    }
+    
+    private func reportRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 16, weight: .medium, design: .monospaced))
+                .foregroundColor(.primary)
+        }
     }
 }
 

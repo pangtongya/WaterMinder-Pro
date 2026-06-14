@@ -71,7 +71,7 @@ class AppState: ObservableObject, @preconcurrency Codable {
             self?.performSave()
         }
         saveWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: workItem)
     }
     
     private func performSave() {

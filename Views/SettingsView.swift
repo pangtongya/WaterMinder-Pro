@@ -12,6 +12,7 @@ struct SettingsView: View {
     
     @State private var showingResetAlert = false
     @State private var showingHealthAlert = false
+    @State private var showingNotificationAlert = false
     @State private var healthAuthorized = false
     @State private var dailyGoalInput: String = ""
     @State private var showingExporter = false
@@ -178,6 +179,9 @@ struct SettingsView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("设置")
         .navigationBarTitleDisplayMode(.large)
+        .onAppear {
+            healthAuthorized = healthManager.isAuthorized
+        }
         .alert("重置确认", isPresented: $showingResetAlert) {
             Button("取消", role: .cancel) { }
             Button("重置", role: .destructive) {
@@ -190,6 +194,16 @@ struct SettingsView: View {
             Button("知道了", role: .cancel) { }
         } message: {
             Text("请在系统设置中允许 WaterMinder 访问健康数据")
+        }
+        .alert("通知权限", isPresented: $showingNotificationAlert) {
+            Button("取消", role: .cancel) { }
+            Button("去设置") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        } message: {
+            Text("请在系统设置中允许 WaterMinder 发送通知")
         }
     }
     
@@ -211,7 +225,7 @@ struct SettingsView: View {
                     notificationManager.scheduleWaterReminder(interval: appState.reminderInterval)
                 } else {
                     appState.reminderEnabled = false
-                    showingHealthAlert = true
+                    showingNotificationAlert = true
                 }
             }
         } else {
@@ -221,10 +235,10 @@ struct SettingsView: View {
     
     private func requestHealthAuthorization() {
         Task {
-            let granted = await healthManager.requestAuthorization()
+            _ = await healthManager.requestAuthorization()
             await MainActor.run {
-                healthAuthorized = granted
-                if !granted {
+                healthAuthorized = healthManager.isAuthorized
+                if !healthAuthorized {
                     showingHealthAlert = true
                 }
             }
@@ -232,34 +246,32 @@ struct SettingsView: View {
     }
     
     private func exportData() {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        
-        let exportDict: [String: Any] = [
-            "version": "1.0.0",
-            "exportDate": ISO8601DateFormatter().string(from: Date()),
-            "dailyGoal": appState.dailyGoal,
-            "totalRecords": recordStore.items.count,
-            "currentStreak": recordStore.currentStreak,
-            "longestStreak": recordStore.longestStreak,
-            "records": recordStore.items.map { record in
-                [
-                    "id": record.id.uuidString,
-                    "date": ISO8601DateFormatter().string(from: record.createdAt),
-                    "amount": record.amount,
-                    "cupType": record.cupType.rawValue,
-                    "note": record.note ?? ""
-                ] as [String: Any]
+        let exportData = ExportData(
+            version: "1.0.0",
+            exportDate: ISO8601DateFormatter().string(from: Date()),
+            dailyGoal: appState.dailyGoal,
+            totalRecords: recordStore.items.count,
+            currentStreak: recordStore.currentStreak,
+            longestStreak: recordStore.longestStreak,
+            records: recordStore.items.map { record in
+                ExportRecord(
+                    id: record.id.uuidString,
+                    date: ISO8601DateFormatter().string(from: record.createdAt),
+                    amount: record.amount,
+                    cupType: record.cupType.rawValue,
+                    note: record.note ?? ""
+                )
             }
-        ]
+        )
         
-        if let jsonData = try? JSONSerialization.data(withJSONObject: exportDict, options: .prettyPrinted),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            exportDataString = jsonString
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let jsonData = try encoder.encode(exportData)
             
             // 保存到临时文件用于分享
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("WaterMinder_Export_\(Date().timeIntervalSince1970).json")
-            try? jsonData.write(to: tempURL)
+            try jsonData.write(to: tempURL)
             
             let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
             
@@ -267,6 +279,8 @@ struct SettingsView: View {
                let rootVC = windowScene.windows.first?.rootViewController {
                 rootVC.present(activityVC, animated: true)
             }
+        } catch {
+            print("[SettingsView] Export error: \(error)")
         }
     }
     
@@ -298,6 +312,25 @@ struct SettingsView: View {
             UIApplication.shared.open(url)
         }
     }
+}
+
+// MARK: - Export Data Model
+struct ExportData: Codable {
+    let version: String
+    let exportDate: String
+    let dailyGoal: Int
+    let totalRecords: Int
+    let currentStreak: Int
+    let longestStreak: Int
+    let records: [ExportRecord]
+}
+
+struct ExportRecord: Codable {
+    let id: String
+    let date: String
+    let amount: Int
+    let cupType: String
+    let note: String
 }
 
 // MARK: - Preview

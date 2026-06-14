@@ -206,7 +206,7 @@ class WaterRecordStore: ObservableObject {
             self?.performSave()
         }
         saveWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: workItem)
     }
     
     private func performSave() {
@@ -219,12 +219,16 @@ class WaterRecordStore: ObservableObject {
     }
     
     private func load() {
-        do {
-            let data = try Data(contentsOf: Self.storeURL)
-            items = try JSONDecoder().decode([WaterRecordModel].self, from: data)
-        } catch {
-            items = []
-            print("[WaterRecordStore] Load error: \(error)")
+        Task.detached(priority: .background) { [weak self] in
+            do {
+                let data = try Data(contentsOf: Self.storeURL)
+                let items = try JSONDecoder().decode([WaterRecordModel].self, from: data)
+                await MainActor.run {
+                    self?.items = items
+                }
+            } catch {
+                print("[WaterRecordStore] Load error: \(error)")
+            }
         }
     }
 }
