@@ -301,7 +301,7 @@ struct SettingsView: View {
     }
     
     private func openPrivacyPolicy() {
-        if let url = URL(string: "https://pangtong.github.io/waterminder/privacy") {
+        if let url = URL(string: "https://pangtongya.github.io") {
             UIApplication.shared.open(url)
         }
     }
