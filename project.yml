@@ -31,8 +31,6 @@ targets:
       SWIFT_STRICT_CONCURRENCY: "minimal"
       CODE_SIGN_STYLE: Automatic
       CODE_SIGN_ENTITLEMENTS: WaterMinder.entitlements
-    dependencies:
-      - target: WaterMinderWidget
     preBuildScripts:
       - name: "Update Widget Data"
         script: |
