@@ -40,7 +40,7 @@ struct HomeView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("WaterMinder")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.large)
         .overlay {
             if showCelebration {
@@ -120,11 +120,11 @@ struct ProgressSection: View {
             }
             .padding(.top, 24)
             
-            // 百分比
+            // 百分比 + 距离目标
             HStack(spacing: 4) {
                 Image(systemName: progress >= 1.0 ? "checkmark.circle.fill" : "drop.fill")
                     .font(.system(size: 13))
-                Text("\(Int(progress * 100))%")
+                Text(progress >= 1.0 ? "今日目标达成！" : "还差 \(goal - totalAmount) ml")
                     .font(.system(size: 15, weight: .semibold))
             }
             .foregroundColor(Color.progressColor(progress))
@@ -171,25 +171,18 @@ struct QuickRecordView: View {
     @EnvironmentObject var healthManager: HealthManager
     
     var body: some View {
-        VStack(spacing: 14) {
-            HStack {
-                Text("快速记录")
-                    .font(.system(size: 17, weight: .semibold))
-                Spacer()
-            }
-            
-            HStack(spacing: 10) {
-                ForEach(CupType.allCases, id: \.self) { cupType in
-                    CupButton(cupType: cupType, isSelected: selectedCupType == cupType) {
-                        let impact = UIImpactFeedbackGenerator(style: .light)
-                        impact.impactOccurred()
-                        selectedCupType = cupType
-                        addWaterRecord(cupType: cupType)
-                    }
+        HStack(spacing: 12) {
+            ForEach(CupType.allCases, id: \.self) { cupType in
+                CupButton(cupType: cupType, isSelected: selectedCupType == cupType) {
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                    selectedCupType = cupType
+                    addWaterRecord(cupType: cupType)
                 }
             }
         }
-        .padding(18)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
@@ -222,23 +215,24 @@ struct CupButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 ZStack {
                     Circle()
                         .fill(isSelected ? Color.waterminderPrimary : Color(.tertiarySystemBackground))
-                        .frame(width: 48, height: 48)
+                        .frame(width: 56, height: 56)
+                        .shadow(color: isSelected ? Color.waterminderPrimary.opacity(0.3) : .clear, radius: 8, y: 4)
                     
                     Image(systemName: cupType.icon)
-                        .font(.system(size: 20))
+                        .font(.system(size: 24))
                         .foregroundColor(isSelected ? .white : .waterminderPrimary)
                 }
                 
                 Text(cupType.rawValue)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(isSelected ? .waterminderPrimary : .secondary)
                 
                 Text("\(cupType.defaultAmount)ml")
-                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
                     .foregroundColor(isSelected ? .waterminderPrimary : .secondary)
             }
             .frame(maxWidth: .infinity)
@@ -296,10 +290,10 @@ struct TodayRecordsView: View {
                     }
 
                     VStack(spacing: 4) {
-                        Text("今天还没记录喝水")
+                        Text("今天还没喝水")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.primary)
-                        Text("点击上方按钮，开始健康饮水之旅 💧")
+                        Text("点击杯型按钮，记录第一杯水")
                             .font(.system(size: 13))
                             .foregroundColor(.secondary)
                     }
