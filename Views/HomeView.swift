@@ -42,7 +42,7 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.large)
         .overlay {
             if showCelebration {
-                CelebrationOverlay {
+                SimpleCelebrationView {
                     withAnimation(.easeOut(duration: 0.5)) {
                         showCelebration = false
                     }
