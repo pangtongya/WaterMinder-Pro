@@ -7,9 +7,10 @@ struct HomeView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var recordStore: WaterRecordStore
     @EnvironmentObject var healthManager: HealthManager
-    
+
     @State private var selectedCupType: CupType = .medium
     @State private var showCelebration = false
+    @State private var hasCelebratedToday = false
     
     var body: some View {
         ScrollView {
@@ -20,7 +21,8 @@ struct HomeView: View {
                     totalAmount: recordStore.todayTotalAmount,
                     goal: appState.dailyGoal,
                     streakDays: recordStore.currentStreak,
-                    onGoalReached: { showCelebration = true }
+                    onGoalReached: { showCelebration = true },
+                    hasCelebratedToday: $hasCelebratedToday
                 )
                 .padding(.horizontal, 20)
                 
@@ -59,6 +61,7 @@ struct ProgressSection: View {
     let goal: Int
     let streakDays: Int
     let onGoalReached: () -> Void
+    @Binding var hasCelebratedToday: Bool
     
     var body: some View {
         VStack(spacing: 0) {
@@ -150,8 +153,12 @@ struct ProgressSection: View {
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.04), radius: 10, y: 4)
         .onChange(of: progress) { newValue in
-            if newValue >= 1.0 {
+            if newValue >= 1.0 && !hasCelebratedToday {
+                hasCelebratedToday = true
                 onGoalReached()
+            } else if newValue < 0.99 {
+                // 当进度下降到99%以下时重置（允许再次庆祝）
+                hasCelebratedToday = false
             }
         }
     }
@@ -190,15 +197,18 @@ struct QuickRecordView: View {
     
     private func addWaterRecord(cupType: CupType) {
         let record = recordStore.addRecord(amount: cupType.defaultAmount, cupType: cupType)
-        
+
         let impact = UIImpactFeedbackGenerator(style: .medium)
         impact.impactOccurred()
-        
-        Task {
-            do {
-                try await healthManager.saveWaterIntake(Double(record.amount))
-            } catch {
-                print("[HomeView] Health sync error: \(error)")
+
+        // 仅在已授权时同步到健康App
+        if healthManager.isAuthorized {
+            Task {
+                do {
+                    try await healthManager.saveWaterIntake(Double(record.amount))
+                } catch {
+                    print("[HomeView] Health sync error: \(error)")
+                }
             }
         }
     }

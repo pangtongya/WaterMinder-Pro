@@ -9,7 +9,7 @@ struct ContentView: View {
     @EnvironmentObject var notificationManager: NotificationManager
     @EnvironmentObject var healthManager: HealthManager
     
-    @State private var selectedTab: Tab = .home // 恢复默认首页
+    @State private var selectedTab: Tab = .home
     
     enum Tab: String, CaseIterable {
         case home = "首页"
@@ -72,7 +72,7 @@ struct ContentView: View {
             syncWidgetData()
             setupInitialTab()
         }
-        .onChange(of: recordStore.items.count) { _ in
+        .onChange(of: recordStore.items) { _ in
             syncWidgetData()
         }
     }

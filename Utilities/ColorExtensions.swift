@@ -14,7 +14,7 @@ extension Color {
     static let waterminderSecondary = Color(red: 0.05, green: 0.45, blue: 0.56)
     
     /// 第三色 - 浅青绿 #A7FEF8
-    static let waterminderAccent = Color(red: 0.65, green: 0.50, blue: 0.97)
+    static let waterminderAccent = Color(red: 0.65, green: 0.996, blue: 0.973)
     
     /// 成功绿 - 翠绿 #10B981
     static let waterminderSuccess = Color(red: 0.06, green: 0.73, blue: 0.51)

@@ -221,14 +221,18 @@ class WaterRecordStore: ObservableObject {
     }
 
     private func load() {
-        Task { @MainActor in
-            do {
-                let data = try Data(contentsOf: Self.storeURL)
-                let decodedItems = try JSONDecoder().decode([WaterRecordModel].self, from: data)
-                self.items = decodedItems
-            } catch {
-                print("[WaterRecordStore] Load error: \(error)")
-            }
+        do {
+            let data = try Data(contentsOf: Self.storeURL)
+            let decodedItems = try JSONDecoder().decode([WaterRecordModel].self, from: data)
+            self.items = decodedItems
+        } catch {
+            print("[WaterRecordStore] Load error: \(error)")
         }
+    }
+    
+    /// 清空所有记录（供设置页面重置数据使用）
+    func deleteAllRecords() {
+        items.removeAll()
+        save()
     }
 }

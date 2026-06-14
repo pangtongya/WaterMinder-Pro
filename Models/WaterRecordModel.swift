@@ -97,6 +97,10 @@ enum CupType: String, CaseIterable, Codable {
 // MARK: - Equatable
 extension WaterRecordModel {
     static func == (lhs: WaterRecordModel, rhs: WaterRecordModel) -> Bool {
-        lhs.id == rhs.id && lhs.amount == rhs.amount && lhs.cupType == rhs.cupType
+        lhs.id == rhs.id &&
+        lhs.amount == rhs.amount &&
+        lhs.cupType == rhs.cupType &&
+        lhs.createdAt == rhs.createdAt &&
+        lhs.note == rhs.note
     }
 }

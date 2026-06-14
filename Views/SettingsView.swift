@@ -285,8 +285,7 @@ struct SettingsView: View {
     }
     
     private func resetAllData() {
-        recordStore.items.removeAll()
-        recordStore.save()
+        recordStore.deleteAllRecords()
         
         appState.dailyGoal = 2000
         appState.reminderEnabled = false

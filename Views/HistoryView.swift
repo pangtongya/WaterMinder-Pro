@@ -189,7 +189,7 @@ struct HistoryView: View {
     private var chartView: some View {
         let calendar = Calendar.current
         let endDate = Date()
-        let startDate = calendar.date(byAdding: .day, value: -(selectedPeriod.days - 1), to: endDate)!
+        let startDate = calendar.date(byAdding: .day, value: -(selectedPeriod.days - 1), to: endDate)!  // Safe: max 29 days back
         let data = recordStore.dailyAmounts(from: startDate, to: endDate)
         
         Chart {
@@ -261,8 +261,8 @@ struct HistoryView: View {
     private var recordsForSelectedDate: [WaterRecordModel] {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: selectedDate)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return [] }
+
         return recordStore.items.filter { record in
             record.createdAt >= startOfDay && record.createdAt < endOfDay
         }.sorted { $0.createdAt > $1.createdAt }
