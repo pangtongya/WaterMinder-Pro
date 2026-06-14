@@ -168,9 +168,10 @@ struct SettingsView: View {
                     openPrivacyPolicy()
                 }
                 
-                Button("评价我们") {
-                    rateApp()
-                }
+                // App上架后取消注释，并替换 App ID
+                // Button("评价我们") {
+                //     rateApp()
+                // }
             } header: {
                 Text("关于")
             }

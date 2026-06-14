@@ -36,6 +36,8 @@ targets:
         script: |
           # Widget data will be updated by the app at runtime
           echo "Widget pre-build step"
+    dependencies:
+      - target: WaterMinderWidget
           
   WaterMinderWidget:
     type: app-extension
