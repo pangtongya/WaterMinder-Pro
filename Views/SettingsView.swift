@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var dailyGoalInput: String = ""
     @State private var showingExporter = false
     @State private var exportDataString = ""
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         Form {
@@ -182,6 +183,11 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
             healthAuthorized = healthManager.isAuthorized
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                healthAuthorized = healthManager.isAuthorized
+            }
         }
         .alert("重置确认", isPresented: $showingResetAlert) {
             Button("取消", role: .cancel) { }
