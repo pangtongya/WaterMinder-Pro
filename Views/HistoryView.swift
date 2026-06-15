@@ -189,7 +189,7 @@ struct HistoryView: View {
     private var chartView: some View {
         let calendar = Calendar.current
         let endDate = Date()
-        let startDate = calendar.date(byAdding: .day, value: -(selectedPeriod.days - 1), to: endDate)!  // Safe: max 29 days back
+        let startDate = calendar.date(byAdding: .day, value: -(selectedPeriod.days - 1), to: endDate) ?? Calendar.current.startOfDay(for: Date())  // Fallback: today
         let data = recordStore.dailyAmounts(from: startDate, to: endDate)
         
         Chart {
@@ -467,7 +467,7 @@ struct AnalysisReportView: View {
     private var goalMetDaysThisWeek: Int {
         let calendar = Calendar.current
         let today = Date()
-        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today) ?? Date()
         let dailyTotals = recordStore.dailyAmounts(from: weekAgo, to: today)
         return dailyTotals.filter { $0.amount >= appState.dailyGoal }.count
     }
@@ -475,7 +475,7 @@ struct AnalysisReportView: View {
     private var bestDayThisWeek: Int {
         let calendar = Calendar.current
         let today = Date()
-        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today) ?? Date()
         let dailyTotals = recordStore.dailyAmounts(from: weekAgo, to: today)
         return dailyTotals.map { $0.amount }.max() ?? 0
     }
@@ -483,7 +483,7 @@ struct AnalysisReportView: View {
     private var monthlyAverage: Int {
         let calendar = Calendar.current
         let today = Date()
-        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
+        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today) ?? Date()
         let dailyTotals = recordStore.dailyAmounts(from: monthAgo, to: today)
         guard !dailyTotals.isEmpty else { return 0 }
         let total = dailyTotals.reduce(0) { $0 + $1.amount }
@@ -493,7 +493,7 @@ struct AnalysisReportView: View {
     private var goalMetRateThisMonth: Double {
         let calendar = Calendar.current
         let today = Date()
-        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
+        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today) ?? Date()
         let dailyTotals = recordStore.dailyAmounts(from: monthAgo, to: today)
         guard !dailyTotals.isEmpty else { return 0 }
         let goalMetDays = dailyTotals.filter { $0.amount >= appState.dailyGoal }.count
