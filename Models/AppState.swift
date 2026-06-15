@@ -28,6 +28,21 @@ class AppState: ObservableObject, @preconcurrency Codable {
     
     private init() {
         load()
+        setupBackgroundSave()
+    }
+    
+    private func setupBackgroundSave() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func handleWillResignActive() {
+        saveWorkItem?.cancel()
+        performSave()
     }
     
     // MARK: - Codable

@@ -19,6 +19,21 @@ class WaterRecordStore: ObservableObject {
     
     init() {
         load()
+        setupBackgroundSave()
+    }
+    
+    private func setupBackgroundSave() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func handleWillResignActive() {
+        saveWorkItem?.cancel()
+        performSave(items: items)
     }
     
     // MARK: - CRUD
