@@ -170,10 +170,10 @@ struct SettingsView: View {
                     openPrivacyPolicy()
                 }
                 
-                // App上架后取消注释，并替换 App ID
-                // Button("评价我们") {
-                //     rateApp()
-                // }
+                // TODO: App 上架后，将 id0000000000 替换为真实的 App Store ID
+                Button("评价我们") {
+                    rateApp()
+                }
             } header: {
                 Text("关于")
             }
@@ -327,8 +327,8 @@ struct SettingsView: View {
     }
     
     private func rateApp() {
-        // App Store review URL
-        if let url = URL(string: "https://apps.apple.com/app/id0000000000?action=write-review") {
+        // TODO: App 上架后，将 id0000000000 替换为真实的 App Store ID
+        if let url = URL(string: "https://apps.apple.com/cn/app/id0000000000?action=write-review") {
             UIApplication.shared.open(url)
         }
     }
