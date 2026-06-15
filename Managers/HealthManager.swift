@@ -16,7 +16,8 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
     
     var isAuthorized: Bool {
         guard HKHealthStore.isHealthDataAvailable() else { return false }
-        let status = healthStore.authorizationStatus(for: HKObjectType.quantityType(forIdentifier: .dietaryWater)!)
+        guard let waterType = HKObjectType.quantityType(forIdentifier: .dietaryWater) else { return false }
+        let status = healthStore.authorizationStatus(for: waterType)
         return status == .sharingAuthorized
     }
     
@@ -26,13 +27,12 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
             return false
         }
         
-        let writeTypes: Set<HKSampleType> = [
-            HKObjectType.quantityType(forIdentifier: .dietaryWater)!
-        ]
+        guard let waterType = HKObjectType.quantityType(forIdentifier: .dietaryWater) else {
+            return false
+        }
         
-        let readTypes: Set<HKObjectType> = [
-            HKObjectType.quantityType(forIdentifier: .dietaryWater)!
-        ]
+        let writeTypes: Set<HKSampleType> = [waterType]
+        let readTypes: Set<HKObjectType> = [waterType]
         
         do {
             try await healthStore.requestAuthorization(toShare: writeTypes, read: readTypes)
@@ -62,7 +62,7 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) ?? Date()
         
         let predicate = HKQuery.predicateForSamples(withStart: today, end: tomorrow, options: .strictStartDate)
         
