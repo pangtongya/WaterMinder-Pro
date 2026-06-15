@@ -321,7 +321,7 @@ struct SettingsView: View {
     }
     
     private func openPrivacyPolicy() {
-        if let url = URL(string: "https://pangtongya.github.io") {
+        if let url = Bundle.main.url(forResource: "privacy_policy", withExtension: "html") {
             UIApplication.shared.open(url)
         }
     }
