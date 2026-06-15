@@ -1,10 +1,11 @@
 // OnboardingView.swift
-// 引导页面 - 极简1步：欢迎+开始使用
+// 引导页面 - 欢迎 + 目标设置（1页完整版）
 
 import SwiftUI
 
 struct OnboardingView: View {
     @EnvironmentObject var appState: AppState
+    @State private var selectedGoal: Int = 2000
     
     var body: some View {
         VStack(spacing: 40) {
@@ -37,6 +38,32 @@ struct OnboardingView: View {
                     .lineSpacing(4)
             }
             
+            // 目标设置
+            VStack(spacing: 12) {
+                Text("每日饮水目标")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.secondary)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([1500, 2000, 2500, 3000], id: \.self) { goal in
+                            Button("\(goal)ml") {
+                                selectedGoal = goal
+                                let impact = UIImpactFeedbackGenerator(style: .light)
+                                impact.impactOccurred()
+                            }
+                            .font(.system(size: 13, weight: .medium))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(selectedGoal == goal ? Color.waterminderPrimary : Color(.tertiarySystemBackground))
+                            .foregroundColor(selectedGoal == goal ? .white : .primary)
+                            .cornerRadius(8)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            
             Spacer()
             
             // 开始按钮
@@ -58,8 +85,8 @@ struct OnboardingView: View {
     }
     
     private func completeOnboarding() {
-        // 使用默认设置：目标2000ml，不开启提醒，稍后可在设置中调整
-        appState.dailyGoal = 2000
+        // 使用用户选择的目标
+        appState.dailyGoal = selectedGoal
         appState.reminderEnabled = false
         appState.reminderInterval = 60
         appState.hasCompletedOnboarding = true
