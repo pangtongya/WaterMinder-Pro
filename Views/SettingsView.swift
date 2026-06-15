@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var dailyGoalInput: String = ""
     @State private var showingExporter = false
     @State private var exportDataString = ""
+    @State private var schedulingError: String? = nil
     @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
@@ -183,6 +184,9 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
             healthAuthorized = healthManager.isAuthorized
+            notificationManager.onSchedulingError = { errorMsg in
+                schedulingError = errorMsg
+            }
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {
@@ -216,6 +220,11 @@ struct SettingsView: View {
             }
         } message: {
             Text("请在系统设置中允许 WaterMinder 发送通知")
+        }
+        .alert("提醒设置失败", isPresented: .constant(schedulingError != nil)) {
+            Button("好的") { schedulingError = nil }
+        } message: {
+            Text(schedulingError ?? "未知错误")
         }
     }
     
