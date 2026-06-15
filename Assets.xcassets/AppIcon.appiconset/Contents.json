@@ -10,5 +10,9 @@
   "info" : {
     "author" : "xcode",
     "version" : 1
+  },
+  "properties" : {
+    "auto-layer-frames" : true,
+    "pre-rendered" : false
   }
 }
