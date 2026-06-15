@@ -191,8 +191,13 @@ struct SettingsView: View {
         } message: {
             Text("此操作将删除所有喝水记录和个人设置，且不可恢复。确定要继续吗？")
         }
-        .alert("权限提示", isPresented: $showingHealthAlert) {
-            Button("知道了", role: .cancel) { }
+        .alert("健康权限", isPresented: $showingHealthAlert) {
+            Button("取消", role: .cancel) { }
+            Button("去设置") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
         } message: {
             Text("请在系统设置中允许 WaterMinder 访问健康数据")
         }

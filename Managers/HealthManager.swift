@@ -36,7 +36,8 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         
         do {
             try await healthStore.requestAuthorization(toShare: writeTypes, read: readTypes)
-            return true
+            // 修复：返回实际授权状态，而不是 true
+            return isAuthorized
         } catch {
             print("[HealthManager] Authorization error: \(error)")
             return false
