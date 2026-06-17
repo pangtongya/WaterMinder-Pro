@@ -183,7 +183,6 @@ struct OnboardingView: View {
                     .textContentType(.none)
                 Text("能告诉你")
                     .font(.system(size: 24, weight: .bold))
-                    .font(.system(size: 24, weight: .bold))
 
                 Text("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。".localized)
                     .font(.system(size: 15))

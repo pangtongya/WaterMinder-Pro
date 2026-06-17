@@ -179,7 +179,11 @@ final class PersistenceManager {
             Logger.persistence.info("Successfully recovered \(filename) from backup")
             
             // 恢复主文件
-            try? data.write(to: url(for: filename)!, options: .atomic)
+            if let fileURL = url(for: filename) {
+                try? data.write(to: fileURL, options: .atomic)
+            } else {
+                Logger.persistence.error("Failed to get URL for \(filename)")
+            }
             
             return decoded
         } catch {

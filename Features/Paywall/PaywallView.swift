@@ -110,7 +110,7 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 14) {
             benefitRow(icon: "📊", title: "高级统计".localized, desc: "完整的数据分析和可视化报告")
             benefitRow(icon: "🎨", title: "自定义主题".localized, desc: "解锁所有 Pro 主题和外观")
-            benefitRow(icon: "✨", title: "无广告体验".localized, desc: "享受纯净的使用体验")
+            benefitRow(icon: "🌱", title: "无限植物品种".localized, desc: "解锁全部7种植物，打造梦幻花园")
             benefitRow(icon: "☁️", title: "多设备同步".localized, desc: "CloudKit 数据同步和备份")
         }
         .padding(18)

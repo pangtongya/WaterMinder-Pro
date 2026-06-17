@@ -30,6 +30,7 @@ struct SettingsView: View {
     @State private var showExportSheet = false
     @State private var showPauseConfirm = false
     @State private var showResumeAlert = false
+    @State private var isRestoringPurchase = false
 
     var body: some View {
         Form {
@@ -164,6 +165,16 @@ struct SettingsView: View {
         } message: {
             Text("请在系统设置中允许 Bloom 发送通知".localized)
         }
+        .alert("恢复购买成功", isPresented: $showRestoreSuccess) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text("感谢您的支持！Pro 权益已解锁。")
+        }
+        .alert("恢复购买失败", isPresented: $showRestoreError) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
         .alert("暂停养护".localized, isPresented: $showPauseConfirm) {
             Button("取消", role: .cancel) { }
             Button("暂停", role: .destructive) {
@@ -214,7 +225,7 @@ struct SettingsView: View {
                             .foregroundColor(.green)
                         Text("恢复养护".localized)
                         Spacer()
-                        Text("剩余 (plantEngine.plant.remainingPauseDays) 天".localized)
+                        Text("剩余 \(plantEngine.plant.remainingPauseDays) 天")
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
@@ -557,7 +568,24 @@ struct SettingsView: View {
                 Text("1.0.0").foregroundStyle(.secondary)
             }
             Button("恢复购买".localized) {
-                Task { await storeManager.restore() }
+                Task {
+                    isRestoringPurchase = true
+                    await storeManager.restore()
+                    isRestoringPurchase = false
+                    
+                    if storeManager.isPro {
+                        showRestoreSuccess = true
+                    } else {
+                        errorMessage = "未找到已购买的记录".localized
+                        showRestoreError = true
+                    }
+                }
+            }
+            .disabled(isRestoringPurchase)
+            .overlay {
+                if isRestoringPurchase {
+                    ProgressView()
+                }
             }
         } header: {
             Text("关于".localized)

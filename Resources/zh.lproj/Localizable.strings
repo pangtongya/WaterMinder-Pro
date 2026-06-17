@@ -717,3 +717,14 @@ enum Haptics {
         .environmentObject(UserStore())
         .environmentObject(PlantEngine())
         .environmentObject(NotificationManager.shared";
+
+// Missing strings added during final audit
+"花园限制提示 %d 株植物" = "免费用户最多保存 %d 株植物。升级 Pro 解锁无限花园！";
+"剩余 %d 天" = "剩余 %d 天";
+"恢复购买成功" = "恢复购买成功";
+"恢复购买失败" = "恢复购买失败";
+"未找到已购买的记录" = "未找到已购买的记录";
+"感谢您的支持！Pro 权益已解锁。" = "感谢您的支持！Pro 权益已解锁。";
+"无限植物品种" = "无限植物品种";
+"解锁全部7种植物，打造梦幻花园" = "解锁全部7种植物，打造梦幻花园";
+"正在加载..." = "正在加载...";

@@ -26,6 +26,7 @@ struct GardenView: View {
     @State private var showPauseConfirm = false
     @State private var showResumeAlert = false
     @State private var isSharing = false
+    @State private var shareImage: UIImage?
     @State private var showGardenLimitAlert = false
     @State private var showPaywall = false
     @EnvironmentObject var storeManager: StoreManager
@@ -112,13 +113,13 @@ struct GardenView: View {
                 showPaywall = true
             }
         } message: {
-            Text("免费用户最多保存 \(GardenStore.freeUserGardenLimit) 株植物。升级 Pro 解锁无限花园！")
+            Text("免费用户最多保存 5 株植物。升级 Pro 解锁无限花园！")
         }
         .sheet(isPresented: $showHarvestSheet) {
             Text("Harvest Sheet Placeholder")
         }
         .sheet(isPresented: $isSharing) {
-            Text("Share Sheet Placeholder")
+            ImagePicker(image: shareImage ?? UIImage())
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
@@ -234,7 +235,7 @@ struct GardenView: View {
                 achievementStore: achievementStore
             )
             await MainActor.run {
-                SharingManager.shared.shareImage(image, from: nil)
+                shareImage = image
                 isSharing = false
             }
         }
@@ -490,4 +491,19 @@ private struct WaterDrop: Identifiable {
             .environmentObject(HealthManager.shared)
             .environmentObject(UserStore())
     }
+}
+
+// MARK: - Image Picker for Sharing
+
+struct ImagePicker: UIViewControllerRepresentable {
+    let image: UIImage
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(
+            activityItems: [image],
+            applicationActivities: nil
+        )
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
