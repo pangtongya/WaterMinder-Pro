@@ -1,3 +1,4 @@
+import WidgetKit
 // PlantEngine.swift
 // ⭐ 植物生命引擎 —— 整个 app 的心脏
 //

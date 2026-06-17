@@ -11,6 +11,7 @@
 		0F9D6CB03D574F0CA8E2CE2C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = ADC878723A0F789B0569E37B /* InfoPlist.strings */; };
 		160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DC2B240492004662250DF8 /* HealthManager.swift */; };
 		18364177D02B353EE1738526 /* QuickRecordBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8FE84BD38D54A8D938E1A4 /* QuickRecordBar.swift */; };
+		18EDC582A715CF951E23D7BE /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA41E01633E07FC06A02CEB /* NetworkMonitor.swift */; };
 		22577BE7CA4755A620B16D1F /* WidgetRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEED693DD6CE8BE0CDFBEE4D /* WidgetRefresher.swift */; };
 		22E3BFC53D79B424BD00A9C6 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75D665C224C9D31EDDDBDF /* NotificationContent.swift */; };
 		280F3AD77BC7A67E08268953 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C4E5C8799715F270E0C44C /* PaywallView.swift */; };
@@ -26,6 +27,7 @@
 		4DFD1EA8A9639C7179357CE1 /* PlantLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3C26ADB360224F1D94B290 /* PlantLifecycleTests.swift */; };
 		4F146B945FBD9DAF49B02F8E /* GrowthRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18516F309A20E456F54E68C4 /* GrowthRules.swift */; };
 		57DD5F3B3C2EE5B407E99FA3 /* ProGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */; };
+		5C8507B585311DBE39D078DF /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDC7320829AB31882FDEC37A /* Haptics.swift */; };
 		5CAC5D97960AF917782C288B /* AchievementStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC4020FB29A2BD96D76112D /* AchievementStore.swift */; };
 		6500D3F77BFDA4419D39C601 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97132AE74897B1E90678C005 /* ThemeManager.swift */; };
 		672ADEC5918606DB9CAC6170 /* HealthCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7CAFF1B010DD5A5905668A /* HealthCalculatorTests.swift */; };
@@ -119,6 +121,7 @@
 		98E8505DE57EAE80ADF460FE /* Bloom.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Bloom.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		997BE93D2FBB40325C660E1B /* BloomWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BloomWidget.entitlements; sourceTree = "<group>"; };
 		9C29AC4BD49D4D36D392153D /* AdvancedStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedStatsView.swift; sourceTree = "<group>"; };
+		9CA41E01633E07FC06A02CEB /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		A06B3F3323B5E8C2EE13D295 /* PlantCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantCanvas.swift; sourceTree = "<group>"; };
 		A6D5B86B1996589FB4E30EA7 /* WidgetAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
 		B4AFAC944C68EDED50F60CA1 /* BloomWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomWidget.swift; sourceTree = "<group>"; };
@@ -129,6 +132,7 @@
 		BF0D114C675CDC68B3E488EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C193AE5E9F39244E07490885 /* ThemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePickerView.swift; sourceTree = "<group>"; };
 		CBC4020FB29A2BD96D76112D /* AchievementStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementStore.swift; sourceTree = "<group>"; };
+		CDC7320829AB31882FDEC37A /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		CEED693DD6CE8BE0CDFBEE4D /* WidgetRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRefresher.swift; sourceTree = "<group>"; };
 		D3D864942A46D845863EC0D6 /* GardenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenStore.swift; sourceTree = "<group>"; };
 		D4B88301ED0F9416D4778251 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -318,7 +322,9 @@
 		AD9E9A076A77556955E92723 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				CDC7320829AB31882FDEC37A /* Haptics.swift */,
 				0E7B3AF3F25F9CAF72FBD8B0 /* LocalizationExtensions.swift */,
+				9CA41E01633E07FC06A02CEB /* NetworkMonitor.swift */,
 				198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */,
 			);
 			path = Utils;
@@ -570,11 +576,13 @@
 				D6CC5CC22171F7E7E934962B /* GardenView.swift in Sources */,
 				4F146B945FBD9DAF49B02F8E /* GrowthRules.swift in Sources */,
 				EFAE24B89AA0E20729A4EC84 /* GrowthStage.swift in Sources */,
+				5C8507B585311DBE39D078DF /* Haptics.swift in Sources */,
 				9822AA91A0543565EC22B4F5 /* HarvestView.swift in Sources */,
 				A5B7C21AE813BCA4A6D0FA03 /* HealthCalculator.swift in Sources */,
 				160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */,
 				44553297C56B4F654A1E215D /* HistoryView.swift in Sources */,
 				30B243EEA9AD823A6D66FAC8 /* LocalizationExtensions.swift in Sources */,
+				18EDC582A715CF951E23D7BE /* NetworkMonitor.swift in Sources */,
 				22E3BFC53D79B424BD00A9C6 /* NotificationContent.swift in Sources */,
 				A61CF1F41097ADB12AB6846C /* NotificationManager.swift in Sources */,
 				D4313469593C69D7027B164C /* OnboardingView.swift in Sources */,
@@ -764,7 +772,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = "$(git rev-list --count HEAD)";
 				DEBUG_DYLIB_INSTALL_NAME = "";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = A9BU96SR38;
@@ -829,7 +837,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = "$(git rev-list --count HEAD)";
 				DEBUG_DYLIB_INSTALL_NAME = "";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = A9BU96SR38;

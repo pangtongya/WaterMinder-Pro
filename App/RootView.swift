@@ -10,6 +10,7 @@ struct RootView: View {
     @EnvironmentObject var gardenStore: GardenStore
     @EnvironmentObject var cloudSyncManager: CloudSyncManager
     @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var networkMonitor = NetworkMonitor.shared
 
     var body: some View {
         Group {
@@ -43,6 +44,32 @@ struct RootView: View {
                 .tabItem { Label("设置".localized, systemImage: "gearshape.fill") }
         }
         .tint(themeManager.currentTheme.accent)
+        .overlay {
+            if !networkMonitor.isConnected {
+                offlineBanner
+            }
+        }
+    }
+    
+    private var offlineBanner: some View {
+        VStack {
+            HStack {
+                Image(systemName: "wifi.slash")
+                    .foregroundColor(.white)
+                Text("离线模式 - 数据已本地保存")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(Color.orange)
+            
+            Spacer()
+        }
+        .transition(.move(edge: .top))
+        .animation(.easeInOut, value: networkMonitor.isConnected)
     }
     
     private func downloadCloudData() async {

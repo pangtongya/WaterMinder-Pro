@@ -15,6 +15,7 @@ struct PaywallView: View {
 
     @State private var selectedProduct: Product?
     @State private var showRestoreSuccess = false
+    @State private var isPurchasing = false
 
     var body: some View {
         NavigationStack {

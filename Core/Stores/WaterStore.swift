@@ -1,3 +1,4 @@
+import WidgetKit
 // WaterStore.swift
 // 喝水记录 store —— 植物的"水分"来源，也是用户行为凭证
 
@@ -28,6 +29,9 @@ final class WaterStore: ObservableObject {
     func add(amount: Int, cupType: CupType = .medium) -> WaterRecord {
         let record = WaterRecord(amount: amount, cupType: cupType)
         records.insert(record, at: 0)
+        
+        // Refresh widgets
+        WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()
         updateAchievements()

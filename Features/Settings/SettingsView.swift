@@ -19,6 +19,7 @@ struct SettingsView: View {
     
     @State private var healthAuthorized = false
     @State private var showPaywall = false
+    @State private var showAdvancedStats = false
     @State private var showHealthAlert = false
     @State private var showNotificationAlert = false
     @State private var showFilePicker = false
@@ -72,11 +73,15 @@ struct SettingsView: View {
                 }
             }
 
-            // 高级统计 (Pro)
-            if userStore.isPro {
-                NavigationLink(destination: AdvancedStatsView()
-                    .environmentObject(waterStore)
-                    .environmentObject(userStore)) {
+            // 高级统计 (Pro teaser)
+            Button {
+                if userStore.isPro {
+                    showAdvancedStats = true
+                } else {
+                    showPaywall = true
+                }
+            } label: {
+                HStack {
                     Label {
                         Text("高级统计".localized)
                             .foregroundColor(.bloomGold)
@@ -84,8 +89,20 @@ struct SettingsView: View {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                             .foregroundColor(.bloomGold)
                     }
+                    Spacer()
+                    if !userStore.isPro {
+                        Text("Pro")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.bloomGold)
+                            .clipShape(Capsule())
+                    }
                 }
             }
+            .disabled(!userStore.isPro)
             // 关于
             aboutSection
         }
@@ -96,6 +113,11 @@ struct SettingsView: View {
         .onAppear { healthAuthorized = healthManager.isAuthorized }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
+        }
+        .sheet(isPresented: $showAdvancedStats) {
+            AdvancedStatsView()
+                .environmentObject(waterStore)
+                .environmentObject(userStore)
         }
         .sheet(isPresented: $showExportSheet) {
             if let url = exportedFileURL {

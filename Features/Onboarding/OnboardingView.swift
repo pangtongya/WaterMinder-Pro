@@ -178,9 +178,11 @@ struct OnboardingView: View {
                 .font(.system(size: 56))
 
             VStack(spacing: 10) {
-                Text("让 \(plantName) 在渴的时候")
+                Text(String(format: "让 %@ 在渴的时候", plantName))
                     .font(.system(size: 24, weight: .bold))
-                Text("能告诉你".localized)
+                    .textContentType(.none)
+                Text("能告诉你")
+                    .font(.system(size: 24, weight: .bold))
                     .font(.system(size: 24, weight: .bold))
 
                 Text("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。".localized)
@@ -256,20 +258,6 @@ struct OnboardingView: View {
                 .background(Color.bloomPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
-    }
-}
-
-// MARK: - 触觉反馈工具
-
-enum Haptics {
-    static func light() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-    }
-    static func medium() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-    }
-    static func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 }
 

@@ -16,6 +16,7 @@ struct GardenView: View {
     @EnvironmentObject var gardenStore: GardenStore
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var healthManager: HealthManager
+    @EnvironmentObject var achievementStore: AchievementStore
 
     @State private var showHarvestSheet = false
     @State private var celebrateStage: GrowthStage?
@@ -230,7 +231,7 @@ struct GardenView: View {
             let image = await SharingManager.shared.generatePlantShareCard(
                 plant: plantEngine.plant,
                 waterStore: waterStore,
-                achievementStore: AchievementStore()
+                achievementStore: achievementStore
             )
             await MainActor.run {
                 SharingManager.shared.shareImage(image, from: nil)
