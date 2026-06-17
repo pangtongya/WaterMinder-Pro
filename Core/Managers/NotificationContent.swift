@@ -60,6 +60,9 @@ enum NotificationContent {
         case ..<50:  pool = wiltingReminders(plantName: plantName)
         default:     pool = healthyReminders(plantName: plantName)
         }
-        return pool.randomElement() ?? healthyReminders(plantName: plantName).first!
+        return pool.randomElement() ?? healthyReminders(plantName: plantName).first ?? Message(
+            title: "喝水时间",
+            body: "该喝水啦！💧"
+        )
     }
 }

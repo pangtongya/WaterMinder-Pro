@@ -14,6 +14,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var selectedProduct: Product?
+    @State private var showRestoreSuccess = false
 
     var body: some View {
         NavigationStack {
@@ -77,6 +78,11 @@ struct PaywallView: View {
                     Button("关闭".localized) { dismiss() }
                 }
             }
+            .alert("恢复成功", isPresented: $showRestoreSuccess) {
+                Button("太好了") { dismiss() }
+            } message: {
+                Text("感谢您的支持！Pro 权益已解锁。")
+            }
         }
     }
 
@@ -101,10 +107,10 @@ struct PaywallView: View {
 
     private var benefitsList: some View {
         VStack(alignment: .leading, spacing: 14) {
-            benefitRow(icon: "🌻", title: "全部 7 种植物", desc: "玫瑰、樱花、薰衣草、郁金香等")
-            benefitRow(icon: "📊", title: "深度数据洞察", desc: "月度趋势图、达标率、成长历程")
-            benefitRow(icon: "🎨", title: "专属植物外观", desc: "Pro 品种拥有独特花瓣形态")
-            benefitRow(icon: "♾️", title: "无限花园收藏", desc: "收获的植物永久保存，不限数量")
+            benefitRow(icon: "📊", title: "高级统计".localized, desc: "完整的数据分析和可视化报告")
+            benefitRow(icon: "🎨", title: "自定义主题".localized, desc: "解锁所有 Pro 主题和外观")
+            benefitRow(icon: "✨", title: "无广告体验".localized, desc: "享受纯净的使用体验")
+            benefitRow(icon: "☁️", title: "多设备同步".localized, desc: "CloudKit 数据同步和备份")
         }
         .padding(18)
         .background(Color(.secondarySystemBackground))
@@ -140,7 +146,12 @@ struct PaywallView: View {
 
             // 恢复购买
             Button("恢复购买".localized) {
-                Task { await storeManager.restore() }
+                Task {
+                    await storeManager.restore()
+                    if storeManager.isPro {
+                        showRestoreSuccess = true
+                    }
+                }
             }
             .font(.system(size: 13))
             .foregroundStyle(.secondary)

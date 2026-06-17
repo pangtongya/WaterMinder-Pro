@@ -26,6 +26,8 @@ struct GardenView: View {
     @State private var showResumeAlert = false
     @State private var isSharing = false
     @State private var showGardenLimitAlert = false
+    @State private var showPaywall = false
+    @EnvironmentObject var storeManager: StoreManager
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -106,7 +108,7 @@ struct GardenView: View {
         .alert("花园已满".localized, isPresented: $showGardenLimitAlert) {
             Button("取消", role: .cancel) { }
             Button("升级 Pro".localized) {
-                // TODO: Show paywall
+                showPaywall = true
             }
         } message: {
             Text("免费用户最多保存 \(GardenStore.freeUserGardenLimit) 株植物。升级 Pro 解锁无限花园！")
@@ -116,6 +118,9 @@ struct GardenView: View {
         }
         .sheet(isPresented: $isSharing) {
             Text("Share Sheet Placeholder")
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView().environmentObject(storeManager)
         }
     }
 

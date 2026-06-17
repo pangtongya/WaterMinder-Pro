@@ -38,6 +38,7 @@
 		8EE7486290A3F0DBC68933F5 /* Plant.swift in Sources */ = {isa = PBXBuildFile; fileRef = F35F0ED8E2E48B437814305B /* Plant.swift */; };
 		926AEED5B702CF1936760217 /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886439BFC290555051B1B9DF /* CloudSyncManager.swift */; };
 		933BBD41A4F36400BAD501A3 /* PlantLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB99E91F27B2117CFA2D51F /* PlantLifecycle.swift */; };
+		9822AA91A0543565EC22B4F5 /* HarvestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF73E83431D7FDAB7C48E540 /* HarvestView.swift */; };
 		9A6406A179A20D8200764AA7 /* WidgetDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E74CA5D0D2C9732FA29DD89 /* WidgetDataManager.swift */; };
 		9AAB95C86AB389C6BDB08A13 /* ThemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C193AE5E9F39244E07490885 /* ThemePickerView.swift */; };
 		A1E1811365C488C9D4D8727B /* PlantEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECED781642AA46AB10F1DD85 /* PlantEngine.swift */; };
@@ -134,6 +135,7 @@
 		D72FAFAAE34DE1CDAB22EF1C /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		DCE0304A48AB99D87A7BDEC7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDBA6130C8E18331C891627C /* PlantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantView.swift; sourceTree = "<group>"; };
+		DF73E83431D7FDAB7C48E540 /* HarvestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarvestView.swift; sourceTree = "<group>"; };
 		E299CE7FCE6BDF614ACD9220 /* PlantVisualState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantVisualState.swift; sourceTree = "<group>"; };
 		E31161F7797D3D8F8C51F6E6 /* GardenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenView.swift; sourceTree = "<group>"; };
 		E348D344B57833B36B924ADB /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -255,6 +257,7 @@
 			children = (
 				E31161F7797D3D8F8C51F6E6 /* GardenView.swift */,
 				189CF01DA85D8A2E11CC497D /* GardenView.swift.broken */,
+				DF73E83431D7FDAB7C48E540 /* HarvestView.swift */,
 				1B992476B4683B036EEA2226 /* PlantStatusCard.swift */,
 			);
 			path = Garden;
@@ -567,6 +570,7 @@
 				D6CC5CC22171F7E7E934962B /* GardenView.swift in Sources */,
 				4F146B945FBD9DAF49B02F8E /* GrowthRules.swift in Sources */,
 				EFAE24B89AA0E20729A4EC84 /* GrowthStage.swift in Sources */,
+				9822AA91A0543565EC22B4F5 /* HarvestView.swift in Sources */,
 				A5B7C21AE813BCA4A6D0FA03 /* HealthCalculator.swift in Sources */,
 				160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */,
 				44553297C56B4F654A1E215D /* HistoryView.swift in Sources */,

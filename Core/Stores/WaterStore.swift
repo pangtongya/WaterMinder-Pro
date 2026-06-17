@@ -125,7 +125,9 @@ final class WaterStore: ObservableObject {
         let last = cal.startOfDay(for: end)
         var result: [(date: Date, amount: Int)] = []
         while cur <= last {
-            let next = cal.date(byAdding: .day, value: 1, to: cur)!
+            guard let next = cal.date(byAdding: .day, value: 1, to: cur) else {
+                continue
+            }
             let total = records
                 .filter { $0.createdAt >= cur && $0.createdAt < next }
                 .reduce(0) { $0 + $1.amount }
@@ -138,7 +140,9 @@ final class WaterStore: ObservableObject {
     var weekAverage: Int {
         let cal = Calendar.current
         let end = Date()
-        let start = cal.date(byAdding: .day, value: -6, to: end)!
+        guard let start = cal.date(byAdding: .day, value: -6, to: end) else {
+            return 0
+        }
         let totals = dailyTotals(from: start, to: end)
         guard !totals.isEmpty else { return 0 }
         return totals.reduce(0) { $0 + $1.amount } / totals.count
@@ -149,7 +153,9 @@ final class WaterStore: ObservableObject {
     private var todayBounds: (start: Date, end: Date) {
         let cal = Calendar.current
         let start = cal.startOfDay(for: Date())
-        let end = cal.date(byAdding: .day, value: 1, to: start)!
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else {
+            return (start, start)
+        }
         return (start, end)
     }
 
@@ -172,11 +178,17 @@ final class WaterStore: ObservableObject {
 
         // 今天还没达标不算中断（今天还没结束），从昨天往前数
         if !includeToday || (totals[check] ?? 0) < goal {
-            check = cal.date(byAdding: .day, value: -1, to: check)!
+            guard let newCheck = cal.date(byAdding: .day, value: -1, to: check) else {
+                return 0
+            }
+            check = newCheck
         }
         while (totals[check] ?? 0) >= goal {
             streak += 1
-            check = cal.date(byAdding: .day, value: -1, to: check)!
+            guard let newCheck = cal.date(byAdding: .day, value: -1, to: check) else {
+                break
+            }
+            check = newCheck
         }
         return streak
     }
