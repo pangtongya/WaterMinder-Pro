@@ -1,64 +1,72 @@
-# WaterMinder-Pro/project.yml
-# XcodeGen 配置文件
+# Bloom - project.yml (XcodeGen 配置)
+# 喝水养植物 App：把"应该喝水"变成"它需要我喝水"
 
-name: WaterMinder
+name: Bloom
 options:
   bundleIdPrefix: com.pangtong
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   xcodeVersion: "15.0"
-  
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_STRICT_CONCURRENCY: "minimal"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: "A9BU96SR38"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    SWIFT_ENABLE_EXPLICIT_MODULES: NO
+    ENABLE_DEBUG_DYLIB: NO
+    DEBUG_DYLIB_INSTALL_NAME: ""
+
 targets:
-  WaterMinder:
+  Bloom:
     type: application
     platform: iOS
-    deploymentTarget: "16.0"
+    deploymentTarget: "17.0"
     sources:
-      - path: WaterMinderApp.swift
-      - path: Info.plist
-      - path: Models
-      - path: Stores
-      - path: Managers
-      - path: Views
-      - path: Utilities
+      - path: LaunchScreen.storyboard
+      - path: Resources
+      - path: App
+      - path: Core
+      - path: Features
+      - path: UI
       - path: Assets.xcassets
     settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.bloom
+      CODE_SIGN_ENTITLEMENTS: Bloom.entitlements
       INFOPLIST_FILE: Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder
-      SWIFT_VERSION: "5.0"
-      MARKETING_VERSION: "1.0.0"
-      CURRENT_PROJECT_VERSION: "1"
-      SWIFT_STRICT_CONCURRENCY: "minimal"
-      CODE_SIGN_STYLE: Automatic
-      CODE_SIGN_ENTITLEMENTS: WaterMinder.entitlements
-    dependencies:
-      - target: WaterMinderWidget
-          
-  WaterMinderWidget:
+      GENERATE_INFOPLIST_FILE: NO
+    capabilities:
+      iCloud:
+        properties:
+          containers:
+            - identifier: iCloud.com.pangtong.bloom
+              name: Bloom CloudKit Container
+              service: CloudKit
+
+  BloomWidget:
     type: app-extension
     platform: iOS
-    deploymentTarget: "16.0"
+    deploymentTarget: "17.0"
     sources:
-      - path: WaterMinderWidget
+      - path: Widget
     settings:
-      INFOPLIST_FILE: WaterMinderWidget/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder.widget
-      SWIFT_VERSION: "5.0"
-      MARKETING_VERSION: "1.0.0"
-      CURRENT_PROJECT_VERSION: "2"
-      CODE_SIGN_STYLE: Automatic
-      CODE_SIGN_ENTITLEMENTS: WaterMinderWidget.entitlements
-      SWIFT_STRICT_CONCURRENCY: "minimal"
-      
-  WaterMinderTests:
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.bloom.widget
+      CODE_SIGN_ENTITLEMENTS: Widget/BloomWidget.entitlements
+      INFOPLIST_FILE: Widget/Info.plist
+      GENERATE_INFOPLIST_FILE: NO
+
+  BloomTests:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "16.0"
+    deploymentTarget: "17.0"
     sources:
       - path: Tests
     settings:
-      INFOPLIST_FILE: Tests/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.waterminder.tests
-      SWIFT_VERSION: "5.0"
+      PRODUCT_BUNDLE_IDENTIFIER: com.pangtong.bloom.tests
     dependencies:
-      - target: WaterMinder
+      - target: Bloom

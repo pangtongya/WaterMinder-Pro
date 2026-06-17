@@ -1,0 +1,11 @@
+/* 
+  InfoPlist.strings (English)
+  Bloom - Localized app information
+*/
+
+"CFBundleDisplayName" = "Bloom";
+"CFBundleName" = "Bloom";
+
+/* HealthKit Permissions */
+"NSHealthShareUsageDescription" = "Read water intake data from Health app to help care for your plant.";
+"NSHealthUpdateUsageDescription" = "Save water intake to Health app for complete health records.";
