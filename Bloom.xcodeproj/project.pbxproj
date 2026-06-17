@@ -25,6 +25,7 @@
 		4D96A031B8662FEE778AE8F4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E959C081126F77EFA5D911AF /* RootView.swift */; };
 		4DFD1EA8A9639C7179357CE1 /* PlantLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3C26ADB360224F1D94B290 /* PlantLifecycleTests.swift */; };
 		4F146B945FBD9DAF49B02F8E /* GrowthRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18516F309A20E456F54E68C4 /* GrowthRules.swift */; };
+		57DD5F3B3C2EE5B407E99FA3 /* ProGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */; };
 		5CAC5D97960AF917782C288B /* AchievementStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC4020FB29A2BD96D76112D /* AchievementStore.swift */; };
 		6500D3F77BFDA4419D39C601 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97132AE74897B1E90678C005 /* ThemeManager.swift */; };
 		672ADEC5918606DB9CAC6170 /* HealthCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7CAFF1B010DD5A5905668A /* HealthCalculatorTests.swift */; };
@@ -84,6 +85,7 @@
 		125314FAAAC6F9AC37667001 /* BloomApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomApp.swift; sourceTree = "<group>"; };
 		18516F309A20E456F54E68C4 /* GrowthRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthRules.swift; sourceTree = "<group>"; };
 		189CF01DA85D8A2E11CC497D /* GardenView.swift.broken */ = {isa = PBXFileReference; path = GardenView.swift.broken; sourceTree = "<group>"; };
+		198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGatingExtensions.swift; sourceTree = "<group>"; };
 		1A7CAFF1B010DD5A5905668A /* HealthCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCalculatorTests.swift; sourceTree = "<group>"; };
 		1AC89F8CEBB6053C706D8BDF /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		1B992476B4683B036EEA2226 /* PlantStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantStatusCard.swift; sourceTree = "<group>"; };
@@ -314,6 +316,7 @@
 			isa = PBXGroup;
 			children = (
 				0E7B3AF3F25F9CAF72FBD8B0 /* LocalizationExtensions.swift */,
+				198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -581,6 +584,7 @@
 				F6401AD1F72D53C073404887 /* PlantStatusCard.swift in Sources */,
 				DDCE0ED8C27ABB84C134E126 /* PlantView.swift in Sources */,
 				ACA540224CD37AFA1F4D2929 /* PlantVisualState.swift in Sources */,
+				57DD5F3B3C2EE5B407E99FA3 /* ProGatingExtensions.swift in Sources */,
 				18364177D02B353EE1738526 /* QuickRecordBar.swift in Sources */,
 				4D96A031B8662FEE778AE8F4 /* RootView.swift in Sources */,
 				39BEA3BD56AE16D37327AF16 /* SettingsView.swift in Sources */,

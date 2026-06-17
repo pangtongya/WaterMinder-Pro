@@ -42,7 +42,7 @@ struct AdvancedStatsView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("高级统计".localized)
+        .navigationTitle("高级统计".localized.localized)
         .navigationBarTitleDisplayMode(.large)
     }
     
@@ -97,7 +97,7 @@ struct AdvancedStatsView: View {
     
     private var trendChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("喝水趋势".localized)
+            Text("喝水趋势".localized.localized)
                 .font(.system(size: 16, weight: .semibold))
             
             Chart {
@@ -143,11 +143,11 @@ struct AdvancedStatsView: View {
             HStack {
                 Image(systemName: "clock.fill")
                     .foregroundColor(.bloomGold)
-                Text("最佳喝水时间".localized)
+                Text("最佳喝水时间".localized.localized)
                     .font(.system(size: 16, weight: .semibold))
             }
             
-            Text("上午 9-10 点是你喝水最频繁的时段，继续保持！".localized)
+            Text("上午 9-10 点是你喝水最频繁的时段，继续保持！".localized.localized)
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
             
@@ -186,7 +186,7 @@ struct AdvancedStatsView: View {
     
     private var weeklyHabitCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("每周习惯".localized)
+            Text("每周习惯".localized.localized)
                 .font(.system(size: 16, weight: .semibold))
             
             HStack(spacing: 8) {
@@ -208,7 +208,7 @@ struct AdvancedStatsView: View {
                 }
             }
             
-            Text("周三、周五是你的喝水高峰日".localized)
+            Text("周三、周五是你的喝水高峰日".localized.localized)
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
         }
@@ -225,12 +225,12 @@ struct AdvancedStatsView: View {
             HStack {
                 Image(systemName: "trophy.fill")
                     .foregroundColor(.bloomGold)
-                Text("成就进度".localized)
+                Text("成就进度".localized.localized)
                     .font(.system(size: 16, weight: .semibold))
             }
             
             HStack {
-                Text("已解锁".localized)
+                Text("已解锁".localized.localized)
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
                 Spacer()

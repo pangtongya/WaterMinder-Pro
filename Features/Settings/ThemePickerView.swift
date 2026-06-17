@@ -14,21 +14,21 @@ struct ThemePickerView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // 说明文字
-                Text("选择你喜欢的主题外观")
+                Text("选择你喜欢的主题外观".localized)
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
                     .padding(.top, 8)
                 
                 // 免费主题
                 themeSection(
-                    title: "免费主题",
+                    title: "免费主题".localized,
                     themes: ThemeLibrary.free,
                     isPro: false
                 )
                 
                 // Pro 主题
                 themeSection(
-                    title: "Pro 主题",
+                    title: "Pro 主题".localized,
                     themes: ThemeLibrary.pro,
                     isPro: true
                 )
@@ -38,7 +38,7 @@ struct ThemePickerView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("主题外观")
+        .navigationTitle("主题外观".localized)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             selectedThemeID = userStore.profile.selectedThemeID

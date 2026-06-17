@@ -9,6 +9,7 @@ struct RootView: View {
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var gardenStore: GardenStore
     @EnvironmentObject var cloudSyncManager: CloudSyncManager
+    @EnvironmentObject var themeManager: ThemeManager
 
     var body: some View {
         Group {
@@ -41,7 +42,7 @@ struct RootView: View {
             NavigationStack { SettingsView() }
                 .tabItem { Label("设置".localized, systemImage: "gearshape.fill") }
         }
-        .tint(Color.bloomPrimary)
+        .tint(themeManager.currentTheme.accent)
     }
     
     private func downloadCloudData() async {
