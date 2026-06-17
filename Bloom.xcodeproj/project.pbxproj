@@ -87,7 +87,7 @@
 		123F2CABE5FC968020DB84FB /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		125314FAAAC6F9AC37667001 /* BloomApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomApp.swift; sourceTree = "<group>"; };
 		18516F309A20E456F54E68C4 /* GrowthRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthRules.swift; sourceTree = "<group>"; };
-		189CF01DA85D8A2E11CC497D /* GardenView.swift.broken */ = {isa = PBXFileReference; path = GardenView.swift.broken; sourceTree = "<group>"; };
+		189CF01DA85D8A2E11CC497D /* GardenView.swift.broken */ = {isa = PBXFileReference; lastKnownFileType = text; path = GardenView.swift.broken; sourceTree = "<group>"; };
 		198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGatingExtensions.swift; sourceTree = "<group>"; };
 		1A7CAFF1B010DD5A5905668A /* HealthCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCalculatorTests.swift; sourceTree = "<group>"; };
 		1AC89F8CEBB6053C706D8BDF /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
@@ -116,9 +116,9 @@
 		7BF982805C787A6311C114E4 /* WaterStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterStore.swift; sourceTree = "<group>"; };
 		835544F44EC5E4EEBCE026AC /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		886439BFC290555051B1B9DF /* CloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncManager.swift; sourceTree = "<group>"; };
-		8F3F5BC60AA3D9FB5C953313 /* BloomWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = BloomWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F3F5BC60AA3D9FB5C953313 /* BloomWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BloomWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		97132AE74897B1E90678C005 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
-		98E8505DE57EAE80ADF460FE /* Bloom.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Bloom.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		98E8505DE57EAE80ADF460FE /* Bloom.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bloom.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		997BE93D2FBB40325C660E1B /* BloomWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BloomWidget.entitlements; sourceTree = "<group>"; };
 		9C29AC4BD49D4D36D392153D /* AdvancedStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedStatsView.swift; sourceTree = "<group>"; };
 		9CA41E01633E07FC06A02CEB /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
@@ -126,7 +126,7 @@
 		A6D5B86B1996589FB4E30EA7 /* WidgetAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
 		B4AFAC944C68EDED50F60CA1 /* BloomWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomWidget.swift; sourceTree = "<group>"; };
 		B5EB55BC4F2D1B2902EACC77 /* AchievementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementView.swift; sourceTree = "<group>"; };
-		B628C277CC0EF1014721EE72 /* BloomTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BloomTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B628C277CC0EF1014721EE72 /* BloomTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BloomTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B679626FE1430DCF72330887 /* GrowthStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthStage.swift; sourceTree = "<group>"; };
 		BC85C0351CDE4A98EB12D139 /* SharingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingManager.swift; sourceTree = "<group>"; };
 		BF0D114C675CDC68B3E488EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -480,15 +480,12 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					03D63355804034CC102CA7FA = {
-						DevelopmentTeam = A9BU96SR38;
 						ProvisioningStyle = Automatic;
 					};
 					28172305F85ADDE844832563 = {
-						DevelopmentTeam = A9BU96SR38;
 						ProvisioningStyle = Automatic;
 					};
 					E5CD0C6D0BDCF2BEDD88E0DB = {
-						DevelopmentTeam = A9BU96SR38;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -652,6 +649,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Bloom.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -669,6 +667,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/BloomWidget.entitlements;
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -687,6 +686,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -704,6 +704,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/BloomWidget.entitlements;
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -724,6 +725,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Bloom.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -878,6 +880,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 2ZNZRXNPWQ;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
