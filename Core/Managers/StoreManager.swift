@@ -84,16 +84,16 @@ final class StoreManager: ObservableObject {
 
     // MARK: - Pro 状态查询
 
-    /// 当前是否为 Pro（优先查交易状态，回退闭包）
+    /// 当前是否为 Pro（优先查交易状态，回退查 Keychain）
     var isProProvider: () -> Bool = { false }
     var isPro: Bool {
         #if DEBUG
-        // 开发模式：可以通过 UserDefaults 手动设置 Pro 状态进行测试
-        if UserDefaults.standard.bool(forKey: "bloom.dev.pro") { return true }
+        // 开发模式：可以通过环境变量手动设置 Pro 状态进行测试
+        if ProcessInfo.processInfo.environment["BLOOM_FORCE_PRO"] == "1" { return true }
         #endif
-        
-        // 先查本地缓存的权益
-        if UserDefaults.standard.bool(forKey: "bloom.isPro") { return true }
+
+        // 先查 Keychain 缓存的权益
+        if KeychainManager.shared.loadBool(for: "bloom.isPro") { return true }
         return isProProvider()
     }
 
@@ -165,7 +165,7 @@ final class StoreManager: ObservableObject {
             }
         }
 
-        UserDefaults.standard.set(hasPro, forKey: "bloom.isPro")
+        KeychainManager.shared.saveBool(hasPro, for: "bloom.isPro")
         if hasPro {
             onProUnlocked?("restored")
         }
@@ -183,7 +183,7 @@ final class StoreManager: ObservableObject {
     }
 
     private func deliverTransaction(_ transaction: Transaction) async {
-        UserDefaults.standard.set(true, forKey: "bloom.isPro")
+        KeychainManager.shared.saveBool(true, for: "bloom.isPro")
         onProUnlocked?(transaction.productID)
     }
 

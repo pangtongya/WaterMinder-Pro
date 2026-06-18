@@ -28,7 +28,14 @@ final class UserStore: ObservableObject {
     var reminderEnabled: Bool { profile.reminderEnabled }
     var reminderInterval: Int { profile.reminderInterval }
     var theme: AppTheme { profile.theme }
-    var isPro: Bool { profile.isPro }
+    /// Pro 状态优先读取 Keychain，其次从 profile 读取
+    var isPro: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["BLOOM_FORCE_PRO"] == "1" { return true }
+        #endif
+        if KeychainManager.shared.loadBool(for: "bloom.isPro") { return true }
+        return profile.isPro
+    }
 
     var colorScheme: ColorScheme? {
         switch profile.theme {
@@ -72,6 +79,7 @@ final class UserStore: ObservableObject {
     }
 
     func unlockPro(productID: String) {
+        KeychainManager.shared.saveBool(true, for: "bloom.isPro")
         profile.isPro = true
         profile.proProductID = productID
         profile.proPurchaseDate = Date()
