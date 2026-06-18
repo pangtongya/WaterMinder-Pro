@@ -25,8 +25,10 @@ struct AnimatedPlantView: View {
     let plant: Plant
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.05, paused: false)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.1, paused: false)) { timeline in
             PlantView(plant: plant, animationPhase: timeline.date.timeIntervalSinceReferenceDate)
         }
+        // drawingGroup() 将视图合成为单一图层，减少重绘次数
+        .drawingGroup()
     }
 }

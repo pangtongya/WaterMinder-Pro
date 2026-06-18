@@ -241,41 +241,27 @@ struct GardenView: View {
         }
     }
     private func harvestPlant() {
-        // 检查花园限制
-        let harvestCheck = gardenStore.canHarvest(isPro: userStore.isPro)
-        
-        if !harvestCheck.allowed {
-            // 免费用户已达上限，显示提示
-            showGardenLimitAlert = true
+        if !gardenStore.harvestPlant(plantEngine: plantEngine, isPro: userStore.isPro) {
+            // 如果失败且不是因为没有可收获的植物（免费用户达到上限）
+            let check = gardenStore.canHarvest(isPro: userStore.isPro)
+            if !check.allowed {
+                showGardenLimitAlert = true
+            }
             return
         }
-        
-        if let item = plantEngine.harvest() {
-            gardenStore.add(item)
-            Haptics.success()
-        }
+        Haptics.success()
     }
 
     // MARK: - 点击植物浇水
 
     /// 点击植物直接浇水（用中杯默认量），并触发水滴动画
     private func waterPlant(_ cup: CupType) {
-        let amount = cup.defaultAmount
-
-        waterStore.add(amount: amount, cupType: cup)
-        plantEngine.water(amount: amount)
-
-        if waterStore.isGoalMetToday {
-            plantEngine.processGoalMet()
+        Task {
+            await plantEngine.waterPlant(cup: cup, waterStore: waterStore, healthManager: healthManager)
+            // 水滴动画 + 触觉（UI 相关，仍在 View 层）
+            splashTrigger += 1
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
-
-        if healthManager.isAuthorized {
-            Task { try? await healthManager.saveWater(amount) }
-        }
-
-        // 水滴动画 + 触觉
-        splashTrigger += 1
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
 
     // MARK: - 今日记录

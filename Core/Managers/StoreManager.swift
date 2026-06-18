@@ -35,21 +35,48 @@ final class StoreManager: ObservableObject {
     @Published var lastError: String?
 
     private var transactionListener: Task<Void, Error>?
+    private var retryTask: Task<Void, Never>?
+    private var isListening = false
 
     /// 解锁 Pro 的回调（购买成功后通知 UserStore）
     var onProUnlocked: ((String) -> Void)?
 
     private init() {
-        transactionListener = listenForTransactions()
-
-        Task {
-            await loadProducts()
-            await updatePurchasedProducts()
-        }
+        startTransactionListener()
     }
 
     deinit {
         transactionListener?.cancel()
+        retryTask?.cancel()
+    }
+
+    // MARK: - 交易监听（带重试）
+
+    private func startTransactionListener() {
+        guard !isListening else { return }
+        isListening = true
+        transactionListener = listenForTransactionsWithRetry()
+    }
+
+    private func listenForTransactionsWithRetry() -> Task<Void, Error> {
+        Task.detached { [weak self] in
+            while !Task.isCancelled {
+                for await result in Transaction.updates {
+                    do {
+                        let transaction = try self?.checkVerified(result)
+                        if let t = transaction {
+                            await self?.deliverTransaction(t)
+                            await t.finish()
+                        }
+                    } catch {
+                        // 单笔交易验证失败，继续监听下一条
+                        print("[StoreManager] 交易验证失败: \(error)")
+                    }
+                }
+                // AsyncSequence 结束（理论上不会发生），短暂等待后重连
+                try? await Task.sleep(for: .seconds(5))
+            }
+        }
     }
 
     // MARK: - 加载商品
@@ -63,8 +90,6 @@ final class StoreManager: ObservableObject {
         let isDevMode = ProcessInfo.processInfo.environment["BLOOM_DEV_MODE"] == "1"
         if isDevMode {
             print("⚠️ [StoreManager] 沙盒测试模式 - 使用模拟商品")
-            // 注意：由于 Product 是 StoreKit 的类型，我们无法直接创建实例
-            // 这里设置为空，让 PaywallView 显示开发模式提示
             products = []
             return
         }
@@ -72,7 +97,6 @@ final class StoreManager: ObservableObject {
 
         do {
             let storeProducts = try await Product.products(for: BloomProduct.allIDs)
-            // 按价格排序（年订阅通常比终身便宜，放前面）
             products = storeProducts.sorted { $0.price < $1.price }
             if products.isEmpty {
                 print("⚠️ [StoreManager] App Store Connect 中未配置商品")
@@ -88,11 +112,9 @@ final class StoreManager: ObservableObject {
     var isProProvider: () -> Bool = { false }
     var isPro: Bool {
         #if DEBUG
-        // 开发模式：可以通过环境变量手动设置 Pro 状态进行测试
         if ProcessInfo.processInfo.environment["BLOOM_FORCE_PRO"] == "1" { return true }
         #endif
 
-        // 先查 Keychain 缓存的权益
         if KeychainManager.shared.loadBool(for: "bloom.isPro") { return true }
         return isProProvider()
     }
@@ -133,37 +155,19 @@ final class StoreManager: ObservableObject {
         }
     }
 
-    // MARK: - 交易监听（后台续订/退款）
-
-    private func listenForTransactions() -> Task<Void, Error> {
-        Task.detached { [weak self] in
-            for await result in Transaction.updates {
-                do {
-                    let transaction = try self?.checkVerified(result)
-                    if let t = transaction {
-                        await self?.deliverTransaction(t)
-                        await t.finish()
-                    }
-                } catch {
-                    // 交易未通过验证，忽略
-                }
-            }
-        }
-    }
-
-    // MARK: - 更新本地权益
+    // MARK: - 更新本地权益（在后台队列执行）
 
     private func updatePurchasedProducts() async {
-        var hasPro = false
-
-        for await result in Transaction.currentEntitlements {
-            if let transaction = try? checkVerified(result) {
-                if BloomProduct.allIDs.contains(transaction.productID) {
-                    hasPro = true
-                    break
+        // 后台队列检查交易权益
+        let hasPro = await Task.detached(priority: .userInitiated) { () -> Bool in
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result,
+                   BloomProduct.allIDs.contains(transaction.productID) {
+                    return true
                 }
             }
-        }
+            return false
+        }.value
 
         KeychainManager.shared.saveBool(hasPro, for: "bloom.isPro")
         if hasPro {

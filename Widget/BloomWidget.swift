@@ -5,6 +5,24 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Widget 本地常量（Widget Extension 无法访问主 App 的 AppConstants）
+
+enum WidgetConstants {
+    static let appGroupIdentifier = "group.com.pangtong.bloom"
+    static let widgetKind = "BloomWidget"
+
+    enum WidgetKeys {
+        static let todayIntake = "widget.todayIntake"
+        static let dailyGoal = "widget.dailyGoal"
+        static let plantName = "widget.plantName"
+        static let plantHealth = "widget.plantHealth"
+        static let plantStage = "widget.plantStage"
+        static let plantSymbol = "widget.plantSymbol"
+        static let isPaused = "widget.isPaused"
+        static let lastUpdated = "widget.lastUpdated"
+    }
+}
+
 // MARK: - Widget 本地化字符串
 
 enum WidgetL {
@@ -91,7 +109,7 @@ struct Provider: TimelineProvider {
     
     private func loadWidgetData() -> WidgetData {
         // 从共享 App Group 读取数据
-        guard let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) else {
+        guard let defaults = UserDefaults(suiteName: WidgetConstants.appGroupIdentifier) else {
             return WidgetData(
                 currentIntake: 0,
                 dailyGoal: 2000,
@@ -104,13 +122,13 @@ struct Provider: TimelineProvider {
             )
         }
         
-        let currentIntake = defaults.integer(forKey: AppConstants.WidgetKeys.todayIntake)
-        let dailyGoal = defaults.integer(forKey: AppConstants.WidgetKeys.dailyGoal)
-        let plantName = defaults.string(forKey: AppConstants.WidgetKeys.plantName) ?? "Plant"
-        let plantHealth = defaults.double(forKey: AppConstants.WidgetKeys.plantHealth)
-        let plantStage = defaults.string(forKey: AppConstants.WidgetKeys.plantStage) ?? "Seed"
-        let plantSymbol = defaults.string(forKey: AppConstants.WidgetKeys.plantSymbol) ?? "🌰"
-        let isPaused = defaults.bool(forKey: AppConstants.WidgetKeys.isPaused)
+        let currentIntake = defaults.integer(forKey: WidgetConstants.WidgetKeys.todayIntake)
+        let dailyGoal = defaults.integer(forKey: WidgetConstants.WidgetKeys.dailyGoal)
+        let plantName = defaults.string(forKey: WidgetConstants.WidgetKeys.plantName) ?? "Plant"
+        let plantHealth = defaults.double(forKey: WidgetConstants.WidgetKeys.plantHealth)
+        let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage) ?? "Seed"
+        let plantSymbol = defaults.string(forKey: WidgetConstants.WidgetKeys.plantSymbol) ?? "🌰"
+        let isPaused = defaults.bool(forKey: WidgetConstants.WidgetKeys.isPaused)
         
         return WidgetData(
             currentIntake: currentIntake,

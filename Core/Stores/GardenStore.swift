@@ -98,15 +98,30 @@ final class GardenStore: ObservableObject {
     /// 检查是否可以收获新植物
     func canHarvest(isPro: Bool) -> (allowed: Bool, current: Int, limit: Int) {
         let current = items.count
-        
+
         // Pro 用户无限制
         if isPro {
             return (true, current, Int.max)
         }
-        
+
         // 免费用户有限制
         let allowed = current < Self.freeUserGardenLimit
         return (allowed, current, Self.freeUserGardenLimit)
+    }
+
+    /// 统一收获入口（由 GardenView 调用）
+    /// 检查权限 → 调用 plantEngine.harvest() → 加入花园
+    /// 返回是否成功（false 表示被限制或无植物可收）
+    @discardableResult
+    func harvestPlant(plantEngine: PlantEngine, isPro: Bool) -> Bool {
+        let check = canHarvest(isPro: isPro)
+        guard check.allowed else { return false }
+
+        if let item = plantEngine.harvest() {
+            add(item)
+            return true
+        }
+        return false
     }
     
     /// 获取花园使用状态描述

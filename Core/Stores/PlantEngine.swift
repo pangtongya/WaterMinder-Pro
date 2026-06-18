@@ -66,6 +66,23 @@ final class PlantEngine: ObservableObject {
         return nil
     }
 
+    /// 统一浇水入口（由 GardenView 调用）
+    /// 整合了：记录喝水、更新植物、检测目标达成、同步 HealthKit
+    func waterPlant(cup: CupType, waterStore: WaterStore, healthManager: HealthManager) async {
+        let amount = cup.defaultAmount
+
+        waterStore.add(amount: amount, cupType: cup)
+        _ = water(amount: amount)
+
+        if waterStore.isGoalMetToday {
+            processGoalMet()
+        }
+
+        if healthManager.isAuthorized {
+            try? await healthManager.saveWater(amount)
+        }
+    }
+
     /// 今日达标时调用（由 UI 层根据 WaterStore.isGoalMetToday 驱动）
     func processGoalMet() {
         guard !goalBonusAppliedToday else { return }

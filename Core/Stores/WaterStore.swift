@@ -277,10 +277,45 @@ final class WaterStore: ObservableObject {
     }
 
     // MARK: - 备份恢复
-    
+
     /// 替换所有记录（用于恢复备份）
     func replaceAllRecords(with newRecords: [WaterRecord]) {
         records = newRecords
         persist()
+    }
+
+    // MARK: - 数据归档（控制内存占用）
+
+    /// 归档超过指定天数的旧记录（保留最近 N 天数据）
+    /// - Parameter keepDays: 保留最近多少天的数据（默认 90 天）
+    /// - Returns: 被归档的记录数量
+    @discardableResult
+    func archiveOldRecords(keepDays: Int = 90) -> Int {
+        let cal = Calendar.current
+        guard let cutoff = cal.date(byAdding: .day, value: -keepDays, to: Date()) else {
+            return 0
+        }
+
+        let oldRecords = records.filter { $0.createdAt < cutoff }
+        guard !oldRecords.isEmpty else { return 0 }
+
+        // 将旧记录归档到单独文件
+        let archiveFilename = "water_records_archive_\(Int(cutoff.timeIntervalSince1970)).json"
+        storage.save(oldRecords, filename: archiveFilename)
+
+        // 从内存中移除旧记录
+        records.removeAll { $0.createdAt < cutoff }
+        persist()
+
+        print("[WaterStore] 归档了 \(oldRecords.count) 条旧记录到 \(archiveFilename)")
+        return oldRecords.count
+    }
+
+    /// 应用启动时自动检查并归档（由 App 启动流程调用）
+    func autoArchiveIfNeeded() {
+        let archived = archiveOldRecords(keepDays: 90)
+        if archived > 0 {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }

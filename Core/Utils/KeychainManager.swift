@@ -56,6 +56,7 @@ final class KeychainManager {
 
     // MARK: - Convenience (Bool)
 
+    @discardableResult
     func saveBool(_ value: Bool, for key: String) -> Bool {
         let data = Data([value ? 1 : 0])
         return save(data, for: key)
