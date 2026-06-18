@@ -785,8 +785,14 @@ struct StatCard: View {
                 .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
+}
+
+// MARK: - Preview
+
+#Preview("Advanced Stats") {
+    AdvancedStatsView()
+        .environmentObject(WaterStore())
+        .environmentObject(UserStore())
+        .environmentObject(PlantEngine())
 }
