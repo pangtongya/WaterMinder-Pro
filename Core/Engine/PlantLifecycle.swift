@@ -1,8 +1,10 @@
 // PlantLifecycle.swift
 // 生命周期编排 —— 把健康度、成长值、阶段推进串成完整流程
 //
-// 这是引擎层与状态层之间的桥梁：纯函数接收"旧状态+输入"，返回"新状态"。
-// 状态层（PlantEngine / Stores）负责持久化，本层只做计算。
+// 设计原则：
+// - 纯函数：接收"旧状态+输入"，返回"新状态"，无副作用
+// - 状态层（PlantEngine）负责持久化，本层只做计算
+// - 阶段升级统一走 advanceStageIfPossible()，保证"每天最多升一级"
 
 import Foundation
 
@@ -10,33 +12,24 @@ enum PlantLifecycle {
     // MARK: - 喝水（核心即时反馈）
 
     /// 用户喝了一口水后，植物的新状态
+    /// - 每次喝水：健康度恢复 + 成长值 + 触发一次阶段检查（可能升级）
     static func applyWatering(_ plant: Plant, amount: Int) -> Plant {
         var p = plant
         p.health = HealthCalculator.applyWater(currentHealth: p.health, amount: amount)
         p.growthPoints += GrowthRules.growthFromWater(amount: amount)
         p.lastWateredAt = Date()
-
-        // 成长值推进后，阶段自动升级
-        let newStage = GrowthRules.stageFor(growthPoints: p.growthPoints)
-        if newStage.rawValue > p.stage.rawValue {
-            p.stage = newStage
-        }
-        return p
+        return advanceStageIfPossible(p)
     }
 
     // MARK: - 当天达标结算
 
     /// 当天饮水达标时，给予额外奖励
+    /// - 额外成长值 + 阶段检查（可能升级）
     static func applyDailyGoalMet(_ plant: Plant) -> Plant {
         var p = plant
         p.health = HealthCalculator.applyGoalMet(currentHealth: p.health)
         p.growthPoints += GrowthRules.dailyGoalBonus
-
-        let newStage = GrowthRules.stageFor(growthPoints: p.growthPoints)
-        if newStage.rawValue > p.stage.rawValue {
-            p.stage = newStage
-        }
-        return p
+        return advanceStageIfPossible(p)
     }
 
     // MARK: - 每日断水结算
@@ -44,10 +37,7 @@ enum PlantLifecycle {
     /// 某天结束时未达标，应用衰减
     /// 如果植物处于暂停状态，不应用衰减
     static func applyDailyDecay(_ plant: Plant, consecutiveMissedDays: Int) -> Plant {
-        // 暂停养护期间不衰减
-        guard !plant.isPaused else {
-            return plant
-        }
+        guard !plant.isPaused else { return plant }
 
         var p = plant
         p.health = HealthCalculator.applyDailyDecay(
@@ -55,6 +45,31 @@ enum PlantLifecycle {
             consecutiveMissedDays: consecutiveMissedDays,
             plantedAt: p.plantedAt
         )
+        return p
+    }
+
+    // MARK: - 阶段升级（统一入口，含每日上限）
+
+    /// 根据当前成长值判断是否应升级阶段
+    /// 每天最多触发一次升级（检查 lastStageUpAt），避免同一天连续弹两次庆祝弹窗
+    /// - 成长值已经累积，只是不在当天立即生效 —— 下一天打开 App 仍然会升级
+    static func advanceStageIfPossible(_ plant: Plant) -> Plant {
+        var p = plant
+        let current = p.stage
+        let target = GrowthRules.stageFor(growthPoints: p.growthPoints)
+
+        // 1. 没有可升的阶段
+        guard target.rawValue > current.rawValue else { return p }
+
+        // 2. 今天已经升过一级了 → 保留成长值，下次再触发
+        if let lastUp = p.lastStageUpAt,
+           Calendar.current.isDate(lastUp, inSameDayAs: Date()) {
+            return p
+        }
+
+        // 3. 执行升级，并记录时间戳
+        p.stage = target
+        p.lastStageUpAt = Date()
         return p
     }
 
@@ -68,8 +83,9 @@ enum PlantLifecycle {
         p.growthPoints = 0
         p.plantedAt = Date()
         p.lastWateredAt = nil
-        p.isPaused = false         // 枯萎后自动取消暂停
+        p.isPaused = false
         p.pausedAt = nil
+        p.lastStageUpAt = nil       // 枯萎后清除升级记录
         return p
     }
 
@@ -84,7 +100,6 @@ enum PlantLifecycle {
             peakStage: plant.stage,
             daysToHarvest: plant.ageInDays
         )
-        // 收获后重新种一株同品种新种子
         var reset = plant
         reset.health = 70
         reset.stage = .seed
@@ -92,8 +107,9 @@ enum PlantLifecycle {
         reset.plantedAt = Date()
         reset.lastWateredAt = nil
         reset.isHarvested = false
-        reset.isPaused = false     // 收获后取消暂停
+        reset.isPaused = false
         reset.pausedAt = nil
+        reset.lastStageUpAt = nil   // 收获后清除升级记录
         return (item, reset)
     }
 }

@@ -15,7 +15,9 @@ struct Plant: Identifiable, Codable {
     var isHarvested: Bool            // 是否已收获（入花园后变 true）
     var isPaused: Bool               // 是否暂停养护（出差/旅游模式）
     var pausedAt: Date?              // 暂停时间
-    
+    /// 最近一次升级阶段的时间（用于实现"每天最多升一级"）
+    var lastStageUpAt: Date?
+
     init(
         id: UUID = UUID(),
         name: String = "小绿",
@@ -27,7 +29,8 @@ struct Plant: Identifiable, Codable {
         lastWateredAt: Date? = nil,
         isHarvested: Bool = false,
         isPaused: Bool = false,
-        pausedAt: Date? = nil
+        pausedAt: Date? = nil,
+        lastStageUpAt: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -40,6 +43,7 @@ struct Plant: Identifiable, Codable {
         self.isHarvested = isHarvested
         self.isPaused = isPaused
         self.pausedAt = pausedAt
+        self.lastStageUpAt = lastStageUpAt
     }
 
     // MARK: - 便捷访问
