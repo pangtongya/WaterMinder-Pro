@@ -29,8 +29,43 @@ final class WaterStore: ObservableObject {
     func add(amount: Int, cupType: CupType = .medium) -> WaterRecord {
         let record = WaterRecord(amount: amount, cupType: cupType)
         records.insert(record, at: 0)
-        
+
         // Refresh widgets
+        WidgetCenter.shared.reloadAllTimelines()
+        persist()
+        triggerSync()
+        updateAchievements()
+        return record
+    }
+
+    /// 从 HealthKit 同步记录时使用（带 HK UUID 去重）
+    /// - Returns: 新增的记录数量（0 表示无新增）
+    @discardableResult
+    func addIfNotExists(
+        amount: Int,
+        date: Date,
+        cupType: CupType = .medium,
+        hkSampleUUID: UUID
+    ) -> WaterRecord? {
+        // 1. HK UUID 去重（最精确）
+        if records.contains(where: { $0.hkSampleUUID == hkSampleUUID }) {
+            return nil
+        }
+        // 2. 时间+水量去重（兜底：同分钟同水量不重复）
+        let cal = Calendar.current
+        let rounded = cal.startOfMinute(for: date)
+        if records.contains(where: {
+            cal.isDate($0.createdAt, equalTo: rounded, toGranularity: .minute)
+            && $0.amount == amount
+        }) {
+            return nil
+        }
+        let record = WaterRecord(
+            amount: amount,
+            cupType: cupType,
+            hkSampleUUID: hkSampleUUID
+        )
+        records.insert(record, at: 0)
         WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()

@@ -49,4 +49,42 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         let sample = HKQuantitySample(type: type, quantity: quantity, start: date, end: date)
         try await store.save(sample)
     }
+
+    // MARK: - 读取喝水记录（用于双向同步）
+
+    /// 从 Health App 读取指定时间范围内的喝水记录
+    /// - Parameters:
+    ///   - from: 起始时间（不含）
+    ///   - to: 结束时间（含）
+    /// - Returns: HKQuantitySample 数组，按时间倒序
+    func fetchWaterRecords(from start: Date, to end: Date) async throws -> [HKQuantitySample] {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType,
+              let store else {
+            return []
+        }
+
+        let predicate = HKQuery.predicateForSamples(
+            withStart: start,
+            end: end,
+            options: .strictStartDate
+        )
+        let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+
+        return try await withCheckedThrowingContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: type,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [sort]
+            ) { _, samples, error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume(returning: samples as? [HKQuantitySample] ?? [])
+                }
+            }
+            store.execute(query)
+        }
+    }
 }

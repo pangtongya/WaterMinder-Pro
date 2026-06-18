@@ -18,6 +18,7 @@ struct BloomApp: App {
     @StateObject private var healthManager = HealthManager.shared
     @StateObject private var cloudSyncManager = CloudSyncManager.shared
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var healthSyncService = HealthSyncService.shared
     
     @State private var isReady = false
 
@@ -41,6 +42,15 @@ struct BloomApp: App {
             .environmentObject(healthManager)
             .environmentObject(cloudSyncManager)
             .environmentObject(themeManager)
+            .environmentObject(healthSyncService)
+            .environment(\.scenePhase, onUpdate: { phase in
+                if phase == .active {
+                    // App 回到前台时立即同步一次 HealthKit 数据
+                    Task {
+                        await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
+                    }
+                }
+            })
             .preferredColorScheme(userStore.colorScheme)
             .task {
                 // 异步完成所有初始化
@@ -54,11 +64,16 @@ struct BloomApp: App {
     private func initializeApp() async {
         // 1. 注入 store 间的依赖
         wireStores()
-        
+
         // 2. 加载保存的主题
         themeManager.loadSavedTheme(isPro: userStore.isPro)
-        
-        // 3. 标记就绪（显示 RootView）
+
+        // 3. 同步 HealthKit 数据（如果有权限）
+        if healthManager.isAuthorized {
+            await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
+        }
+
+        // 4. 标记就绪（显示 RootView）
         isReady = true
     }
     
