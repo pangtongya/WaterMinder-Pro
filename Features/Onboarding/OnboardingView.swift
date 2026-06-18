@@ -14,7 +14,11 @@ struct OnboardingView: View {
 
     @State private var step = 1
     @State private var plantName = "小绿"
-    @State private var selectedGoal = 2000
+    /// 每日目标默认值：根据用户语言/地区自动推荐（US→8oz标准≈2400ml，其他→2000ml）
+    @State private var selectedGoal = {
+        let locale = Locale.current.identifier
+        return locale.contains("US") ? 2400 : 2000
+    }()
     @State private var demoWatered = false  // 第1步浇水演示
 
     var body: some View {
@@ -138,22 +142,35 @@ struct OnboardingView: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
-                    ForEach([1500, 2000, 2500, 3000], id: \.self) { goal in
+                    ForEach(Locale.current.identifier.contains("US") ? [1800, 2400, 3000, 3600] : [1500, 2000, 2500, 3000], id: \.self) { goal in
                         Button {
                             Haptics.light()
                             selectedGoal = goal
                         } label: {
-                            Text("\(goal)")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .foregroundStyle(selectedGoal == goal ? .white : .primary)
-                                .background(selectedGoal == goal ? Color.bloomPrimary : Color(.tertiarySystemBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            VStack(spacing: 2) {
+                                Text("\(goal)")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                if Locale.current.identifier.contains("US") {
+                                    Text("\(Int(Double(goal) / 29.574))oz")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(selectedGoal == goal ? .white.opacity(0.7) : .secondary)
+                                } else {
+                                    Text("ml")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(selectedGoal == goal ? .white.opacity(0.7) : .secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .foregroundStyle(selectedGoal == goal ? .white : .primary)
+                            .background(selectedGoal == goal ? Color.bloomPrimary : Color(.tertiarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                     }
                 }
-                Text("ml / 天 · 建议成人每日 2000ml".localized)
+                Text(Locale.current.identifier.contains("US")
+                     ? NSLocalizedString("基于美国标准：每天 8 杯 × 8oz ≈ 2400ml，可根据个人情况调整", comment: "")
+                     : NSLocalizedString("基于中国卫健委建议：每日 2000ml，可根据个人情况调整", comment: ""))
                     .font(.system(size: 12))
                     .foregroundStyle(.tertiary)
             }
