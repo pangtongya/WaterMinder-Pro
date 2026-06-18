@@ -645,7 +645,7 @@ struct SettingsView: View {
                 }
             }
             Button {
-                openURL("https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html")
+                openURL("https://pangtongya.github.io/Bloom-Website/privacy-policy.html")
             } label: {
                 HStack {
                     Image(systemName: "hand.raised.fill")

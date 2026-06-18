@@ -293,13 +293,13 @@ Test credentials: Not required
 ## 📞 Support Information
 
 ### Support URL
-`https://pangtongya.github.io/WaterMinder-Pro/support`
+`https://pangtongya.github.io/Bloom-Website/support.html`
 
 ### Marketing URL (optional)
-`https://pangtongya.github.io/WaterMinder-Pro`
+`https://pangtongya.github.io/Bloom-Website`
 
 ### Contact Email
-`support@yourcompany.com`
+`pongtom@qq.com`
 
 ---
 

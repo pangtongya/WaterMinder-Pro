@@ -173,7 +173,7 @@ struct PaywallView: View {
             // 服务条款 & 隐私政策
             HStack(spacing: 4) {
                 Button("服务条款") {
-                    openURL("https://your-website.com/terms.html")
+                    openURL("https://pangtongya.github.io/Bloom-Website/terms.html")
                 }
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
@@ -181,7 +181,7 @@ struct PaywallView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
                 Button("隐私政策") {
-                    openURL("https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html")
+                    openURL("https://pangtongya.github.io/Bloom-Website/privacy-policy.html")
                 }
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
