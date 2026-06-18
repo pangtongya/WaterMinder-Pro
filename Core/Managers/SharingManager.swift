@@ -54,21 +54,24 @@ final class SharingManager: ObservableObject {
     
     private func renderToImage<V: View>(view: V, size: CGSize) async -> UIImage {
         let controller = UIHostingController(rootView: view.frame(width: size.width, height: size.height))
-        
+
+        // 强制使用浅色模式渲染（分享卡片无论系统什么主题都应该是明亮、色彩鲜艳的）
+        controller.view.overrideUserInterfaceStyle = .light
+
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
             return UIImage()
         }
-        
+
         window.addSubview(controller.view)
         controller.view.frame = CGRect(origin: .zero, size: size)
         controller.view.layoutIfNeeded()
-        
+
         let renderer = UIGraphicsImageRenderer(size: size)
         let image = renderer.image { _ in
             controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
         }
-        
+
         controller.view.removeFromSuperview()
         return image
     }
