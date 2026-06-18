@@ -116,13 +116,18 @@ struct GardenView: View {
             Text(L.proGardenLimit)
         }
         .sheet(isPresented: $showHarvestSheet) {
-            Text("Harvest Sheet Placeholder")
+            HarvestView(plant: plantEngine.plant, onHarvest: performHarvest)
         }
         .sheet(isPresented: $isSharing) {
-            ImagePicker(image: shareImage ?? UIImage())
+            if let shareImage {
+                ActivityViewController(activityItems: [shareImage])
+            }
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("showPaywall"))) { _ in
+            showPaywall = true
         }
     }
 
@@ -201,7 +206,7 @@ struct GardenView: View {
 
     private var harvestButton: some View {
         Button {
-            harvestPlant()
+            showHarvestSheet = true
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
@@ -240,9 +245,10 @@ struct GardenView: View {
             }
         }
     }
-    private func harvestPlant() {
+
+    /// 实际执行收获逻辑（由 HarvestView 的 onHarvest 调用）
+    private func performHarvest() {
         if !gardenStore.harvestPlant(plantEngine: plantEngine, isPro: userStore.isPro) {
-            // 如果失败且不是因为没有可收获的植物（免费用户达到上限）
             let check = gardenStore.canHarvest(isPro: userStore.isPro)
             if !check.allowed {
                 showGardenLimitAlert = true
@@ -465,19 +471,4 @@ private struct WaterDrop: Identifiable {
     var xOffset: Double
     var yOffset: Double
     var opacity: Double
-}
-
-// MARK: - Image Picker for Sharing
-
-struct ImagePicker: UIViewControllerRepresentable {
-    let image: UIImage
-    
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(
-            activityItems: [image],
-            applicationActivities: nil
-        )
-    }
-    
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

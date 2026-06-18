@@ -43,6 +43,8 @@ final class StoreManager: ObservableObject {
 
     private init() {
         startTransactionListener()
+        // 启动时异步验证现有购买权益（不阻塞 init）
+        Task { await updatePurchasedProducts() }
     }
 
     deinit {
