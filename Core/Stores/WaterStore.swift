@@ -30,7 +30,8 @@ final class WaterStore: ObservableObject {
         let record = WaterRecord(amount: amount, cupType: cupType)
         records.insert(record, at: 0)
 
-        // Refresh widgets
+        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group）
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()
@@ -68,6 +69,7 @@ final class WaterStore: ObservableObject {
             hkSampleUUID: hkSampleUUID
         )
         records.insert(record, at: 0)
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()
@@ -315,6 +317,7 @@ final class WaterStore: ObservableObject {
     func autoArchiveIfNeeded() {
         let archived = archiveOldRecords(keepDays: 90)
         if archived > 0 {
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
             WidgetCenter.shared.reloadAllTimelines()
         }
     }

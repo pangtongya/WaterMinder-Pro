@@ -96,6 +96,9 @@ final class PlantEngine: ObservableObject {
         if plant.stage.rawValue > oldStage.rawValue {
             lastStageUpCelebration = plant.stage
         }
+
+        // 植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     // MARK: - 每日结算（app 启动 / 跨天时调用）
@@ -131,6 +134,9 @@ final class PlantEngine: ObservableObject {
         lastActiveDay = today
         persist()
         triggerSync()
+
+        // 植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     /// 喝水/打开 app 时标记今天活跃
@@ -149,6 +155,9 @@ final class PlantEngine: ObservableObject {
         }
         persist()
         triggerSync()
+
+        // 植物健康度变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     // MARK: - 收获
@@ -160,6 +169,9 @@ final class PlantEngine: ObservableObject {
         plant = reset
         persist()
         triggerSync()
+
+        // 收获后植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         return item
     }
 

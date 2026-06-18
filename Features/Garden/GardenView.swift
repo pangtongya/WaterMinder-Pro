@@ -110,7 +110,7 @@ struct GardenView: View {
         .alert(L.gardenFull, isPresented: $showGardenLimitAlert) {
             Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
             Button(L.upgradeToPro) {
-                NotificationCenter.default.post(name: Notification.Name("showPaywall"), object: nil)
+                NotificationCenter.default.post(name: AppConstants.NotificationNames.showPaywall, object: nil)
             }
         } message: {
             Text(L.proGardenLimit)
@@ -126,7 +126,7 @@ struct GardenView: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
         }
-        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("showPaywall"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.showPaywall)) { _ in
             showPaywall = true
         }
     }

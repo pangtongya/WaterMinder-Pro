@@ -2,6 +2,8 @@
 // @main 入口 —— 阶段1 最小骨架，阶段3 重写完整根视图
 
 import SwiftUI
+import WidgetKit
+import Combine
 
 @main
 struct BloomApp: App {
@@ -55,6 +57,15 @@ struct BloomApp: App {
                 // 异步完成所有初始化
                 await initializeApp()
             }
+            .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.refreshWidget)) { _ in
+                // 接收 Widget 数据刷新通知：写数据到 App Group，然后 reload Widget
+                WidgetRefresher.shared.refresh(
+                    waterStore: waterStore,
+                    userStore: userStore,
+                    plantEngine: plantEngine
+                )
+                WidgetCenter.shared.reloadAllTimelines()
+            }
             .onChange(of: scenePhase) { newPhase in
                 if newPhase == .background {
                     // App 进入后台时调度后台任务
@@ -85,7 +96,14 @@ struct BloomApp: App {
             await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
         }
 
-        // 6. 标记就绪（显示 RootView）
+        // 6. 首次 Widget 数据同步（让 Widget 立即有数据）
+        WidgetRefresher.shared.refresh(
+            waterStore: waterStore,
+            userStore: userStore,
+            plantEngine: plantEngine
+        )
+
+        // 7. 标记就绪（显示 RootView）
         isReady = true
     }
     

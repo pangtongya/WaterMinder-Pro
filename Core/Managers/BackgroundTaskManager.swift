@@ -80,11 +80,25 @@ final class BackgroundTaskManager {
             let hoursSinceLastActive = Calendar.current.dateComponents([.hour], from: lastActiveDate, to: Date()).hour ?? 0
 
             if hoursSinceLastActive >= 1 {
-                NotificationCenter.default.post(
-                    name: .applyOfflineDecay,
-                    object: nil,
-                    userInfo: ["hours": hoursSinceLastActive]
-                )
+                // 在后台任务中直接加载并修改植物状态
+                Task { @MainActor in
+                    let engine = PlantEngine()
+                    engine.applyOfflineDecay(hours: hoursSinceLastActive)
+
+                    // 更新 Widget 数据
+                    let waterStore = WaterStore()
+                    let userStore = UserStore()
+                    WidgetDataManager.shared.updateWidgetData(
+                        currentIntake: waterStore.todayTotal,
+                        dailyGoal: userStore.dailyGoal,
+                        plantName: engine.plant.name,
+                        plantHealth: engine.plant.health,
+                        plantStageRawValue: engine.plant.stage.rawValue,
+                        plantSymbol: engine.plant.species.symbol,
+                        isPaused: engine.plant.isPaused
+                    )
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
             }
         }
 
@@ -98,13 +112,29 @@ final class BackgroundTaskManager {
             task.setTaskCompleted(success: false)
         }
 
-        WidgetCenter.shared.reloadAllTimelines()
+        // 在后台任务中直接读取最新数据写入 App Group
+        Task { @MainActor in
+            let waterStore = WaterStore()
+            let plantEngine = PlantEngine()
+            let userStore = UserStore()
+
+            WidgetDataManager.shared.updateWidgetData(
+                currentIntake: waterStore.todayTotal,
+                dailyGoal: userStore.dailyGoal,
+                plantName: plantEngine.plant.name,
+                plantHealth: plantEngine.plant.health,
+                plantStageRawValue: plantEngine.plant.stage.rawValue,
+                plantSymbol: plantEngine.plant.species.symbol,
+                isPaused: plantEngine.plant.isPaused
+            )
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         task.setTaskCompleted(success: true)
     }
 }
 
-// MARK: - Notification Names
+// MARK: - Notification Names（已迁移到 AppConstants.NotificationNames，保留向后兼容）
 
 extension Notification.Name {
-    static let applyOfflineDecay = Notification.Name("applyOfflineDecay")
+    static let applyOfflineDecay = AppConstants.NotificationNames.applyOfflineDecay
 }
