@@ -131,3 +131,274 @@
 "开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。" = "Enable notifications so your plant can tell you when it's thirsty.\nYou can skip this, but you might forget about it.";
 "暂不开启" = "Not Now";
 "用 Bloom 养成喝水好习惯" = "Build good hydration habits with Bloom";
+"开始养护" = "Start Caring";
+"先浇一次水试试" = "Try Watering Once";
+"下一步" = "Next";
+"开启通知" = "Enable Notifications";
+
+// MARK: - Tabs (标签栏)
+"花园" = "Garden";
+"记录" = "Log";
+"收藏" = "Collection";
+
+// MARK: - Network (网络状态)
+"离线模式 - 数据已本地保存" = "Offline Mode - Data saved locally";
+
+// MARK: - Widget
+"更新于" = "Updated at";
+
+// MARK: - Notification (通知文案)
+"🌱 %@ 想喝点水了" = "🌱 %@ is thirsty";
+"它正等着你呢，来一口吧" = "It's waiting for you, take a sip";
+"💧 该浇水啦" = "💧 Time to water";
+"%@ 长得正欢，别让它干着" = "%@ is growing well, don't let it dry";
+"🌿 %@ 在向你招手" = "🌿 %@ is waving at you";
+"喝杯水，它会更有精神" = "Drink water, it will feel better";
+"🪴 你的小植物在期盼" = "🪴 Your plant is looking forward";
+"一口水，换来它的笑容" = "A sip for its smile";
+"🥀 %@ 有点蔫了……" = "🥀 %@ is wilting...";
+"它渴了好久了，快来救救它" = "It's been thirsty for a long time, come save it";
+"🍂 它快撑不住了" = "🍂 It can barely hold on";
+"%@ 需要你，现在就喝一口吧" = "%@ needs you, drink now";
+"😟 %@ 无精打采" = "😟 %@ is listless";
+"叶子都垂下来了，快给它浇水" = "Leaves are drooping, water it quickly";
+"💧 它在等你" = "💧 It's waiting";
+"%@ 已经等很久了，别让它失望" = "%@ has waited too long, don't disappoint";
+"💔 %@ 快要枯萎了" = "💔 %@ is about to wither";
+"再不喝水就来不及了！求求你" = "It's too late if you don't drink! Please";
+"🆘 紧急求救" = "🆘 Emergency";
+"%@ 命悬一线，立刻喝杯水吧" = "%@ is dying, drink now";
+"🎉 %@ 今天喝饱啦" = "🎉 %@ is full today";
+"它精神焕发，明天也要继续哦" = "It's refreshed, keep going tomorrow";
+"🌸 今天完成得真好" = "🌸 Great job today";
+"%@ 因为你又长大了一点" = "%@ grew a little because of you";
+"喝水时间" = "Water Time";
+"该喝水啦！💧" = "Time to drink! 💧";
+
+// MARK: - Statistics Detail (统计详情)
+"平均每日" = "Average Daily";
+"达标率" = "Goal Rate";
+"总喝水量" = "Total Intake";
+"最长连续" = "Longest Streak";
+"天" = "days";
+"实际" = "Actual";
+"平均" = "Average";
+"目标" = "Goal";
+"暂无足够数据分析高峰时段" = "Not enough data for peak hours";
+"%s 是你喝水最频繁的时段，继续保持！" = "%s is your peak hydration time, keep it up!";
+"暂无足够数据分析每周习惯" = "Not enough data for weekly habits";
+"周%s 是你的喝水高峰日" = "Week %s is your peak day";
+"最近解锁" = "Recently Unlocked";
+"平均 %dml / 天（达到目标的 %d%%），继续保持！" = "Average %dml/day (%d%% of goal), keep going!";
+"平均 %dml / 天（达到目标的 %d%%），还差 %dml 达标" = "Average %dml/day (%d%% of goal), %dml more to reach goal";
+"平均 %dml / 天（达到目标的 %d%%），建议增加喝水频次" = "Average %dml/day (%d%% of goal), suggest increasing frequency";
+"新记录" = "New Record";
+
+// MARK: - Garden Details (花园详情)
+"剩余 %d 天" = "%d days left";
+
+// MARK: - Health Status (健康状态)
+"它快要枯萎了……快救救它" = "It's about to wither... Save it";
+"它有点蔫了，需要喝水" = "It's wilting, needs water";
+"它状态还行" = "It's doing okay";
+"它生机勃勃！" = "It's vibrant!";
+
+// MARK: - Achievements (成就详情)
+"喝水达人" = "Hydration Master";
+"坚持不懈" = "Consistency Champion";
+"花园大师" = "Garden Expert";
+"社交分享" = "Social Sharing";
+"重要里程碑" = "Important Milestones";
+"第一口水" = "First Sip";
+"完成第一次喝水记录" = "Complete your first water log";
+"初入门径" = "Getting Started";
+"累计喝水10次" = "Log 10 drinks";
+"饮水习惯" = "Hydration Habit";
+"累计喝水50次" = "Log 50 drinks";
+"百杯成就" = "Century Cup";
+"累计喝水100次" = "Log 100 drinks";
+"喝水大师" = "Hydration Master";
+"累计喝水500次" = "Log 500 drinks";
+"千杯不醉" = "Thousand Cups";
+"累计喝水1000次" = "Log 1000 drinks";
+"三日坚持" = "Three Day Streak";
+"连续3天完成喝水目标" = "Complete goal for 3 consecutive days";
+"一周达人" = "Weekly Champion";
+"连续7天完成喝水目标" = "Complete goal for 7 consecutive days";
+"两周习惯" = "Two Week Habit";
+"连续14天完成喝水目标" = "Complete goal for 14 consecutive days";
+"月度挑战" = "Monthly Challenge";
+"连续30天完成喝水目标" = "Complete goal for 30 consecutive days";
+"双月坚守" = "Two Month Dedication";
+"初露锋芒" = "First Sprout";
+"坚持一周" = "One Week Strong";
+"两周达人" = "Two Week Expert";
+"三周传奇" = "Three Week Legend";
+"满月之约" = "Full Moon Promise";
+"百日不辍" = "Hundred Day Journey";
+"连续60天完成喝水目标" = "Complete goal for 60 consecutive days";
+"百日筑基" = "Hundred Day Foundation";
+"连续100天完成喝水目标" = "Complete goal for 100 consecutive days";
+"首次收获" = "First Harvest";
+"第一次收获植物到花园" = "Harvest your first plant to the garden";
+"花园新手" = "Garden Novice";
+"累计收获5次" = "Harvest 5 times";
+"园丁认证" = "Certified Gardener";
+"累计收获10次" = "Harvest 10 times";
+"花园大师" = "Garden Master";
+"累计收获25次" = "Harvest 25 times";
+"传奇园丁" = "Legendary Gardener";
+"累计收获50次" = "Harvest 50 times";
+"品种收集家" = "Species Collector";
+"收集5种不同植物品种" = "Collect 5 different plant species";
+"收集7种不同植物品种" = "Collect 7 different plant species";
+"植物学家" = "Botanist";
+"全品种大师" = "Master Collector";
+"收集所有植物品种" = "Collect all plant species";
+"初次分享" = "First Share";
+"第一次分享植物状态" = "Share your plant status for the first time";
+"社交达人" = "Social Expert";
+"累计分享10次" = "Share 10 times";
+"万水千山" = "Ten Thousand Waters";
+"累计喝水10000ml" = "Log 10000ml total";
+"五万成就" = "Fifty Thousand Achievement";
+"累计喝水50000ml" = "Log 50000ml total";
+"十万喝水王" = "Hundred Thousand Champion";
+"累计喝水100000ml" = "Log 100000ml total";
+
+// MARK: - Additional UI strings (其他界面字符串)
+"已满级" = "Max Level";
+"成长进度" = "Growth Progress";
+"当前连胜" = "Current Streak";
+"最长连胜" = "Longest Streak";
+"周均 ml" = "Weekly Avg ml";
+"本期达标率" = "Period Achievement Rate";
+"%d / %d 天达标" = "%d / %d days achieved";
+"平均目标完成度" = "Average Goal Completion";
+"平均每天 %d ml" = "Average %d ml per day";
+"本期最佳" = "Best Day";
+"%@ · %@ · 种植 %d 天" = "%@ · %@ · %d days old";
+"暂无数据" = "No Data";
+"%@ 已成熟！" = "%@ is mature!";
+"阶段:" = "Stage:";
+"天数:" = "Days:";
+"%d 天" = "%d days";
+"今日目标达成！" = "Goal Achieved!";
+"还差 %d ml" = "%d ml to go";
+"恭喜！你的植物已经成长到 %@ 阶段" = "Congratulations! Your plant has grown to %@ stage";
+"收获并保存到收藏" = "Harvest and Save";
+"收获植物" = "Harvest Plant";
+"取消" = "Cancel";
+"好的" = "OK";
+"太好了" = "Great!";
+"暂停" = "Pause";
+"今日喝水" = "Today's Water Intake";
+"目标" = "Goal";
+"总次数" = "Total Records";
+"总水量" = "Total Amount";
+"同步中..." = "Syncing...";
+"iCloud 同步成功" = "iCloud Sync Success";
+"iCloud 同步失败" = "iCloud Sync Failed";
+"正在保存数据到 iCloud" = "Saving data to iCloud...";
+"你的数据已同步到所有设备" = "Your data is synced to all devices";
+"本周" = "This Week";
+"本月" = "This Month";
+"相比订阅节省 %d%%" = "Save %d%% compared to subscription";
+"基于美国标准：每天 8 杯 × 8oz ≈ 2400ml，可根据个人情况调整" = "Based on US standard: 8 cups × 8oz ≈ 2400ml, adjust to your needs";
+"基于中国卫健委建议：每日 2000ml，可根据个人情况调整" = "Based on China's health guidelines: 2000ml/day, adjust to your needs";
+"同步失败：%@" = "Sync failed: %@";
+
+// MARK: - Paywall (新增)
+"一次购买，永久解锁" = "One-time purchase, permanent unlock";
+"全年无限养护" = "Unlimited care all year";
+"高级统计" = "Advanced Statistics";
+"完整的数据分析和可视化报告" = "Complete data analysis and visualization reports";
+"自定义主题" = "Custom Themes";
+"解锁所有 Pro 主题和外观" = "Unlock all Pro themes and appearances";
+"无限植物品种" = "Unlimited Plants";
+"解锁全部7种植物，打造梦幻花园" = "Unlock all 7 plant species for your dream garden";
+"多设备同步" = "Multi-device Sync";
+"CloudKit 数据同步和备份" = "CloudKit data sync and backup";
+"终身买断" = "Lifetime Purchase";
+"Pro 年订阅" = "Pro Yearly";
+"最划算" = "Best Value";
+"最受欢迎" = "Popular";
+"服务条款" = "Terms of Service";
+"隐私政策" = "Privacy Policy";
+
+// MARK: - Collection (新增)
+"已收获" = "Harvested";
+"品种数" = "Species";
+"图鉴总数" = "Total";
+
+// MARK: - Theme (新增)
+"Pro 主题" = "Pro Themes";
+"免费主题" = "Free Themes";
+"已拥有" = "Owned";
+"解锁" = "Unlock";
+
+// MARK: - CupType (新增)
+"小杯" = "Small Cup";
+"中杯" = "Medium Cup";
+"大杯" = "Large Cup";
+"水瓶" = "Bottle";
+
+// MARK: - Growth Stage (新增)
+"种子" = "Seed";
+"发芽" = "Sprout";
+"幼苗" = "Seedling";
+"成长期" = "Growing";
+"成熟" = "Mature";
+"开花" = "Blooming";
+
+// MARK: - Plant Health (新增)
+"植物渴了" = "Plant is thirsty";
+"植物状态一般" = "Plant is okay";
+"植物状态不错" = "Plant is doing well";
+"植物很健康" = "Plant is healthy";
+"植物快枯萎了" = "Plant is wilting";
+
+// MARK: - Additional (新增)
+"Pro Themes" = "Pro Themes";
+"Free Themes" = "Free Themes";
+"Plant Health" = "Plant Health";
+"Status" = "Status";
+"Updated at" = "Updated at";
+"Paused" = "Paused";
+"Pause Care" = "Pause Care";
+"ml" = "ml";
+"Bloom Progress" = "Bloom Progress";
+"View your hydration progress and plant status" = "View your hydration progress and plant status";
+"No Data" = "No Data";
+"Harvested" = "Harvested";
+"Species" = "Species";
+"Total" = "Total";
+"Complete data analysis and visualization reports" = "Complete data analysis and visualization reports";
+"Unlock all Pro themes and appearances" = "Unlock all Pro themes and appearances";
+"Unlock all 7 plant species for your dream garden" = "Unlock all 7 plant species for your dream garden";
+"CloudKit data sync and backup" = "CloudKit data sync and backup";
+"Lifetime Purchase" = "Lifetime Purchase";
+"Pro Yearly" = "Pro Yearly";
+"Best Value" = "Best Value";
+"Popular" = "Popular";
+"Terms of Service" = "Terms of Service";
+"Privacy Policy" = "Privacy Policy";
+"One-time purchase, permanent unlock" = "One-time purchase, permanent unlock";
+"Unlimited care all year" = "Unlimited care all year";
+"Save %d%% vs subscription" = "Save %d%% vs subscription";
+"Unsupported backup version: %@" = "Unsupported backup version: %@";
+"Backup file not found" = "Backup file not found";
+"Invalid backup data format" = "Invalid backup data format";
+"Backup file is corrupted (checksum verification failed)" = "Backup file is corrupted (checksum verification failed)";
+"Export failed: %@" = "Export failed: %@";
+"Import failed: %@" = "Import failed: %@";
+"Unable to access document directory" = "Unable to access document directory";
+"File not found: %@" = "File not found: %@";
+"Read failed (%@): %@" = "Read failed (%@): %@";
+"Write failed (%@): %@" = "Write failed (%@): %@";
+"Decode failed (%@): %@" = "Decode failed (%@): %@";
+"Encode failed (%@): %@" = "Encode failed (%@): %@";
+"Data corrupted: %@" = "Data corrupted: %@";
+"Data validation failed (%@): %@" = "Data validation failed (%@): %@";
+"Backup failed (%@): %@" = "Backup failed (%@): %@";
+"Recovery failed (%@): %@" = "Recovery failed (%@): %@";
