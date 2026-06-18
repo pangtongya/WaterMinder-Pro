@@ -76,9 +76,9 @@ struct HarvestView: View {
     }
 }
 
-#Preview {
-    HarvestView(
-        plant: Plant(name: "小绿", stage: .mature, health: 95),
-        onHarvest: {}
-    )
-}
+// #Preview {
+//     HarvestView(
+//         plant: Plant(name: "小绿", stage: .mature, health: 95),
+//         onHarvest: {}
+//     )
+// }

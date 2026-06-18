@@ -69,7 +69,7 @@ final class HealthSyncService: ObservableObject {
             // 逐条处理：去重 → 写入 WaterStore → 触发植物浇水
             var newCount = 0
             for sample in hkRecords {
-                let amountML = Int(sample.quantity.doubleValue(for: .literUnit()) * 1000)
+                let amountML = Int(sample.quantity.doubleValue(for: .liter()) * 1000)
                 // 从 sample.uuid 获取（HKQuantitySample 本身是 UUID-backed）
                 let sampleUUID = sample.uuid
 
@@ -85,7 +85,7 @@ final class HealthSyncService: ObservableObject {
                     // 每新增一条 → 触发植物喝水（避免一次喂太多，让植物慢慢长）
                     // 批量同步时最多喂 10 次，避免一次性全部触发升级
                     if let engine = plantEngine, newCount <= 10 {
-                        engine.water(amount: amountML, cupType: .medium)
+                        engine.water(amount: amountML)
                     }
                 }
             }

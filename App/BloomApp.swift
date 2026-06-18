@@ -43,14 +43,6 @@ struct BloomApp: App {
             .environmentObject(cloudSyncManager)
             .environmentObject(themeManager)
             .environmentObject(healthSyncService)
-            .environment(\.scenePhase, onUpdate: { phase in
-                if phase == .active {
-                    // App 回到前台时立即同步一次 HealthKit 数据
-                    Task {
-                        await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
-                    }
-                }
-            })
             .preferredColorScheme(userStore.colorScheme)
             .task {
                 // 异步完成所有初始化

@@ -184,9 +184,9 @@ struct ThemeCard: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        ThemePickerView()
-            .environmentObject(UserStore())
-    }
-}
+// #Preview {
+//     NavigationStack {
+//         ThemePickerView()
+//             .environmentObject(UserStore())
+//     }
+// }

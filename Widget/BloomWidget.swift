@@ -384,9 +384,9 @@ extension Color {
 
 // MARK: - Preview
 
-#Preview(as: .systemSmall) {
-    BloomWidget()
-} timeline: {
+// // #Preview(as: .systemSmall) {
+//     BloomWidget()
+// } timeline: {
     SimpleEntry(
         date: Date(),
         data: WidgetData(

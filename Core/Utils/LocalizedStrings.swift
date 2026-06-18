@@ -121,17 +121,6 @@ extension L {
     static let proThankYou            = s("感谢您的支持！Pro 权益已解锁。")
 }
 
-// MARK: - Collection (花园收藏)
-extension L {
-    static let harvestWall            = s("收获墙")
-    static let speciesCollection      = s("品种图鉴")
-    static let notCollected           = s("未收集")
-    static let myGarden               = s("我的花园")
-    static let gardenFull             = s("花园已满")
-    // Format
-    static let daysToHarvest          = s("养护 %d 天")
-}
-
 // MARK: - Paywall
 extension L {
     static let unlockBloomPro         = s("解锁 Bloom Pro")
@@ -158,7 +147,6 @@ extension L {
 
 // MARK: - Onboarding
 extension L {
-    static let bloomTagline           = s("用 Bloom 养成喝水好习惯")
     static let keepPlantAlive         = s("养活一株植物")
     static let justByDrinking         = s("只需要你好好喝水")
     static let growsWithEverySip      = s("你每喝一口水，它就长大一点")

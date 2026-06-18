@@ -74,7 +74,7 @@ final class CloudSyncManager: ObservableObject {
         )
         
         Task {
-            await checkAccountStatus()
+            checkAccountStatus()
         }
     }
     
@@ -443,8 +443,8 @@ final class CloudSyncManager: ObservableObject {
     }
     
     private func saveAchievements(_ achievements: [Achievement]) async throws {
-        let records = achievements.map { achievement in
-            var record = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
+        let records: [CKRecord] = achievements.map { achievement in
+            let record = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
             record["title"] = achievement.title
             record["description"] = achievement.description
             record["icon"] = achievement.icon
@@ -454,7 +454,7 @@ final class CloudSyncManager: ObservableObject {
             record["unlockedAt"] = achievement.unlockedAt as NSDate?
             return record
         }
-        
-        try await database.modifyRecords(saving: records, deleting: [])
+
+        _ = try await database.modifyRecords(saving: records, deleting: [])
     }
 }

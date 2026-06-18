@@ -31,12 +31,12 @@ struct AnimatedPlantView: View {
     }
 }
 
-#Preview {
-    VStack(spacing: 40) {
-        AnimatedPlantView(plant: Plant(name: "小绿", stage: .harvestable, health: 90))
-            .frame(width: 200, height: 280)
-        AnimatedPlantView(plant: Plant(name: "蔫蔫", stage: .mature, health: 25))
-            .frame(width: 200, height: 280)
-    }
-    .padding()
-}
+// #Preview {
+//     VStack(spacing: 40) {
+//         AnimatedPlantView(plant: Plant(name: "小绿", stage: .harvestable, health: 90))
+//             .frame(width: 200, height: 280)
+//         AnimatedPlantView(plant: Plant(name: "蔫蔫", stage: .mature, health: 25))
+//             .frame(width: 200, height: 280)
+//     }
+//     .padding()
+// }

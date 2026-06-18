@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		001F83D45AAF4BC9414B02B6 /* AchievementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB55BC4F2D1B2902EACC77 /* AchievementView.swift */; };
+		06DC05D5A24C17A269273C7B /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49771ADB8F2D7F7DA488B61 /* HealthSyncService.swift */; };
 		0F9D6CB03D574F0CA8E2CE2C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = ADC878723A0F789B0569E37B /* InfoPlist.strings */; };
 		160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DC2B240492004662250DF8 /* HealthManager.swift */; };
 		18364177D02B353EE1738526 /* QuickRecordBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8FE84BD38D54A8D938E1A4 /* QuickRecordBar.swift */; };
@@ -34,6 +35,7 @@
 		71373977114EA039A1B4317F /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835544F44EC5E4EEBCE026AC /* StoreManager.swift */; };
 		74653204188C6BACDA3E2F32 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AC89F8CEBB6053C706D8BDF /* CollectionView.swift */; };
 		79146D5B7A193D78805E5C88 /* WaterRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4529E94D8917C55B843E09A4 /* WaterRecord.swift */; };
+		7D00B57A9402FC527387FBFC /* LocalizedStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7650A122D1D61EC343D68136 /* LocalizedStrings.swift */; };
 		7DEA671F933E0F8BE671F0EB /* GardenView.swift.broken in Resources */ = {isa = PBXBuildFile; fileRef = 189CF01DA85D8A2E11CC497D /* GardenView.swift.broken */; };
 		8687301B31D566148F6CAC4D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E348D344B57833B36B924ADB /* Theme.swift */; };
 		8B81D6300DD775D2CE019304 /* PlantSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 530E98A2CB1A2012982093BF /* PlantSpecies.swift */; };
@@ -57,6 +59,7 @@
 		D4313469593C69D7027B164C /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B88301ED0F9416D4778251 /* OnboardingView.swift */; };
 		D535BC6061D893D9626F355B /* BloomColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0380932EEBD553BCB50CD5AB /* BloomColors.swift */; };
 		D6CC5CC22171F7E7E934962B /* GardenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31161F7797D3D8F8C51F6E6 /* GardenView.swift */; };
+		D98386831EA0CA7AFD7A2841 /* SyncToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94B863D42937FC9F60F41A9 /* SyncToastView.swift */; };
 		D9F7C49D5D9650769C5EA121 /* SharingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC85C0351CDE4A98EB12D139 /* SharingManager.swift */; };
 		DDCE0ED8C27ABB84C134E126 /* PlantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBA6130C8E18331C891627C /* PlantView.swift */; };
 		E9315AE94D3044A286247907 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28119807405E8D5017638E16 /* PersistenceManager.swift */; };
@@ -113,6 +116,7 @@
 		68F07D6B42E720D28E74C2AB /* BloomWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomWidgetBundle.swift; sourceTree = "<group>"; };
 		6B4A3EDEA9FE2B28D03D85A2 /* GrowthRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthRulesTests.swift; sourceTree = "<group>"; };
 		7469C141FAF000FDD202B551 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		7650A122D1D61EC343D68136 /* LocalizedStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedStrings.swift; sourceTree = "<group>"; };
 		7BF982805C787A6311C114E4 /* WaterStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaterStore.swift; sourceTree = "<group>"; };
 		835544F44EC5E4EEBCE026AC /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		886439BFC290555051B1B9DF /* CloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncManager.swift; sourceTree = "<group>"; };
@@ -135,6 +139,7 @@
 		CDC7320829AB31882FDEC37A /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		CEED693DD6CE8BE0CDFBEE4D /* WidgetRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRefresher.swift; sourceTree = "<group>"; };
 		D3D864942A46D845863EC0D6 /* GardenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenStore.swift; sourceTree = "<group>"; };
+		D49771ADB8F2D7F7DA488B61 /* HealthSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncService.swift; sourceTree = "<group>"; };
 		D4B88301ED0F9416D4778251 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		D72FAFAAE34DE1CDAB22EF1C /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		DCE0304A48AB99D87A7BDEC7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -146,6 +151,7 @@
 		E959C081126F77EFA5D911AF /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		ECED781642AA46AB10F1DD85 /* PlantEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantEngine.swift; sourceTree = "<group>"; };
 		F35F0ED8E2E48B437814305B /* Plant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
+		F94B863D42937FC9F60F41A9 /* SyncToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncToastView.swift; sourceTree = "<group>"; };
 		FE231CFA3A891EE92E605B53 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -298,9 +304,18 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		993378778B5D1D7445B50635 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				F94B863D42937FC9F60F41A9 /* SyncToastView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		A643A1BD7530DDE9E27085D5 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				993378778B5D1D7445B50635 /* Components */,
 				014F66E3D6E260BF316A11DC /* PlantCanvas */,
 				52AFA9D32247E7850AFBC1D2 /* Theme */,
 			);
@@ -324,6 +339,7 @@
 			children = (
 				CDC7320829AB31882FDEC37A /* Haptics.swift */,
 				0E7B3AF3F25F9CAF72FBD8B0 /* LocalizationExtensions.swift */,
+				7650A122D1D61EC343D68136 /* LocalizedStrings.swift */,
 				9CA41E01633E07FC06A02CEB /* NetworkMonitor.swift */,
 				198186EB0CDB56593B9E10C6 /* ProGatingExtensions.swift */,
 			);
@@ -360,6 +376,7 @@
 				886439BFC290555051B1B9DF /* CloudSyncManager.swift */,
 				30B3455DB4B98BC8DA71EE0E /* DataBackupManager.swift */,
 				48DC2B240492004662250DF8 /* HealthManager.swift */,
+				D49771ADB8F2D7F7DA488B61 /* HealthSyncService.swift */,
 				4C75D665C224C9D31EDDDBDF /* NotificationContent.swift */,
 				633052D5EBCE002717CF9A0A /* NotificationManager.swift */,
 				28119807405E8D5017638E16 /* PersistenceManager.swift */,
@@ -577,8 +594,10 @@
 				9822AA91A0543565EC22B4F5 /* HarvestView.swift in Sources */,
 				A5B7C21AE813BCA4A6D0FA03 /* HealthCalculator.swift in Sources */,
 				160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */,
+				06DC05D5A24C17A269273C7B /* HealthSyncService.swift in Sources */,
 				44553297C56B4F654A1E215D /* HistoryView.swift in Sources */,
 				30B243EEA9AD823A6D66FAC8 /* LocalizationExtensions.swift in Sources */,
+				7D00B57A9402FC527387FBFC /* LocalizedStrings.swift in Sources */,
 				18EDC582A715CF951E23D7BE /* NetworkMonitor.swift in Sources */,
 				22E3BFC53D79B424BD00A9C6 /* NotificationContent.swift in Sources */,
 				A61CF1F41097ADB12AB6846C /* NotificationManager.swift in Sources */,
@@ -599,6 +618,7 @@
 				39BEA3BD56AE16D37327AF16 /* SettingsView.swift in Sources */,
 				D9F7C49D5D9650769C5EA121 /* SharingManager.swift in Sources */,
 				71373977114EA039A1B4317F /* StoreManager.swift in Sources */,
+				D98386831EA0CA7AFD7A2841 /* SyncToastView.swift in Sources */,
 				8687301B31D566148F6CAC4D /* Theme.swift in Sources */,
 				6500D3F77BFDA4419D39C601 /* ThemeManager.swift in Sources */,
 				9AAB95C86AB389C6BDB08A13 /* ThemePickerView.swift in Sources */,
@@ -777,9 +797,10 @@
 				CURRENT_PROJECT_VERSION = "$(git rev-list --count HEAD)";
 				DEBUG_DYLIB_INSTALL_NAME = "";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = A9BU96SR38;
+				DEVELOPMENT_TEAM = "$(BLOOM_DEVELOPMENT_TEAM)";
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -794,6 +815,7 @@
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "-D RELEASE_BUILD";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -842,8 +864,9 @@
 				CURRENT_PROJECT_VERSION = "$(git rev-list --count HEAD)";
 				DEBUG_DYLIB_INSTALL_NAME = "";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = A9BU96SR38;
+				DEVELOPMENT_TEAM = "$(BLOOM_DEVELOPMENT_TEAM)";
 				ENABLE_DEBUG_DYLIB = NO;
+				ENABLE_PREVIEWS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -866,6 +889,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "-D RELEASE_BUILD";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;

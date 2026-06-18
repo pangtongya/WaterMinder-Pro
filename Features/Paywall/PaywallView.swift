@@ -169,6 +169,17 @@ struct PaywallView: View {
     private func productCard(_ product: Product) -> some View {
         let isSelected = selectedProduct?.id == product.id
         let isLifetime = product.id == BloomProduct.lifetimeID
+        let isYearly = product.id == BloomProduct.yearlyID
+
+        // 计算终身相对于年订阅的节省（如果有年订阅商品）
+        let yearlyProduct = storeManager.products.first { $0.id == BloomProduct.yearlyID }
+        let savingsPercent: Int? = {
+            guard let yearly = yearlyProduct, isLifetime else { return nil }
+            let yearlyCostPer3Years = (yearly.price as NSDecimalNumber).doubleValue * 3
+            let lifetimePrice = (product.price as NSDecimalNumber).doubleValue
+            let savings = (yearlyCostPer3Years - lifetimePrice) / yearlyCostPer3Years * 100
+            return Int(max(0, savings))
+        }()
 
         return Button {
             selectedProduct = product
@@ -187,11 +198,25 @@ struct PaywallView: View {
                                 .padding(.vertical, 2)
                                 .background(Color.bloomGold)
                                 .clipShape(Capsule())
+                        } else if isYearly {
+                            Text("最受欢迎".localized)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.bloomPrimary)
+                                .clipShape(Capsule())
                         }
                     }
-                    Text(isLifetime ? "一次购买，永久解锁" : "全年无限养护")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
+                    if let savings = savingsPercent, savings > 0 {
+                        Text(String(format: NSLocalizedString("相比订阅节省 %d%%", comment: "Save X% compared to subscription"), savings))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.bloomSuccess)
+                    } else {
+                        Text(isLifetime ? "一次购买，永久解锁" : "全年无限养护")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Text(product.displayPrice)
@@ -224,7 +249,7 @@ struct PaywallView: View {
     }
 }
 
-#Preview {
-    PaywallView()
-        .environmentObject(StoreManager.shared)
-}
+// // #Preview {
+//     PaywallView()
+//         .environmentObject(StoreManager.shared)
+// }

@@ -213,6 +213,30 @@ enum AchievementLibrary {
                 category: .garden,
                 requirement: 50
             ),
+            Achievement(
+                id: "garden_5_species",
+                title: "品种收集家",
+                description: "收集5种不同植物品种",
+                icon: "leaf.fill",
+                category: .garden,
+                requirement: 5
+            ),
+            Achievement(
+                id: "garden_10_species",
+                title: "植物学家",
+                description: "收集10种不同植物品种",
+                icon: "tree.fill",
+                category: .garden,
+                requirement: 10
+            ),
+            Achievement(
+                id: "garden_all_species",
+                title: "全品种大师",
+                description: "收集所有植物品种",
+                icon: "crown.fill",
+                category: .garden,
+                requirement: PlantLibrary.all.count
+            ),
             
             // 社交分享系列
             Achievement(

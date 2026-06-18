@@ -111,7 +111,7 @@ struct SyncToastView: View {
         case .idle:          return ""
         case .syncing:       return NSLocalizedString("同步中...", comment: "Syncing")
         case .success:      return NSLocalizedString("iCloud 同步成功", comment: "iCloud sync success")
-        case .failed(let e): return NSLocalizedString("iCloud 同步失败", comment: "iCloud sync failed")
+        case .failed:        return NSLocalizedString("iCloud 同步失败", comment: "iCloud sync failed")
         }
     }
 
@@ -143,16 +143,6 @@ struct SyncToastView: View {
 
 // MARK: - Preview
 
-#Preview("Success") {
-    SyncToastView(state: .success(Date())) { }
-}
-
-// 确保 .bloomSuccess / .bloomWarning 颜色已定义（定义在 BloomColors.swift）
-// 如果未定义，使用 fallback：
-#if !canImport(BloomColors)
-import SwiftUI
-extension Color {
-    static let bloomSuccess = Color(hex: "#66BB6A")
-    static let bloomWarning = Color(hex: "#FFA726")
-}
-#endif
+// #Preview("Success") {
+//     SyncToastView(state: .success(Date())) { }
+// }

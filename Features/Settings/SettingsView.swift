@@ -103,7 +103,6 @@ struct SettingsView: View {
                     }
                 }
             }
-            .disabled(!userStore.isPro)
             // 关于
             aboutSection
         }
@@ -119,6 +118,7 @@ struct SettingsView: View {
             AdvancedStatsView()
                 .environmentObject(waterStore)
                 .environmentObject(userStore)
+                .environmentObject(achievementStore)
         }
         .sheet(isPresented: $showExportSheet) {
             if let url = exportedFileURL {
@@ -452,6 +452,9 @@ struct SettingsView: View {
 
     private var backupSection: some View {
         Section {
+            // 数据概览卡片
+            dataSummaryCard
+                .listRowBackground(Color(.systemGroupedBackground))
             // 导出按钮
             Button {
                 Task {
@@ -460,7 +463,8 @@ struct SettingsView: View {
                             waterStore: waterStore,
                             plantEngine: plantEngine,
                             gardenStore: gardenStore,
-                            userStore: userStore
+                            userStore: userStore,
+                            achievementStore: achievementStore
                         )
                         await MainActor.run {
                             exportedFileURL = fileURL
@@ -527,6 +531,55 @@ struct SettingsView: View {
         } footer: {
             Text("导出 JSON 文件可保存到 Files App，用于数据备份或迁移".localized)
         }
+    }
+
+    // 数据概览卡片
+    private var dataSummaryCard: some View {
+        HStack(spacing: 0) {
+            summaryItem(
+                title: "喝水记录",
+                value: "\(waterStore.records.count)",
+                icon: "drop.fill",
+                color: .bloomWater
+            )
+            summaryItem(
+                title: "养成天数",
+                value: "\(daysSincePlanted)",
+                icon: "leaf.fill",
+                color: .green
+            )
+            summaryItem(
+                title: "成就",
+                value: "\(achievementStore.unlockedCount)/\(achievementStore.totalCount)",
+                icon: "trophy.fill",
+                color: .bloomGold
+            )
+            summaryItem(
+                title: "收藏品种",
+                value: "\(gardenStore.items.count)",
+                icon: "tray.full.fill",
+                color: .orange
+            )
+        }
+        .padding(.vertical, 8)
+    }
+
+    private func summaryItem(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.system(size: 16))
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+            Text(title)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var daysSincePlanted: Int {
+        Calendar.current.dateComponents([.day], from: plantEngine.plant.plantedAt, to: Date()).day ?? 0
     }
 
     // MARK: - Pro
@@ -599,12 +652,13 @@ struct SettingsView: View {
     private func restoreBackup(from fileURL: URL) async {
         do {
             let backup = try await backupManager.importBackup(from: fileURL)
-            await backupManager.restoreData(
+            backupManager.restoreData(
                 from: backup,
                 waterStore: waterStore,
                 plantEngine: plantEngine,
                 gardenStore: gardenStore,
                 userStore: userStore,
+                achievementStore: achievementStore,
                 merge: true
             )
             await MainActor.run {
@@ -647,16 +701,16 @@ extension Date {
     }
 }
 
-#Preview {
-    NavigationStack {
-        SettingsView()
-            .environmentObject(UserStore())
-            .environmentObject(PlantEngine())
-            .environmentObject(GardenStore())
-            .environmentObject(WaterStore())
-            .environmentObject(NotificationManager.shared)
-            .environmentObject(HealthManager.shared)
-            .environmentObject(StoreManager.shared)
-            .environmentObject(CloudSyncManager.shared)
-    }
-}
+// #Preview {
+//     NavigationStack {
+//         SettingsView()
+//             .environmentObject(UserStore())
+//             .environmentObject(PlantEngine())
+//             .environmentObject(GardenStore())
+//             .environmentObject(WaterStore())
+//             .environmentObject(NotificationManager.shared)
+//             .environmentObject(HealthManager.shared)
+//             .environmentObject(StoreManager.shared)
+//             .environmentObject(CloudSyncManager.shared)
+//     }
+// }

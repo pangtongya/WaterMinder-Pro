@@ -63,7 +63,7 @@ struct GardenView: View {
         .navigationTitle(L.myGarden)
         .navigationBarTitleDisplayMode(.large)
         // 阶段升级庆祝：监听 engine 发布的庆祝事件
-        .onChange(of: plantEngine.lastStageUpCelebration) { newStage in
+        .onChange(of: plantEngine.lastStageUpCelebration) { _, newStage in
             if let stage = newStage {
                 celebrateStage = stage
                 Haptics.success()
@@ -439,7 +439,7 @@ struct WaterSplashOverlay: View {
             }
         }
         .allowsHitTesting(false)
-        .onChange(of: trigger) { _ in
+        .onChange(of: trigger) { _, _ in
             spawnDrops()
         }
     }
@@ -481,17 +481,16 @@ private struct WaterDrop: Identifiable {
     var opacity: Double
 }
 
-#Preview {
-    NavigationStack {
-        GardenView()
-            .environmentObject(UserStore())
-            .environmentObject(PlantEngine())
-            .environmentObject(WaterStore())
-            .environmentObject(GardenStore())
-            .environmentObject(HealthManager.shared)
-            .environmentObject(UserStore())
-    }
-}
+// // #Preview {
+//     NavigationStack {
+//         GardenView()
+//             .environmentObject(UserStore())
+//             .environmentObject(PlantEngine())
+//             .environmentObject(WaterStore())
+//             .environmentObject(GardenStore())
+//             .environmentObject(HealthManager.shared)
+//             .environmentObject(UserStore())
+//     }
 
 // MARK: - Image Picker for Sharing
 

@@ -61,9 +61,12 @@ final class GardenStore: ObservableObject {
     /// 更新成就进度（在收获后调用）
     private func updateAchievements() {
         guard let achievementStore = achievementStore else { return }
-        
-        // 更新花园成就（总收获次数）
-        achievementStore.updateGardenProgress(totalHarvests: items.count)
+
+        // 更新花园成就（总收获次数 + 品种收集数）
+        achievementStore.updateGardenProgress(
+            totalHarvests: items.count,
+            uniqueSpecies: uniqueSpeciesCount
+        )
     }
 
     // MARK: - 云端数据合并

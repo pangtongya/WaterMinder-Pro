@@ -156,7 +156,6 @@ final class PersistenceManager {
         }
         
         // 查找最新的备份文件
-        let backupPattern = filename.replacingOccurrences(of: ".json", with: "_*.json")
         let contents = try fm.contentsOfDirectory(at: backupDir, includingPropertiesForKeys: nil)
         let backups = contents.filter { url in
             let name = url.lastPathComponent

@@ -296,9 +296,8 @@ struct AchievementUnlockOverlay: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        AchievementView()
-            .environmentObject(AchievementStore())
-    }
-}
+// // #Preview {
+//     NavigationStack {
+//         AchievementView()
+//             .environmentObject(AchievementStore())
+//     }

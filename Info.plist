@@ -59,5 +59,11 @@
 		<string>en</string>
 		<string>zh_CN</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>WaterMinder Pro will read your water intake data from HealthKit to provide you with a comprehensive view of your hydration habits and help keep your plant healthy.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>WaterMinder Pro will save the water you record through the app to HealthKit so your hydration data stays in sync across all your devices.</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>WaterMinder Pro sends friendly reminders so you stay hydrated throughout the day and grow a thriving plant.</string>
 </dict>
 </plist>

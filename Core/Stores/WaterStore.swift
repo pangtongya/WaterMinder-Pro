@@ -53,7 +53,9 @@ final class WaterStore: ObservableObject {
         }
         // 2. 时间+水量去重（兜底：同分钟同水量不重复）
         let cal = Calendar.current
-        let rounded = cal.startOfMinute(for: date)
+        let rounded = cal.date(bySettingHour: cal.component(.hour, from: date),
+                               minute: cal.component(.minute, from: date),
+                               second: 0, of: date)!
         if records.contains(where: {
             cal.isDate($0.createdAt, equalTo: rounded, toGranularity: .minute)
             && $0.amount == amount

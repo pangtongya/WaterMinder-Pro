@@ -130,7 +130,7 @@ struct OnboardingView: View {
                     .padding(14)
                     .background(Color(.tertiarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onChange(of: plantName) { _ in
+                    .onChange(of: plantName) { _, _ in
                         if plantName.count > 8 { plantName = String(plantName.prefix(8)) }
                     }
             }
@@ -276,9 +276,9 @@ struct OnboardingView: View {
     }
 }
 
-#Preview {
-    OnboardingView()
-        .environmentObject(UserStore())
-        .environmentObject(PlantEngine())
-        .environmentObject(NotificationManager.shared)
-}
+// // #Preview {
+//     OnboardingView()
+//         .environmentObject(UserStore())
+//         .environmentObject(PlantEngine())
+//         .environmentObject(NotificationManager.shared)
+// }
