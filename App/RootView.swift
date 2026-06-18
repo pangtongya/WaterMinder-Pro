@@ -56,7 +56,7 @@ struct RootView: View {
             HStack {
                 Image(systemName: "wifi.slash")
                     .foregroundColor(.white)
-                Text("离线模式 - 数据已本地保存")
+                Text(NSLocalizedString("离线模式 - 数据已本地保存", comment: "Offline mode - data saved locally"))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
                 Spacer()

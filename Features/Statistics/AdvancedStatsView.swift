@@ -10,10 +10,19 @@ struct AdvancedStatsView: View {
     @State private var selectedTimeRange: TimeRange = .week
     
     enum TimeRange: String, CaseIterable {
-        case week = "周"
-        case month = "月"
+        case week    = "周"
+        case month   = "月"
         case quarter = "季"
-        case year = "年"
+        case year    = "年"
+
+        var localizedTitle: String {
+            switch self {
+            case .week:    return NSLocalizedString("周", comment: "Week")
+            case .month:   return NSLocalizedString("月", comment: "Month")
+            case .quarter: return NSLocalizedString("季", comment: "Quarter")
+            case .year:    return NSLocalizedString("年", comment: "Year")
+            }
+        }
     }
     
     var body: some View {
@@ -42,7 +51,7 @@ struct AdvancedStatsView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("高级统计".localized.localized)
+        .navigationTitle(L.advancedStats)
         .navigationBarTitleDisplayMode(.large)
     }
     
@@ -51,7 +60,7 @@ struct AdvancedStatsView: View {
     private var timeRangeSelector: some View {
         Picker("时间范围", selection: $selectedTimeRange) {
             ForEach(TimeRange.allCases, id: \.self) { range in
-                Text(range.rawValue).tag(range)
+                Text(range.localizedTitle).tag(range)
             }
         }
         .pickerStyle(.segmented)
@@ -64,28 +73,28 @@ struct AdvancedStatsView: View {
         
         return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             StatCard(
-                title: "平均每日",
+                title: NSLocalizedString("平均每日", comment: "Average daily"),
                 value: "\(stats.averageDaily)ml",
                 icon: "chart.bar.fill",
                 color: .bloomWater
             )
-            
+
             StatCard(
-                title: "达标率",
+                title: NSLocalizedString("达标率", comment: "Goal completion rate"),
                 value: "\(stats.goalCompletionRate)%",
                 icon: "target",
                 color: .bloomPrimary
             )
-            
+
             StatCard(
-                title: "总喝水量",
+                title: NSLocalizedString("总喝水量", comment: "Total intake"),
                 value: "\(stats.totalAmount / 1000)L",
                 icon: "drop.fill",
                 color: .blue
             )
-            
+
             StatCard(
-                title: "最长连续",
+                title: NSLocalizedString("最长连续", comment: "Longest streak"),
                 value: "\(stats.longestStreak)天",
                 icon: "flame.fill",
                 color: .orange
@@ -97,9 +106,9 @@ struct AdvancedStatsView: View {
     
     private var trendChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("喝水趋势".localized.localized)
+            Text(L.waterTrend)
                 .font(.system(size: 16, weight: .semibold))
-            
+
             Chart {
                 ForEach(getChartData(), id: \.date) { point in
                     LineMark(
@@ -108,7 +117,7 @@ struct AdvancedStatsView: View {
                     )
                     .foregroundStyle(Color.bloomWater)
                     .lineStyle(StrokeStyle(lineWidth: 2))
-                    
+
                     AreaMark(
                         x: .value("日期", point.date),
                         y: .value("水量", point.amount)
@@ -121,7 +130,7 @@ struct AdvancedStatsView: View {
                         )
                     )
                 }
-                
+
                 // 目标线
                 RuleMark(y: .value("目标", waterStore.dailyGoal))
                     .foregroundStyle(.red.opacity(0.5))
@@ -135,22 +144,22 @@ struct AdvancedStatsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
-    
+
     // MARK: - 最佳喝水时间
-    
+
     private var bestTimeCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "clock.fill")
                     .foregroundColor(.bloomGold)
-                Text("最佳喝水时间".localized.localized)
+                Text(L.peakHydrationTime)
                     .font(.system(size: 16, weight: .semibold))
             }
-            
-            Text("上午 9-10 点是你喝水最频繁的时段，继续保持！".localized.localized)
+
+            Text(NSLocalizedString("上午 9-10 点是你喝水最频繁的时段，继续保持！", comment: "Peak time explanation"))
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
-            
+
             // 时间分布条
             HStack(spacing: 4) {
                 ForEach(0..<24) { hour in
@@ -161,7 +170,7 @@ struct AdvancedStatsView: View {
                 }
             }
             .frame(height: 30)
-            
+
             HStack {
                 Text("00:00")
                     .font(.system(size: 10))
@@ -181,14 +190,14 @@ struct AdvancedStatsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
-    
+
     // MARK: - 每周习惯分析
-    
+
     private var weeklyHabitCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("每周习惯".localized.localized)
+            Text(L.weeklyHabits)
                 .font(.system(size: 16, weight: .semibold))
-            
+
             HStack(spacing: 8) {
                 ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
                     VStack(spacing: 4) {
@@ -200,15 +209,15 @@ struct AdvancedStatsView: View {
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundColor(day == "三" || day == "五" ? .white : .secondary)
                             )
-                        
+
                         Text(day)
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                     }
                 }
             }
-            
-            Text("周三、周五是你的喝水高峰日".localized.localized)
+
+            Text(NSLocalizedString("周三、周五是你的喝水高峰日", comment: "Weekly habit explanation"))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
         }
@@ -217,20 +226,20 @@ struct AdvancedStatsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
-    
+
     // MARK: - 成就进度汇总
-    
+
     private var achievementSummary: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "trophy.fill")
                     .foregroundColor(.bloomGold)
-                Text("成就进度".localized.localized)
+                Text(L.achievementProgress)
                     .font(.system(size: 16, weight: .semibold))
             }
-            
+
             HStack {
-                Text("已解锁".localized.localized)
+                Text(L.unlocked)
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
                 Spacer()
@@ -238,7 +247,7 @@ struct AdvancedStatsView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.bloomPrimary)
             }
-            
+
             ProgressView(value: 12, total: 20)
                 .tint(.bloomPrimary)
         }

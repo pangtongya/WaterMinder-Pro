@@ -330,7 +330,7 @@ struct LargeWidgetView: View {
             // 底部：统计信息
             HStack(spacing: 20) {
                 VStack {
-                    Text("植物健康")
+                    Text(NSLocalizedString("植物健康", comment: "Plant health"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Text("\(Int(data.plantHealth))%")
@@ -340,7 +340,7 @@ struct LargeWidgetView: View {
                 Divider()
                 
                 VStack {
-                    Text("状态")
+                    Text(NSLocalizedString("状态", comment: "Status"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Text(data.healthEmoji)
@@ -349,7 +349,8 @@ struct LargeWidgetView: View {
                 
                 Spacer()
                 
-                Text("更新于 \(data.lastUpdated, style: .time)")
+                Text(String(format: NSLocalizedString("更新于 %@", comment: "Updated at"),
+                            DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }

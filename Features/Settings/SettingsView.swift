@@ -109,7 +109,7 @@ struct SettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("设置".localized)
+        .navigationTitle(L.settings)
         .navigationBarTitleDisplayMode(.large)
         .onAppear { healthAuthorized = healthManager.isAuthorized }
         .sheet(isPresented: $showPaywall) {
@@ -168,7 +168,7 @@ struct SettingsView: View {
         .alert("恢复购买成功", isPresented: $showRestoreSuccess) {
             Button("好的", role: .cancel) {}
         } message: {
-            Text("感谢您的支持！Pro 权益已解锁。")
+            Text(L.proThankYou)
         }
         .alert("恢复购买失败", isPresented: $showRestoreError) {
             Button("好的", role: .cancel) {}
@@ -225,7 +225,7 @@ struct SettingsView: View {
                             .foregroundColor(.green)
                         Text("恢复养护".localized)
                         Spacer()
-                        Text("剩余 \(plantEngine.plant.remainingPauseDays) 天")
+                        Text(String(format: NSLocalizedString("剩余 %d 天", comment: ""), plantEngine.plant.remainingPauseDays))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
@@ -297,7 +297,9 @@ struct SettingsView: View {
 
             if userStore.reminderEnabled {
                 Picker("提醒间隔", selection: intervalBinding) {
-                    ForEach([30, 60, 90, 120], id: \.self) { Text("每 \($0) 分钟").tag($0) }
+                    ForEach([30, 60, 90, 120], id: \.self) {
+                        Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), $0)).tag($0)
+                    }
                 }
             }
         } header: {

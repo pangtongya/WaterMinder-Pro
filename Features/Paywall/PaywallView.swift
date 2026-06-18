@@ -82,7 +82,7 @@ struct PaywallView: View {
             .alert("恢复成功", isPresented: $showRestoreSuccess) {
                 Button("太好了") { dismiss() }
             } message: {
-                Text("感谢您的支持！Pro 权益已解锁。")
+                Text(L.proThankYou)
             }
         }
     }

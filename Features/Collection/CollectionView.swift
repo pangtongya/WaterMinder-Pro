@@ -36,7 +36,7 @@ struct CollectionView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("我的花园".localized)
+        .navigationTitle(L.myGarden)
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showPaywall) {
             PaywallView()
@@ -116,7 +116,7 @@ struct CollectionView: View {
             Text(item.species.symbol).font(.system(size: 32))
             Text(item.name).font(.system(size: 13, weight: .semibold))
             Text(item.species.name).font(.system(size: 11)).foregroundStyle(.secondary)
-            Text("养护 \(item.daysToHarvest) 天")
+            Text(String(format: L.daysToHarvest, item.daysToHarvest))
                 .font(.system(size: 10)).foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)

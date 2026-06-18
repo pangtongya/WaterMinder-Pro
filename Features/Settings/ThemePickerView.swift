@@ -38,7 +38,7 @@ struct ThemePickerView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("主题外观".localized)
+        .navigationTitle(L.themeAppearance)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             selectedThemeID = userStore.profile.selectedThemeID

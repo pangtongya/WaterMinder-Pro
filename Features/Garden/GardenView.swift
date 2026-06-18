@@ -60,7 +60,7 @@ struct GardenView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("我的花园".localized)
+        .navigationTitle(L.myGarden)
         .navigationBarTitleDisplayMode(.large)
         // 阶段升级庆祝：监听 engine 发布的庆祝事件
         .onChange(of: plantEngine.lastStageUpCelebration) { newStage in
@@ -89,31 +89,31 @@ struct GardenView: View {
                 .disabled(isSharing)
             }
         }
-        .alert("暂停养护".localized, isPresented: $showPauseConfirm) {
-            Button("取消", role: .cancel) { }
-            Button("暂停", role: .destructive) {
+        .alert(L.pauseCare, isPresented: $showPauseConfirm) {
+            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("暂停", comment: "Pause"), role: .destructive) {
                 plantEngine.pauseCare()
                 Haptics.light()
             }
         } message: {
-            Text("暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。".localized)
+            Text(L.pauseExplanation)
         }
-        .alert("恢复养护".localized, isPresented: $showResumeAlert) {
-            Button("恢复".localized) {
+        .alert(L.resumeCare, isPresented: $showResumeAlert) {
+            Button(L.restore) {
                 plantEngine.resumeCare()
                 Haptics.success()
             }
-            Button("取消", role: .cancel) { }
+            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
         } message: {
-            Text("确定要恢复养护吗？植物将重新开始生长。".localized)
+            Text(L.confirmResumeCare)
         }
-        .alert("花园已满".localized, isPresented: $showGardenLimitAlert) {
-            Button("取消", role: .cancel) { }
-            Button("升级 Pro".localized) {
+        .alert(L.gardenFull, isPresented: $showGardenLimitAlert) {
+            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
+            Button(L.upgradeToPro) {
                 showPaywall = true
             }
         } message: {
-            Text("免费用户最多保存 5 株植物。升级 Pro 解锁无限花园！")
+            Text(L.proGardenLimit)
         }
         .sheet(isPresented: $showHarvestSheet) {
             Text("Harvest Sheet Placeholder")
@@ -166,17 +166,17 @@ struct GardenView: View {
                 .foregroundColor(.orange)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("暂停养护中".localized)
+                Text(L.carePaused)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.orange)
-                Text("剩余 \(plantEngine.plant.remainingPauseDays) 天")
+                Text(String(format: NSLocalizedString("剩余 %d 天", comment: ""), plantEngine.plant.remainingPauseDays))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
             }
 
             Spacer()
 
-            Button("恢复".localized) {
+            Button(L.resumeCare) {
                 showResumeAlert = true
             }
             .font(.system(size: 14, weight: .medium))
@@ -205,7 +205,7 @@ struct GardenView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
-                Text("收获 \(plantEngine.plant.name)")
+                Text(String(format: NSLocalizedString("收获 %@", comment: "Harvest [plant name]"), plantEngine.plant.name))
                 Image(systemName: "chevron.right")
             }
             .font(.system(size: 15, weight: .semibold))
@@ -294,7 +294,7 @@ struct TodayRecordsCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("今日记录".localized)
+                Text(L.todayLog)
                     .font(.system(size: 16, weight: .semibold))
                 Spacer()
                 if !waterStore.todayRecords.isEmpty {
@@ -309,7 +309,7 @@ struct TodayRecordsCard: View {
                     Image(systemName: "drop")
                         .font(.system(size: 28))
                         .foregroundStyle(Color.bloomWater.opacity(0.4))
-                    Text("\(plantEngine.plant.name) 还没喝到水")
+                    Text(String(format: NSLocalizedString("%@ 还没喝到水", comment: ""), plantEngine.plant.name))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
@@ -388,12 +388,12 @@ struct StageUpCelebration: View {
                         .scaleEffect(appear ? 1.0 : 0.3)
                 }
 
-                Text("长大啦！".localized)
+                Text(L.itGrew)
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .opacity(appear ? 1 : 0)
 
-                Text("进入了「\(stage.name)」阶段")
+                Text(String(format: NSLocalizedString("进入了「%@」阶段", comment: "Reached the [stage] stage"), stage.name))
                     .font(.system(size: 15))
                     .foregroundStyle(.white.opacity(0.85))
                     .opacity(appear ? 1 : 0)
@@ -401,7 +401,7 @@ struct StageUpCelebration: View {
                 Button {
                     onDismiss()
                 } label: {
-                    Text("继续守护".localized)
+                    Text(L.keepNurturing)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.bloomPrimary)
                         .padding(.horizontal, 40)

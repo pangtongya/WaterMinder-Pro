@@ -22,7 +22,7 @@ struct AchievementView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("成就".localized)
+        .navigationTitle(L.achievements)
         .navigationBarTitleDisplayMode(.large)
         .overlay {
             if let achievement = achievementStore.newlyUnlocked {

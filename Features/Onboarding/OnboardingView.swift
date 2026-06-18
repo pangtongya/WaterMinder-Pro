@@ -178,10 +178,9 @@ struct OnboardingView: View {
                 .font(.system(size: 56))
 
             VStack(spacing: 10) {
-                Text(String(format: "让 %@ 在渴的时候", plantName))
+                Text(String(format: NSLocalizedString("让 %@ 在渴的时候", comment: ""), plantName))
                     .font(.system(size: 24, weight: .bold))
-                    .textContentType(.none)
-                Text("能告诉你")
+                Text(NSLocalizedString("能告诉你", comment: "Can tell you"))
                     .font(.system(size: 24, weight: .bold))
 
                 Text("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。".localized)
