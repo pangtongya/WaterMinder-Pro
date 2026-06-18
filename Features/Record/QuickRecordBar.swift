@@ -146,3 +146,12 @@ struct QuickRecordBar: View {
         }
     }
 }
+
+#Preview {
+    QuickRecordBar()
+        .environmentObject(WaterStore())
+        .environmentObject(PlantEngine())
+        .environmentObject(HealthManager.shared)
+        .padding()
+        .background(Color(.systemBackground))
+}

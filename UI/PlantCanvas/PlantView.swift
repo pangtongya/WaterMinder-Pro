@@ -32,3 +32,17 @@ struct AnimatedPlantView: View {
         .drawingGroup()
     }
 }
+
+#Preview {
+    AnimatedPlantView(plant: Plant(stage: .sprout, health: 85))
+        .frame(width: 300, height: 300)
+        .padding()
+        .background(Color(.systemBackground))
+}
+
+#Preview("Seedling") {
+    AnimatedPlantView(plant: Plant(stage: .seedling, health: 55))
+        .frame(width: 300, height: 300)
+        .padding()
+        .background(Color(.systemBackground))
+}

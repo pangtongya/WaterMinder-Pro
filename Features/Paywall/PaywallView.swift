@@ -271,3 +271,8 @@ struct PaywallView: View {
         }
     }
 }
+
+#Preview {
+    PaywallView()
+        .environmentObject(StoreManager.shared)
+}
