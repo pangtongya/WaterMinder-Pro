@@ -199,36 +199,49 @@ struct AchievementCard: View {
 struct AchievementUnlockOverlay: View {
     let achievement: Achievement
     let dismiss: () -> Void
-    
+
+    /// 控制 overlay 显隐的动画状态
+    @State private var isVisible = true
+
+    /// 5 秒自动关闭定时器
+    /// 用户也可以通过点击背景或"太棒了"按钮提前关闭
+    private let autoDismissSeconds: Double = 5.0
+
     var body: some View {
         ZStack {
+            // 半透明黑色背景（点击任意处关闭）
             Color.black.opacity(0.6)
                 .ignoresSafeArea()
-                .onTapGesture { dismiss() }
-            
+                .onTapGesture { dismissAnimated() }
+
+            // 成就卡片
             VStack(spacing: 20) {
                 // 动画图标
                 Image(systemName: achievement.icon)
                     .font(.system(size: 64))
                     .foregroundColor(.white)
-                    .scaleEffect(1.0)
-                    .animation(.spring(response: 0.4).delay(0.2), value: achievement)
-                
-                Text("成就解锁！".localized)
+                    .scaleEffect(isVisible ? 1.0 : 0.8)
+                    .opacity(isVisible ? 1 : 0)
+                    .animation(.spring(response: 0.4).delay(0.2), value: isVisible)
+
+                Text(L.achievementUnlocked)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
-                
+
                 Text(achievement.title)
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.white)
-                
+
                 Text(achievement.description)
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
-                
-                Button("太棒了！".localized) {
-                    dismiss()
+
+                // 进度指示器（倒计时）
+                countdownBar
+
+                Button(L.amazing) {
+                    dismissAnimated()
                 }
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.bloomPrimary)
@@ -241,9 +254,45 @@ struct AchievementUnlockOverlay: View {
             .background(Color(.systemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .padding(.horizontal, 40)
-            .transition(.scale.combined(with: .opacity))
+            .scaleEffect(isVisible ? 1.0 : 0.8)
+            .opacity(isVisible ? 1 : 0)
         }
-        .animation(.easeInOut(duration: 0.3), value: achievement)
+        .animation(.easeInOut(duration: 0.3), value: isVisible)
+        .onAppear {
+            // 5 秒后自动淡出
+            DispatchQueue.main.asyncAfter(deadline: .now() + autoDismissSeconds) {
+                dismissAnimated()
+            }
+        }
+    }
+
+    /// 倒计时进度条（UI 反馈）
+    private var countdownBar: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.white.opacity(0.2))
+                    .frame(height: 4)
+
+                Capsule()
+                    .fill(Color.white)
+                    .frame(width: geo.size.width, height: 4)
+                    .animation(.linear(duration: autoDismissSeconds), value: isVisible)
+                    .scaleEffect(x: isVisible ? 1 : 0, y: 1, anchor: .leading)
+            }
+        }
+        .frame(height: 4)
+    }
+
+    /// 带动画效果的关闭（淡出 + 缩放）
+    private func dismissAnimated() {
+        withAnimation(.easeOut(duration: 0.3)) {
+            isVisible = false
+        }
+        // 等待动画完成后调用实际 dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            dismiss()
+        }
     }
 }
 
