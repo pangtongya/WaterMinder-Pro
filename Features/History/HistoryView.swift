@@ -148,7 +148,7 @@ struct HistoryView: View {
                             .font(.system(size: 13, weight: .medium))
                         Spacer()
                         Text(String(format: NSLocalizedString("%@ · %@ · 种植 %d 天", comment: ""),
-                                    plantEngine.plant.species.name,
+                                    plantEngine.plant.species.localizedName,
                                     plantEngine.plant.stage.name,
                                     plantEngine.plant.ageInDays))
                             .font(.system(size: 12))

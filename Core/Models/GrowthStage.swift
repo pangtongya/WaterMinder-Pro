@@ -11,15 +11,15 @@ enum GrowthStage: Int, Codable, CaseIterable {
     case blooming  = 4   // 开花
     case harvestable = 5 // 可收获（盛开到极致，等待收获入花园）
 
-    /// 显示名
+    /// 本地化的显示名
     var name: String {
         switch self {
-        case .seed:        return "种子"
-        case .sprout:      return "发芽"
-        case .seedling:    return "幼苗"
-        case .mature:      return "成株"
-        case .blooming:    return "含苞"
-        case .harvestable: return "盛开"
+        case .seed:        return NSLocalizedString("种子", comment: "Seed stage")
+        case .sprout:      return NSLocalizedString("发芽", comment: "Sprout stage")
+        case .seedling:    return NSLocalizedString("幼苗", comment: "Seedling stage")
+        case .mature:      return NSLocalizedString("成株", comment: "Mature stage")
+        case .blooming:    return NSLocalizedString("含苞", comment: "Blooming stage")
+        case .harvestable: return NSLocalizedString("盛开", comment: "Harvestable stage")
         }
     }
 

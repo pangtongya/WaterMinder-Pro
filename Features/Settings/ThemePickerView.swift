@@ -28,7 +28,7 @@ struct ThemePickerView: View {
                 
                 // Pro 主题
                 themeSection(
-                    title: "Pro 主题".localized,
+                    title: "Pro Themes".localized,
                     themes: ThemeLibrary.pro,
                     isPro: true
                 )

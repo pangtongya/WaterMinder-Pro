@@ -41,6 +41,16 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         }
     }
 
+    func requestAuthorizationIfNeeded() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType else { return false }
+        let status = store?.authorizationStatus(for: type) ?? .notDetermined
+        if status == .notDetermined {
+            return await requestAuthorization()
+        }
+        return status == .sharingAuthorized
+    }
+
     // MARK: - 写入喝水记录
 
     func saveWater(_ amountML: Int, date: Date = Date()) async throws {

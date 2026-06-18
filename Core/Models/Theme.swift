@@ -12,6 +12,7 @@ struct Theme: Identifiable, Codable, Hashable {
     let nameEn: String
     let isPro: Bool
     let description: String
+    let descriptionEn: String
     
     // 颜色配置
     let primaryColor: String
@@ -36,6 +37,16 @@ struct Theme: Identifiable, Codable, Hashable {
     var plantTintColor: Color? { plantTint.map { Color(hex: $0) } }
     
     var isFree: Bool { !isPro }
+    
+    /// 本地化的名称
+    var localizedName: String {
+        Bundle.main.preferredLocalizations.contains("zh") ? name : nameEn
+    }
+    
+    /// 本地化的描述
+    var localizedDescription: String {
+        Bundle.main.preferredLocalizations.contains("zh") ? description : descriptionEn
+    }
 }
 
 // MARK: - 主题库
@@ -71,6 +82,7 @@ extension Theme {
         nameEn: "Classic",
         isPro: false,
         description: "Bloom 默认配色，清新自然",
+        descriptionEn: "Bloom's default color scheme, fresh and natural",
         primaryColor: "#4CAF50",
         secondaryColor: "#8BC34A",
         accentColor: "#FF9800",
@@ -87,6 +99,7 @@ extension Theme {
         nameEn: "Light",
         isPro: false,
         description: "清爽明亮的白色基调",
+        descriptionEn: "Fresh and bright white theme",
         primaryColor: "#2196F3",
         secondaryColor: "#03A9F4",
         accentColor: "#FF5722",
@@ -103,6 +116,7 @@ extension Theme {
         nameEn: "Dark",
         isPro: false,
         description: "护眼的深色模式",
+        descriptionEn: "Eye-friendly dark mode",
         primaryColor: "#4CAF50",
         secondaryColor: "#66BB6A",
         accentColor: "#FFA726",
@@ -120,6 +134,7 @@ extension Theme {
         nameEn: "Ocean",
         isPro: true,
         description: "深邃的海洋蓝调",
+        descriptionEn: "Deep ocean blue tones",
         primaryColor: "#00BCD4",
         secondaryColor: "#0097A7",
         accentColor: "#FF9800",
@@ -135,6 +150,7 @@ extension Theme {
         nameEn: "Forest",
         isPro: true,
         description: "浓郁的森林绿意",
+        descriptionEn: "Rich forest green tones",
         primaryColor: "#2E7D32",
         secondaryColor: "#4CAF50",
         accentColor: "#FFC107",
@@ -150,6 +166,7 @@ extension Theme {
         nameEn: "Sunset",
         isPro: true,
         description: "温暖的夕阳橙红",
+        descriptionEn: "Warm sunset orange and red",
         primaryColor: "#FF5722",
         secondaryColor: "#FF9800",
         accentColor: "#FFC107",
@@ -165,6 +182,7 @@ extension Theme {
         nameEn: "Lavender",
         isPro: true,
         description: "浪漫的紫色梦幻",
+        descriptionEn: "Romantic purple dreams",
         primaryColor: "#9C27B0",
         secondaryColor: "#BA68C8",
         accentColor: "#FF9800",
@@ -180,6 +198,7 @@ extension Theme {
         nameEn: "Midnight",
         isPro: true,
         description: "神秘的午夜蓝黑",
+        descriptionEn: "Mysterious midnight blue-black",
         primaryColor: "#3F51B5",
         secondaryColor: "#5C6BC0",
         accentColor: "#FF4081",

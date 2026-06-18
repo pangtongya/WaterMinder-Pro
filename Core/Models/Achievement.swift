@@ -7,8 +7,8 @@ import Foundation
 
 struct Achievement: Identifiable, Codable, Hashable {
     let id: String
-    let title: String
-    let description: String
+    let titleKey: String       // 本地化 key
+    let descriptionKey: String // 本地化 key
     let icon: String
     let category: AchievementCategory
     var requirement: Int  // 完成条件（如喝水次数、天数等）
@@ -24,10 +24,20 @@ struct Achievement: Identifiable, Codable, Hashable {
         return min(1.0, Double(progress) / Double(requirement))
     }
     
+    /// 获取本地化的标题
+    var title: String {
+        NSLocalizedString(titleKey, comment: titleKey)
+    }
+    
+    /// 获取本地化的描述
+    var description: String {
+        NSLocalizedString(descriptionKey, comment: descriptionKey)
+    }
+    
     init(
         id: String,
-        title: String,
-        description: String,
+        titleKey: String,
+        descriptionKey: String,
         icon: String,
         category: AchievementCategory,
         requirement: Int,
@@ -35,8 +45,8 @@ struct Achievement: Identifiable, Codable, Hashable {
         progress: Int = 0
     ) {
         self.id = id
-        self.title = title
-        self.description = description
+        self.titleKey = titleKey
+        self.descriptionKey = descriptionKey
         self.icon = icon
         self.category = category
         self.requirement = requirement
@@ -48,11 +58,27 @@ struct Achievement: Identifiable, Codable, Hashable {
 // MARK: - 成就分类
 
 enum AchievementCategory: String, Codable, CaseIterable {
-    case hydration = "喝水达人"
-    case streak = "坚持不懈"
-    case garden = "花园大师"
-    case social = "社交分享"
-    case milestone = "重要里程碑"
+    case hydration
+    case streak
+    case garden
+    case social
+    case milestone
+    
+    /// 本地化的分类名称 key
+    var localizedKey: String {
+        switch self {
+        case .hydration: return "喝水达人"
+        case .streak: return "坚持不懈"
+        case .garden: return "花园大师"
+        case .social: return "社交分享"
+        case .milestone: return "重要里程碑"
+        }
+    }
+    
+    /// 本地化的分类名称
+    var localizedName: String {
+        NSLocalizedString(localizedKey, comment: localizedKey)
+    }
     
     var color: String {
         switch self {
@@ -75,48 +101,48 @@ enum AchievementLibrary {
             // 喝水达人系列
             Achievement(
                 id: "hydration_first",
-                title: "第一口水",
-                description: "完成第一次喝水记录",
+                titleKey: "第一口水",
+                descriptionKey: "完成第一次喝水记录",
                 icon: "drop.fill",
                 category: .hydration,
                 requirement: 1
             ),
             Achievement(
                 id: "hydration_10",
-                title: "初入门径",
-                description: "累计喝水10次",
+                titleKey: "初入门径",
+                descriptionKey: "累计喝水10次",
                 icon: "drop.fill",
                 category: .hydration,
                 requirement: 10
             ),
             Achievement(
                 id: "hydration_50",
-                title: "饮水习惯",
-                description: "累计喝水50次",
+                titleKey: "饮水习惯",
+                descriptionKey: "累计喝水50次",
                 icon: "cup.and.saucer.fill",
                 category: .hydration,
                 requirement: 50
             ),
             Achievement(
                 id: "hydration_100",
-                title: "百杯成就",
-                description: "累计喝水100次",
+                titleKey: "百杯成就",
+                descriptionKey: "累计喝水100次",
                 icon: "mug.fill",
                 category: .hydration,
                 requirement: 100
             ),
             Achievement(
                 id: "hydration_500",
-                title: "喝水大师",
-                description: "累计喝水500次",
+                titleKey: "喝水大师",
+                descriptionKey: "累计喝水500次",
                 icon: "waterbottle.fill",
                 category: .hydration,
                 requirement: 500
             ),
             Achievement(
                 id: "hydration_1000",
-                title: "千杯不醉",
-                description: "累计喝水1000次",
+                titleKey: "千杯不醉",
+                descriptionKey: "累计喝水1000次",
                 icon: "sparkles",
                 category: .hydration,
                 requirement: 1000
@@ -125,48 +151,48 @@ enum AchievementLibrary {
             // 坚持不懈系列
             Achievement(
                 id: "streak_3",
-                title: "三日坚持",
-                description: "连续3天完成喝水目标",
+                titleKey: "三日坚持",
+                descriptionKey: "连续3天完成喝水目标",
                 icon: "calendar.badge.checkmark",
                 category: .streak,
                 requirement: 3
             ),
             Achievement(
                 id: "streak_7",
-                title: "一周达人",
-                description: "连续7天完成喝水目标",
+                titleKey: "一周达人",
+                descriptionKey: "连续7天完成喝水目标",
                 icon: "calendar.badge.checkmark",
                 category: .streak,
                 requirement: 7
             ),
             Achievement(
                 id: "streak_14",
-                title: "两周习惯",
-                description: "连续14天完成喝水目标",
+                titleKey: "两周习惯",
+                descriptionKey: "连续14天完成喝水目标",
                 icon: "calendar.badge.checkmark",
                 category: .streak,
                 requirement: 14
             ),
             Achievement(
                 id: "streak_30",
-                title: "月度挑战",
-                description: "连续30天完成喝水目标",
+                titleKey: "月度挑战",
+                descriptionKey: "连续30天完成喝水目标",
                 icon: "trophy.fill",
                 category: .streak,
                 requirement: 30
             ),
             Achievement(
                 id: "streak_60",
-                title: "双月坚守",
-                description: "连续60天完成喝水目标",
+                titleKey: "双月坚守",
+                descriptionKey: "连续60天完成喝水目标",
                 icon: "trophy.fill",
                 category: .streak,
                 requirement: 60
             ),
             Achievement(
                 id: "streak_100",
-                title: "百日筑基",
-                description: "连续100天完成喝水目标",
+                titleKey: "百日筑基",
+                descriptionKey: "连续100天完成喝水目标",
                 icon: "crown.fill",
                 category: .streak,
                 requirement: 100
@@ -175,64 +201,64 @@ enum AchievementLibrary {
             // 花园大师系列
             Achievement(
                 id: "garden_first_harvest",
-                title: "首次收获",
-                description: "第一次收获植物到花园",
+                titleKey: "首次收获",
+                descriptionKey: "第一次收获植物到花园",
                 icon: "leaf.fill",
                 category: .garden,
                 requirement: 1
             ),
             Achievement(
                 id: "garden_5_harvests",
-                title: "花园新手",
-                description: "累计收获5次",
+                titleKey: "花园新手",
+                descriptionKey: "累计收获5次",
                 icon: "leaf.fill",
                 category: .garden,
                 requirement: 5
             ),
             Achievement(
                 id: "garden_10_harvests",
-                title: "园丁认证",
-                description: "累计收获10次",
+                titleKey: "园丁认证",
+                descriptionKey: "累计收获10次",
                 icon: "tree.fill",
                 category: .garden,
                 requirement: 10
             ),
             Achievement(
                 id: "garden_25_harvests",
-                title: "花园大师",
-                description: "累计收获25次",
+                titleKey: "花园大师",
+                descriptionKey: "累计收获25次",
                 icon: "flower.fill",
                 category: .garden,
                 requirement: 25
             ),
             Achievement(
                 id: "garden_50_harvests",
-                title: "传奇园丁",
-                description: "累计收获50次",
+                titleKey: "传奇园丁",
+                descriptionKey: "累计收获50次",
                 icon: "sparkles",
                 category: .garden,
                 requirement: 50
             ),
             Achievement(
                 id: "garden_5_species",
-                title: "品种收集家",
-                description: "收集5种不同植物品种",
+                titleKey: "品种收集家",
+                descriptionKey: "收集5种不同植物品种",
                 icon: "leaf.fill",
                 category: .garden,
                 requirement: 5
             ),
             Achievement(
                 id: "garden_10_species",
-                title: "植物学家",
-                description: "收集10种不同植物品种",
+                titleKey: "植物学家",
+                descriptionKey: "收集7种不同植物品种",
                 icon: "tree.fill",
                 category: .garden,
-                requirement: 10
+                requirement: 7
             ),
             Achievement(
                 id: "garden_all_species",
-                title: "全品种大师",
-                description: "收集所有植物品种",
+                titleKey: "全品种大师",
+                descriptionKey: "收集所有植物品种",
                 icon: "crown.fill",
                 category: .garden,
                 requirement: PlantLibrary.all.count
@@ -241,16 +267,16 @@ enum AchievementLibrary {
             // 社交分享系列
             Achievement(
                 id: "social_first_share",
-                title: "初次分享",
-                description: "第一次分享植物状态",
+                titleKey: "初次分享",
+                descriptionKey: "第一次分享植物状态",
                 icon: "square.and.arrow.up",
                 category: .social,
                 requirement: 1
             ),
             Achievement(
                 id: "social_10_shares",
-                title: "社交达人",
-                description: "累计分享10次",
+                titleKey: "社交达人",
+                descriptionKey: "累计分享10次",
                 icon: "square.and.arrow.up",
                 category: .social,
                 requirement: 10
@@ -259,24 +285,24 @@ enum AchievementLibrary {
             // 重要里程碑
             Achievement(
                 id: "milestone_10000ml",
-                title: "万水千山",
-                description: "累计喝水10000ml",
+                titleKey: "万水千山",
+                descriptionKey: "累计喝水10000ml",
                 icon: "drop.fill",
                 category: .milestone,
                 requirement: 10000
             ),
             Achievement(
                 id: "milestone_50000ml",
-                title: "五万成就",
-                description: "累计喝水50000ml",
+                titleKey: "五万成就",
+                descriptionKey: "累计喝水50000ml",
                 icon: "sparkles",
                 category: .milestone,
                 requirement: 50000
             ),
             Achievement(
                 id: "milestone_100000ml",
-                title: "十万喝水王",
-                description: "累计喝水100000ml",
+                titleKey: "十万喝水王",
+                descriptionKey: "累计喝水100000ml",
                 icon: "crown.fill",
                 category: .milestone,
                 requirement: 100000

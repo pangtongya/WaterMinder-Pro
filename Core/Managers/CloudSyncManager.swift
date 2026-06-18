@@ -61,6 +61,11 @@ final class CloudSyncManager: ObservableObject {
     /// 用户是否有权使用同步（Pro 用户）
     var isProProvider: () -> Bool = { false }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        toastResetTimer?.invalidate()
+    }
+    
     private init() {
         container = CKContainer(identifier: containerName)
         database = container.privateCloudDatabase

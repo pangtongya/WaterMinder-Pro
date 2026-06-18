@@ -77,7 +77,7 @@ struct QuickRecordBar: View {
                 .onChanged { _ in pressedCup = cup }
                 .onEnded { _ in pressedCup = nil }
         )
-        .accessibilityLabel("\(cup.rawValue) \(cup.defaultAmount) 毫升")
+        .accessibilityLabel("\(cup.localizedName) \(cup.defaultAmount) ml")
     }
 
     // MARK: - 进度提示
@@ -98,8 +98,8 @@ struct QuickRecordBar: View {
 
     private var progressText: String {
         waterStore.isGoalMetToday
-            ? "今日目标达成！"
-            : "还差 \(waterStore.remaining) ml"
+            ? NSLocalizedString("今日目标达成！", comment: "Goal achieved")
+            : String(format: NSLocalizedString("还差 %d ml", comment: "Remaining ml"), waterStore.remaining)
     }
 
     private var progressColor: Color {

@@ -320,17 +320,17 @@ enum BackupError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unsupportedVersion(let version):
-            return "不支持的备份版本：\(version)"
+            return String(format: NSLocalizedString("Unsupported backup version: %@", comment: ""), version)
         case .fileNotFound:
-            return "备份文件未找到"
+            return NSLocalizedString("Backup file not found", comment: "")
         case .invalidData:
-            return "备份数据格式无效"
+            return NSLocalizedString("Invalid backup data format", comment: "")
         case .corruptedData:
-            return "备份文件已损坏（checksum 验证失败）"
+            return NSLocalizedString("Backup file is corrupted (checksum verification failed)", comment: "")
         case .exportFailed(let message):
-            return "导出失败：\(message)"
+            return String(format: NSLocalizedString("Export failed: %@", comment: ""), message)
         case .importFailed(let message):
-            return "导入失败：\(message)"
+            return String(format: NSLocalizedString("Import failed: %@", comment: ""), message)
         }
     }
 }

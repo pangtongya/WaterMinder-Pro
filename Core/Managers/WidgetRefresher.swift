@@ -24,7 +24,7 @@ final class WidgetRefresher {
             dailyGoal: userStore.dailyGoal,
             plantName: plant.name,
             plantHealth: plant.health,
-            plantStage: plant.stage.name,
+            plantStageRawValue: plant.stage.rawValue,
             plantSymbol: species.symbol,
             isPaused: plant.isPaused
         )

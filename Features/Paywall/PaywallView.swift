@@ -79,8 +79,8 @@ struct PaywallView: View {
                     Button("关闭".localized) { dismiss() }
                 }
             }
-            .alert("恢复成功", isPresented: $showRestoreSuccess) {
-                Button("太好了") { dismiss() }
+            .alert("恢复成功".localized, isPresented: $showRestoreSuccess) {
+                Button("太好了".localized) { dismiss() }
             } message: {
                 Text(L.proThankYou)
             }
@@ -108,10 +108,10 @@ struct PaywallView: View {
 
     private var benefitsList: some View {
         VStack(alignment: .leading, spacing: 14) {
-            benefitRow(icon: "📊", title: "高级统计".localized, desc: "完整的数据分析和可视化报告")
-            benefitRow(icon: "🎨", title: "自定义主题".localized, desc: "解锁所有 Pro 主题和外观")
-            benefitRow(icon: "🌱", title: "无限植物品种".localized, desc: "解锁全部7种植物，打造梦幻花园")
-            benefitRow(icon: "☁️", title: "多设备同步".localized, desc: "CloudKit 数据同步和备份")
+            benefitRow(icon: "📊", title: "Advanced Statistics".localized, desc: "Complete data analysis and visualization reports")
+            benefitRow(icon: "🎨", title: "Custom Themes".localized, desc: "Unlock all Pro themes and appearances")
+            benefitRow(icon: "🌱", title: "Unlimited Plants".localized, desc: "Unlock all 7 plant species for your dream garden")
+            benefitRow(icon: "☁️", title: "Multi-device Sync".localized, desc: "CloudKit data sync and backup")
         }
         .padding(18)
         .background(Color(.secondarySystemBackground))
@@ -172,7 +172,7 @@ struct PaywallView: View {
 
             // 服务条款 & 隐私政策
             HStack(spacing: 4) {
-                Button("服务条款") {
+                Button("Terms of Service".localized) {
                     openURL("https://pangtongya.github.io/Bloom-Website/terms.html")
                 }
                 .font(.system(size: 10))
@@ -180,7 +180,7 @@ struct PaywallView: View {
                 Text("·")
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
-                Button("隐私政策") {
+                Button("Privacy Policy".localized) {
                     openURL("https://pangtongya.github.io/Bloom-Website/privacy-policy.html")
                 }
                 .font(.system(size: 10))
@@ -211,10 +211,10 @@ struct PaywallView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(isLifetime ? "终身买断" : "Pro 年订阅")
+                        Text(isLifetime ? "Lifetime Purchase" : "Pro Yearly")
                             .font(.system(size: 16, weight: .bold))
                         if isLifetime {
-                            Text("最划算".localized)
+                            Text("BEST VALUE".localized)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -222,7 +222,7 @@ struct PaywallView: View {
                                 .background(Color.bloomGold)
                                 .clipShape(Capsule())
                         } else if isYearly {
-                            Text("最受欢迎".localized)
+                            Text("POPULAR".localized)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -232,11 +232,11 @@ struct PaywallView: View {
                         }
                     }
                     if let savings = savingsPercent, savings > 0 {
-                        Text(String(format: NSLocalizedString("相比订阅节省 %d%%", comment: "Save X% compared to subscription"), savings))
+                        Text(String(format: "Save %d%% vs subscription".localized, savings))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(Color.bloomSuccess)
                     } else {
-                        Text(isLifetime ? "一次购买，永久解锁" : "全年无限养护")
+                        Text(isLifetime ? "One-time purchase, permanent unlock".localized : "Unlimited care all year")
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                     }

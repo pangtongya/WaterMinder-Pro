@@ -101,13 +101,13 @@ enum HealthCalculator {
 
     // MARK: - 状态判断
 
-    /// 健康度对应的生命状态文案
+    /// 健康度对应的生命状态文案（已本地化）
     static func statusMessage(_ health: Double) -> String {
         switch health {
-        case ..<25:  return "它快要枯萎了……快救救它"
-        case ..<50:  return "它有点蔫了，需要喝水"
-        case ..<80:  return "它状态还行"
-        default:     return "它生机勃勃！"
+        case ..<25:  return NSLocalizedString("它快要枯萎了……快救救它", comment: "Plant health critical")
+        case ..<50:  return NSLocalizedString("它有点蔫了，需要喝水", comment: "Plant health low")
+        case ..<80:  return NSLocalizedString("它状态还行", comment: "Plant health okay")
+        default:     return NSLocalizedString("它生机勃勃！", comment: "Plant health great")
         }
     }
 }

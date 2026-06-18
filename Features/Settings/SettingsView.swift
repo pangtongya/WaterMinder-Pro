@@ -146,40 +146,40 @@ struct SettingsView: View {
             }
         }
         .alert("恢复成功".localized, isPresented: $showBackupSuccess) {
-            Button("好的", role: .cancel) {}
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text("数据已成功恢复".localized)
         }
         .alert("恢复失败".localized, isPresented: $showBackupError) {
-            Button("好的", role: .cancel) {}
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
         .alert("健康权限".localized, isPresented: $showHealthAlert) {
-            Button("取消", role: .cancel) {}
+            Button("取消".localized, role: .cancel) {}
             Button("去设置".localized) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 访问健康数据".localized)
         }
         .alert("通知权限".localized, isPresented: $showNotificationAlert) {
-            Button("取消", role: .cancel) {}
+            Button("取消".localized, role: .cancel) {}
             Button("去设置".localized) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 发送通知".localized)
         }
-        .alert("恢复购买成功", isPresented: $showRestoreSuccess) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复购买成功".localized, isPresented: $showRestoreSuccess) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text(L.proThankYou)
         }
-        .alert("恢复购买失败", isPresented: $showRestoreError) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复购买失败".localized, isPresented: $showRestoreError) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
         .alert("暂停养护".localized, isPresented: $showPauseConfirm) {
-            Button("取消", role: .cancel) { }
-            Button("暂停", role: .destructive) {
+            Button("取消".localized, role: .cancel) { }
+            Button("暂停".localized, role: .destructive) {
                 plantEngine.pauseCare()
                 Haptics.light()
             }
@@ -191,7 +191,7 @@ struct SettingsView: View {
                 plantEngine.resumeCare()
                 Haptics.success()
             }
-            Button("取消", role: .cancel) { }
+            Button("取消".localized, role: .cancel) { }
         } message: {
             Text("确定要恢复养护吗？植物将重新开始生长。".localized)
         }
@@ -212,7 +212,7 @@ struct SettingsView: View {
             HStack {
                 Text("品种".localized)
                 Spacer()
-                Text(plantEngine.plant.species.name)
+                Text(plantEngine.plant.species.localizedName)
                     .foregroundStyle(.secondary)
                 Text(plantEngine.plant.species.symbol)
             }

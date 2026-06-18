@@ -109,6 +109,19 @@ final class PlantEngine: ObservableObject {
         lastActiveDay = Calendar.current.startOfDay(for: Date())
     }
 
+    /// 离线期间应用衰减（后台任务或 App 启动时调用）
+    func applyOfflineDecay(hours: Int) {
+        guard hours > 0 else { return }
+        let decayPerHour = 2.0
+        let totalDecay = min(plant.health, Double(hours) * decayPerHour)
+        plant.health -= totalDecay
+        if plant.health <= 0 {
+            plant = PlantLifecycle.wilt(plant)
+        }
+        persist()
+        triggerSync()
+    }
+
     // MARK: - 收获
 
     /// 收获成熟植物，返回 garden item；由 GardenStore 接收

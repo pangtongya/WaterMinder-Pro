@@ -32,25 +32,25 @@ enum PersistenceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .directoryNotFound:
-            return "无法访问文档目录"
+            return NSLocalizedString("Unable to access document directory", comment: "")
         case .fileNotFound(let filename):
-            return "文件未找到：\(filename)"
+            return String(format: NSLocalizedString("File not found: %@", comment: ""), filename)
         case .readFailed(let filename, let error):
-            return "读取失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Read failed (%@): %@", comment: ""), filename, error.localizedDescription)
         case .writeFailed(let filename, let error):
-            return "写入失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Write failed (%@): %@", comment: ""), filename, error.localizedDescription)
         case .decodeFailed(let filename, let error):
-            return "解码失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Decode failed (%@): %@", comment: ""), filename, error.localizedDescription)
         case .encodeFailed(let filename, let error):
-            return "编码失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Encode failed (%@): %@", comment: ""), filename, error.localizedDescription)
         case .dataCorrupted(let filename):
-            return "数据已损坏：\(filename)"
+            return String(format: NSLocalizedString("Data corrupted: %@", comment: ""), filename)
         case .validationFailed(let filename, let reason):
-            return "数据验证失败（\(filename)）：\(reason)"
+            return String(format: NSLocalizedString("Data validation failed (%@): %@", comment: ""), filename, reason)
         case .backupFailed(let filename, let error):
-            return "备份失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Backup failed (%@): %@", comment: ""), filename, error.localizedDescription)
         case .recoveryFailed(let filename, let error):
-            return "恢复失败（\(filename)）：\(error.localizedDescription)"
+            return String(format: NSLocalizedString("Recovery failed (%@): %@", comment: ""), filename, error.localizedDescription)
         }
     }
 }

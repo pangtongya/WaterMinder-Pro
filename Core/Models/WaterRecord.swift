@@ -50,10 +50,10 @@ struct WaterRecord: Identifiable, Codable, Equatable, Hashable {
 // MARK: - CupType 杯型
 
 enum CupType: String, CaseIterable, Codable {
-    case small  = "小杯"
-    case medium = "中杯"
-    case large  = "大杯"
-    case bottle = "水瓶"
+    case small  = "Small Cup"
+    case medium = "Medium Cup"
+    case large  = "Large Cup"
+    case bottle = "Bottle"
 
     var icon: String {
         switch self {
@@ -70,6 +70,16 @@ enum CupType: String, CaseIterable, Codable {
         case .medium: return 350
         case .large:  return 500
         case .bottle: return 750
+        }
+    }
+    
+    /// 本地化的名称
+    var localizedName: String {
+        switch self {
+        case .small:  return NSLocalizedString("小杯", comment: "Small cup")
+        case .medium: return NSLocalizedString("中杯", comment: "Medium cup")
+        case .large:  return NSLocalizedString("大杯", comment: "Large cup")
+        case .bottle: return NSLocalizedString("水瓶", comment: "Bottle")
         }
     }
 }

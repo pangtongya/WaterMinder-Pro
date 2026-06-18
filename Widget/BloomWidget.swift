@@ -5,6 +5,20 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Widget 本地化字符串
+
+enum WidgetL {
+    static let plantHealth = NSLocalizedString("Plant Health", comment: "Widget plant health label")
+    static let status = NSLocalizedString("Status", comment: "Widget status label")
+    static let updatedAt = NSLocalizedString("Updated at", comment: "Widget updated at")
+    static let pauseCare = NSLocalizedString("Paused", comment: "Widget pause label")
+    static let pauseCareFull = NSLocalizedString("Pause Care", comment: "Widget full pause label")
+    static let ml = NSLocalizedString("ml", comment: "Milliliters abbreviation")
+    static let bloomWidgetName = NSLocalizedString("Bloom Progress", comment: "Widget name")
+    static let bloomWidgetDesc = NSLocalizedString("View your hydration progress and plant status", comment: "Widget description")
+    static let noData = NSLocalizedString("No Data", comment: "No data available")
+}
+
 // MARK: - Widget 数据模型
 
 struct WidgetData: Codable {
@@ -26,7 +40,7 @@ struct WidgetData: Codable {
         switch plantHealth {
         case 80...100: return "🌿"
         case 60..<80: return "🌱"
-        case 40..<60: return "��"
+        case 40..<60: return "🌾"
         case 20..<40: return "😟"
         default: return "🥀"
         }
@@ -49,9 +63,9 @@ struct Provider: TimelineProvider {
             data: WidgetData(
                 currentIntake: 1500,
                 dailyGoal: 2000,
-                plantName: "小绿",
+                plantName: "Plant",
                 plantHealth: 75.0,
-                plantStage: "成长期",
+                plantStage: "Growing",
                 plantSymbol: "🌱",
                 isPaused: false,
                 lastUpdated: Date()
@@ -77,26 +91,26 @@ struct Provider: TimelineProvider {
     
     private func loadWidgetData() -> WidgetData {
         // 从共享 App Group 读取数据
-        guard let defaults = UserDefaults(suiteName: "group.com.pangtong.bloom") else {
+        guard let defaults = UserDefaults(suiteName: AppConstants.appGroupIdentifier) else {
             return WidgetData(
                 currentIntake: 0,
                 dailyGoal: 2000,
                 plantName: "Bloom",
                 plantHealth: 50.0,
-                plantStage: "种子",
+                plantStage: "Seed",
                 plantSymbol: "🌰",
                 isPaused: false,
                 lastUpdated: Date()
             )
         }
         
-        let currentIntake = defaults.integer(forKey: "widget.todayIntake")
-        let dailyGoal = defaults.integer(forKey: "widget.dailyGoal")
-        let plantName = defaults.string(forKey: "widget.plantName") ?? "小绿"
-        let plantHealth = defaults.double(forKey: "widget.plantHealth")
-        let plantStage = defaults.string(forKey: "widget.plantStage") ?? "种子"
-        let plantSymbol = defaults.string(forKey: "widget.plantSymbol") ?? "🌰"
-        let isPaused = defaults.bool(forKey: "widget.isPaused")
+        let currentIntake = defaults.integer(forKey: AppConstants.WidgetKeys.todayIntake)
+        let dailyGoal = defaults.integer(forKey: AppConstants.WidgetKeys.dailyGoal)
+        let plantName = defaults.string(forKey: AppConstants.WidgetKeys.plantName) ?? "Plant"
+        let plantHealth = defaults.double(forKey: AppConstants.WidgetKeys.plantHealth)
+        let plantStage = defaults.string(forKey: AppConstants.WidgetKeys.plantStage) ?? "Seed"
+        let plantSymbol = defaults.string(forKey: AppConstants.WidgetKeys.plantSymbol) ?? "🌰"
+        let isPaused = defaults.bool(forKey: AppConstants.WidgetKeys.isPaused)
         
         return WidgetData(
             currentIntake: currentIntake,
@@ -220,7 +234,7 @@ struct MediumWidgetView: View {
                 }
                 
                 if data.isPaused {
-                    Label("暂停养护", systemImage: "pause.circle.fill")
+                    Label(WidgetL.pauseCareFull, systemImage: "pause.circle.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.orange)
                 }
@@ -260,7 +274,7 @@ struct MediumWidgetView: View {
                 VStack(spacing: 2) {
                     Text("\(data.currentIntake)")
                         .font(.system(size: 24, weight: .bold))
-                    Text("ml")
+                    Text(WidgetL.ml)
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
@@ -291,7 +305,7 @@ struct LargeWidgetView: View {
                 }
                 Spacer()
                 if data.isPaused {
-                    Label("暂停", systemImage: "pause.circle.fill")
+                    Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
                         .font(.system(size: 13))
                         .foregroundColor(.orange)
                 }
@@ -330,7 +344,7 @@ struct LargeWidgetView: View {
             // 底部：统计信息
             HStack(spacing: 20) {
                 VStack {
-                    Text(NSLocalizedString("植物健康", comment: "Plant health"))
+                    Text(WidgetL.plantHealth)
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Text("\(Int(data.plantHealth))%")
@@ -340,7 +354,7 @@ struct LargeWidgetView: View {
                 Divider()
                 
                 VStack {
-                    Text(NSLocalizedString("状态", comment: "Status"))
+                    Text(WidgetL.status)
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Text(data.healthEmoji)
@@ -349,8 +363,7 @@ struct LargeWidgetView: View {
                 
                 Spacer()
                 
-                Text(String(format: NSLocalizedString("更新于 %@", comment: "Updated at"),
-                            DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
+                Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
@@ -368,8 +381,8 @@ struct BloomWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             BloomWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Bloom 喝水进度")
-        .description("随时查看喝水进度和植物状态")
+        .configurationDisplayName(WidgetL.bloomWidgetName)
+        .description(WidgetL.bloomWidgetDesc)
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
@@ -381,22 +394,3 @@ extension Color {
     static let bloomPrimary = Color(red: 0.25, green: 0.75, blue: 0.55)
     static let bloomGold = Color(red: 1.0, green: 0.85, blue: 0.2)
 }
-
-// MARK: - Preview (disabled - Widget previews require WidgetKit macros)
-// #Preview(as: .systemSmall) {
-//     BloomWidget()
-// } timeline: {
-//     SimpleEntry(
-//         date: Date(),
-//         data: WidgetData(
-//             currentIntake: 1500,
-//             dailyGoal: 2000,
-//             plantName: "小绿",
-//             plantHealth: 75.0,
-//             plantStage: "成长期",
-//             plantSymbol: "🌱",
-//             isPaused: false,
-//             lastUpdated: Date()
-//         )
-//     )
-// }

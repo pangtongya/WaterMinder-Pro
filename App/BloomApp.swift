@@ -60,12 +60,15 @@ struct BloomApp: App {
         // 2. 加载保存的主题
         themeManager.loadSavedTheme(isPro: userStore.isPro)
 
-        // 3. 同步 HealthKit 数据（如果有权限）
+        // 3. 请求 HealthKit 授权（仅在未决定时弹窗）
+        await healthManager.requestAuthorizationIfNeeded()
+
+        // 4. 同步 HealthKit 数据（如果有权限）
         if healthManager.isAuthorized {
             await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
         }
 
-        // 4. 标记就绪（显示 RootView）
+        // 5. 标记就绪（显示 RootView）
         isReady = true
     }
     

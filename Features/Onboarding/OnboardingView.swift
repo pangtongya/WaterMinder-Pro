@@ -80,7 +80,7 @@ struct OnboardingView: View {
 
             Spacer()
 
-            nextButton(title: demoWatered ? "开始养护" : "先浇一次水试试") {
+            nextButton(title: demoWatered ? "开始养护".localized : "先浇一次水试试".localized) {
                 if demoWatered {
                     withAnimation { step = 2 }
                 } else {
@@ -95,7 +95,7 @@ struct OnboardingView: View {
     private var demoPlant: some View {
         // 演示植物：浇水前蔫，浇水后绽放
         let demoPlant = Plant(
-            name: "小绿",
+            name: "小绿".localized,
             stage: demoWatered ? .seedling : .seed,
             health: demoWatered ? 90 : 40
         )
@@ -210,7 +210,7 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 12) {
-                nextButton(title: "开启通知") {
+                nextButton(title: "开启通知".localized) {
                     finishOnboarding(enableNotification: true)
                 }
 
@@ -238,7 +238,7 @@ struct OnboardingView: View {
         // 种下新植物（用用户起的名字和目标）
         plantEngine.plantNew(
             speciesID: PlantSpecies.sunflower.id,
-            name: plantName.isEmpty ? "小绿" : plantName
+            name: plantName.isEmpty ? "小绿".localized : plantName
         )
 
         // 通知权限

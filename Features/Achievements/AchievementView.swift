@@ -117,7 +117,7 @@ struct CategoryButton: View {
             VStack(spacing: 4) {
                 Image(systemName: categoryIcon)
                     .font(.system(size: 20))
-                Text(category.rawValue)
+                Text(category.localizedName)
                     .font(.system(size: 12, weight: .medium))
             }
             .padding(.horizontal, 16)
