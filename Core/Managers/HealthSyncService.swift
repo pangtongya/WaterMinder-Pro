@@ -30,7 +30,7 @@ final class HealthSyncService: ObservableObject {
     @Published private(set) var newRecordsCount = 0  // 本次同步新增的记录数
 
     private let healthManager = HealthManager.shared
-    private let storage = UserDefaults(suiteName: "group.com.pangtong.bloom") ?? .standard
+    private let storage = UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? .standard
 
     private init() {
         lastSyncTime = storage.object(forKey: lastSyncKey) as? Date
