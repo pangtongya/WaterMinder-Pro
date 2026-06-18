@@ -1,4 +1,3 @@
-import WidgetKit
 // PlantEngine.swift
 // ⭐ 植物生命引擎 —— 整个 app 的心脏
 //
@@ -28,6 +27,19 @@ final class PlantEngine: ObservableObject {
 
     init() {
         plant = storage.load(Plant.self, filename: filename) ?? Plant()
+
+        // 监听后台任务触发的离线衰减
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOfflineDecayNotification(_:)),
+            name: .applyOfflineDecay,
+            object: nil
+        )
+    }
+
+    @objc private func handleOfflineDecayNotification(_ notification: Notification) {
+        guard let hours = notification.userInfo?["hours"] as? Int else { return }
+        applyOfflineDecay(hours: hours)
     }
 
     /// 今天是否已发放达标奖励（对比存储的日期是否为今天）

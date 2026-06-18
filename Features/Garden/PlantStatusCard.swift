@@ -178,10 +178,3 @@ struct PlantStatusCard: View {
         }
     }
 }
-
-// // #Preview {
-//     PlantStatusCard()
-//         .environmentObject(PlantEngine())
-//         .environmentObject(WaterStore())
-//         .padding()
-// }

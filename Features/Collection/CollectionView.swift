@@ -175,11 +175,3 @@ struct CollectionView: View {
         }
     }
 }
-
-// // #Preview {
-//     NavigationStack {
-//         CollectionView()
-//             .environmentObject(GardenStore())
-//             .environmentObject(PlantEngine())
-//             .environmentObject(StoreManager.shared)
-//     }

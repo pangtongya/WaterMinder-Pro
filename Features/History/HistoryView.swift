@@ -288,13 +288,3 @@ struct HistoryView: View {
         }
     }
 }
-
-// #Preview {
-//     NavigationStack {
-//         HistoryView()
-//             .environmentObject(WaterStore())
-//             .environmentObject(UserStore())
-//             .environmentObject(StoreManager.shared)
-//             .environmentObject(PlantEngine())
-//     }
-// }

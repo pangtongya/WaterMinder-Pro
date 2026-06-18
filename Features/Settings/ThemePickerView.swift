@@ -183,10 +183,3 @@ struct ThemeCard: View {
         .disabled(isLocked)
     }
 }
-
-// #Preview {
-//     NavigationStack {
-//         ThemePickerView()
-//             .environmentObject(UserStore())
-//     }
-// }

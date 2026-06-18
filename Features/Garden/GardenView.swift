@@ -481,17 +481,6 @@ private struct WaterDrop: Identifiable {
     var opacity: Double
 }
 
-// // #Preview {
-//     NavigationStack {
-//         GardenView()
-//             .environmentObject(UserStore())
-//             .environmentObject(PlantEngine())
-//             .environmentObject(WaterStore())
-//             .environmentObject(GardenStore())
-//             .environmentObject(HealthManager.shared)
-//             .environmentObject(UserStore())
-//     }
-
 // MARK: - Image Picker for Sharing
 
 struct ImagePicker: UIViewControllerRepresentable {

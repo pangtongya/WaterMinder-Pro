@@ -140,9 +140,3 @@ struct SyncToastView: View {
         }
     }
 }
-
-// MARK: - Preview
-
-// #Preview("Success") {
-//     SyncToastView(state: .success(Date())) { }
-// }

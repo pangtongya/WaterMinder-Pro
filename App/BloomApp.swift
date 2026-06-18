@@ -21,7 +21,13 @@ struct BloomApp: App {
     @StateObject private var healthSyncService = HealthSyncService.shared
     
     @State private var isReady = false
-
+    @Environment(\.scenePhase) private var scenePhase
+    
+    init() {
+        // 注册后台任务（尽早注册）
+        BackgroundTaskManager.shared.registerBackgroundTasks()
+    }
+    
     var body: some Scene {
         WindowGroup {
             Group {
@@ -44,9 +50,17 @@ struct BloomApp: App {
             .environmentObject(themeManager)
             .environmentObject(healthSyncService)
             .preferredColorScheme(userStore.colorScheme)
+            .environment(\.scenePhase, scenePhase)
             .task {
                 // 异步完成所有初始化
                 await initializeApp()
+            }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .background {
+                    // App 进入后台时调度后台任务
+                    BackgroundTaskManager.shared.scheduleHealthDecayTask()
+                    BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
+                }
             }
         }
     }

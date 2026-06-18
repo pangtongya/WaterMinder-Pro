@@ -722,17 +722,3 @@ extension Date {
         return formatter.localizedString(for: self, relativeTo: Date())
     }
 }
-
-// #Preview {
-//     NavigationStack {
-//         SettingsView()
-//             .environmentObject(UserStore())
-//             .environmentObject(PlantEngine())
-//             .environmentObject(GardenStore())
-//             .environmentObject(WaterStore())
-//             .environmentObject(NotificationManager.shared)
-//             .environmentObject(HealthManager.shared)
-//             .environmentObject(StoreManager.shared)
-//             .environmentObject(CloudSyncManager.shared)
-//     }
-// }

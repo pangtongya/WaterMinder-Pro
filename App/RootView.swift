@@ -97,12 +97,3 @@ struct RootView: View {
         }
     }
 }
-
-// // #Preview {
-//     RootView()
-//         .environmentObject(UserStore())
-//         .environmentObject(PlantEngine())
-//         .environmentObject(WaterStore())
-//         .environmentObject(GardenStore())
-//         .environmentObject(CloudSyncManager.shared)
-// }

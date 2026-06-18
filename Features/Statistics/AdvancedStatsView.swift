@@ -790,10 +790,3 @@ struct StatCard: View {
         .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
 }
-
-// // #Preview {
-//     NavigationStack {
-//         AdvancedStatsView()
-//             .environmentObject(WaterStore())
-//             .environmentObject(UserStore())
-//     }

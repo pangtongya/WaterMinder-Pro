@@ -275,10 +275,3 @@ struct OnboardingView: View {
         }
     }
 }
-
-// // #Preview {
-//     OnboardingView()
-//         .environmentObject(UserStore())
-//         .environmentObject(PlantEngine())
-//         .environmentObject(NotificationManager.shared)
-// }
