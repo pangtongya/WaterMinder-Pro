@@ -48,11 +48,12 @@ enum PlantLifecycle {
         guard !plant.isPaused else {
             return plant
         }
-        
+
         var p = plant
         p.health = HealthCalculator.applyDailyDecay(
             currentHealth: p.health,
-            missedDays: consecutiveMissedDays
+            consecutiveMissedDays: consecutiveMissedDays,
+            plantedAt: p.plantedAt
         )
         return p
     }

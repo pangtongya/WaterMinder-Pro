@@ -73,6 +73,11 @@ final class PlantEngine: ObservableObject {
 
     /// 检查自上次结算以来断水的天数，应用衰减
     func processOverdueDays() {
+        // 自动恢复：暂停超过14天 → 自动解除暂停
+        if plant.isPauseExpired {
+            resumeCare()
+        }
+
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let lastActive = lastActiveDay
@@ -86,6 +91,7 @@ final class PlantEngine: ObservableObject {
         let gap = cal.dateComponents([.day], from: lastActive, to: today).day ?? 0
         if gap > 0 {
             // gap 天未达标（每一天都算断水）
+            // 暂停养护期间 PlantLifecycle.applyDailyDecay 已跳过，这里不再检查
             plant = PlantLifecycle.applyDailyDecay(plant, consecutiveMissedDays: gap)
 
             // 健康度归零 → 枯萎重置
