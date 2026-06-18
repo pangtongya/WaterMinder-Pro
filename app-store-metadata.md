@@ -207,7 +207,7 @@ Free (with In-App Purchases)
 **None** - We don't collect anonymous data either
 
 ### Privacy Policy URL
-`https://your-website.com/privacy-policy.html` (host the privacy-policy.html file)
+`https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html` (host the privacy-policy.html file)
 
 ---
 
@@ -293,10 +293,10 @@ Test credentials: Not required
 ## 📞 Support Information
 
 ### Support URL
-`https://your-website.com/support`
+`https://pangtongya.github.io/WaterMinder-Pro/support`
 
 ### Marketing URL (optional)
-`https://your-website.com/bloom`
+`https://pangtongya.github.io/WaterMinder-Pro`
 
 ### Contact Email
 `support@yourcompany.com`

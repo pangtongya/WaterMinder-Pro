@@ -382,22 +382,21 @@ extension Color {
     static let bloomGold = Color(red: 1.0, green: 0.85, blue: 0.2)
 }
 
-// MARK: - Preview
-
-// // #Preview(as: .systemSmall) {
+// MARK: - Preview (disabled - Widget previews require WidgetKit macros)
+// #Preview(as: .systemSmall) {
 //     BloomWidget()
 // } timeline: {
-    SimpleEntry(
-        date: Date(),
-        data: WidgetData(
-            currentIntake: 1500,
-            dailyGoal: 2000,
-            plantName: "小绿",
-            plantHealth: 75.0,
-            plantStage: "成长期",
-            plantSymbol: "🌱",
-            isPaused: false,
-            lastUpdated: Date()
-        )
-    )
-}
+//     SimpleEntry(
+//         date: Date(),
+//         data: WidgetData(
+//             currentIntake: 1500,
+//             dailyGoal: 2000,
+//             plantName: "小绿",
+//             plantHealth: 75.0,
+//             plantStage: "成长期",
+//             plantSymbol: "🌱",
+//             isPaused: false,
+//             lastUpdated: Date()
+//         )
+//     )
+// }

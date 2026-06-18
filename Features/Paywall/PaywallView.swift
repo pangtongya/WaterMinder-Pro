@@ -131,6 +131,12 @@ struct PaywallView: View {
         }
     }
 
+    private func openURL(_ urlString: String) {
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
+
     // MARK: - 商品列表
 
     private var productsList: some View {
@@ -163,6 +169,23 @@ struct PaywallView: View {
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+
+            // 服务条款 & 隐私政策
+            HStack(spacing: 4) {
+                Button("服务条款") {
+                    openURL("https://your-website.com/terms.html")
+                }
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+                Text("·")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                Button("隐私政策") {
+                    openURL("https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html")
+                }
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+            }
         }
     }
 

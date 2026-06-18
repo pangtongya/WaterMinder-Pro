@@ -9,3 +9,6 @@
 /* HealthKit 权限 */
 "NSHealthShareUsageDescription" = "读取健康 App 的饮水数据，帮你更好地照顾植物。";
 "NSHealthUpdateUsageDescription" = "把每次喝水量写入健康 App，让你的健康记录更完整。";
+
+/* 通知权限 */
+"NSUserNotificationUsageDescription" = "水滴花园会发送友善的提醒，帮助你全天保持规律喝水，让你的植物茁壮成长。";

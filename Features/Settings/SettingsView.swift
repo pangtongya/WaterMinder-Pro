@@ -25,6 +25,8 @@ struct SettingsView: View {
     @State private var showFilePicker = false
     @State private var showRestoreSuccess = false
     @State private var showRestoreError = false
+    @State private var showBackupSuccess = false
+    @State private var showBackupError = false
     @State private var errorMessage = ""
     @State private var exportedFileURL: URL?
     @State private var showExportSheet = false
@@ -143,12 +145,12 @@ struct SettingsView: View {
                 }
             }
         }
-        .alert("恢复成功".localized, isPresented: $showRestoreSuccess) {
+        .alert("恢复成功".localized, isPresented: $showBackupSuccess) {
             Button("好的", role: .cancel) {}
         } message: {
             Text("数据已成功恢复".localized)
         }
-        .alert("恢复失败".localized, isPresented: $showRestoreError) {
+        .alert("恢复失败".localized, isPresented: $showBackupError) {
             Button("好的", role: .cancel) {}
         } message: {
             Text(errorMessage)
@@ -642,12 +644,32 @@ struct SettingsView: View {
                     ProgressView()
                 }
             }
+            Button {
+                openURL("https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html")
+            } label: {
+                HStack {
+                    Image(systemName: "hand.raised.fill")
+                        .foregroundStyle(.blue)
+                    Text("隐私政策".localized)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
         } header: {
             Text("关于".localized)
         }
     }
 
     // MARK: - 工具
+
+    private func openURL(_ urlString: String) {
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
 
     private func restoreBackup(from fileURL: URL) async {
         do {
@@ -662,12 +684,12 @@ struct SettingsView: View {
                 merge: true
             )
             await MainActor.run {
-                showRestoreSuccess = true
+                showBackupSuccess = true
             }
         } catch {
             await MainActor.run {
                 errorMessage = error.localizedDescription
-                showRestoreError = true
+                showBackupError = true
             }
         }
     }
