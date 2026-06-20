@@ -7,71 +7,149 @@ struct HarvestView: View {
     let plant: Plant
     let onHarvest: () -> Void
     @Environment(\.dismiss) var dismiss
+    @State private var showCelebration = false
+    @State private var plantScale: CGFloat = 0.8
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
+            ZStack {
+                // 背景渐变
+                LinearGradient(
+                    colors: [
+                        Color.bloomPrimary.opacity(0.05),
+                        Color(.systemBackground)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 
-                // 庆祝图标
-                Text("🎉")
-                    .font(.system(size: 80))
-                
-                // 标题
-                Text(String(format: NSLocalizedString("%@ 已成熟！", comment: ""), plant.name))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                
-                // 植物信息
-                VStack(spacing: 12) {
-                    HStack {
-                        Text(NSLocalizedString("阶段:", comment: "Stage:"))
-                            .foregroundColor(.secondary)
-                        Text(plant.stage.name)
-                            .fontWeight(.semibold)
-                    }
-                    
-                    HStack {
-                        Text(L.health)
-                            .foregroundColor(.secondary)
-                        Text("\(Int(plant.health))%")
-                            .fontWeight(.semibold)
-                    }
-                    
-                    HStack {
-                        Text(NSLocalizedString("天数:", comment: "Days:"))
-                            .foregroundColor(.secondary)
-                        Text(String(format: NSLocalizedString("%d 天", comment: ""), plant.ageInDays))
-                            .fontWeight(.semibold)
-                    }
+                // 庆祝粒子动画
+                if showCelebration {
+                    CelebrationParticles()
                 }
-                .font(.system(size: 16))
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(12)
                 
-                Text(String(format: NSLocalizedString("恭喜！你的植物已经成长到 %@ 阶段", comment: ""), plant.stage.name))
+                VStack(spacing: 20) {
+                    Spacer()
+                    
+                    // 真实植物视觉（替代 emoji）
+                    AnimatedPlantView(plant: plant)
+                        .frame(height: 220)
+                        .scaleEffect(plantScale)
+                        .animation(.spring(response: 0.8, dampingFraction: 0.6).delay(0.2), value: plantScale)
+                    
+                    // 标题
+                    VStack(spacing: 6) {
+                        Text(String(format: NSLocalizedString("%@ 已成熟！", comment: ""), plant.name))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text(String(format: NSLocalizedString("恭喜！你的植物已经成长到 %@ 阶段", comment: ""), plant.stage.name))
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    }
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
                     .padding(.horizontal)
-                
-                Spacer()
-                
-                // 收获按钮
-                Button(NSLocalizedString("收获并保存到收藏", comment: "Harvest and save")) {
-                    onHarvest()
-                    dismiss()
+                    
+                    // 植物信息卡片
+                    VStack(spacing: 12) {
+                        infoRow(label: NSLocalizedString("品种", comment: "Species"), value: plant.species.localizedName)
+                        Divider()
+                        infoRow(label: NSLocalizedString("阶段", comment: "Stage"), value: plant.stage.name)
+                        Divider()
+                        infoRow(label: L.health, value: "\(Int(plant.health))%")
+                        Divider()
+                        infoRow(label: NSLocalizedString("养护天数", comment: "Days cared"), value: String(format: NSLocalizedString("%d 天", comment: ""), plant.ageInDays))
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color(.secondarySystemBackground))
+                    )
+                    .padding(.horizontal, 20)
+                    
+                    Spacer()
+                    
+                    // 收获按钮
+                    Button {
+                        onHarvest()
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text(NSLocalizedString("收获并保存到收藏", comment: "Harvest and save"))
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.bloomPrimary, Color.bloomDeep],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .shadow(color: Color.bloomPrimary.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.bloomPrimary)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal)
-                .padding(.bottom, 40)
+                .navigationTitle(NSLocalizedString("收获植物", comment: "Harvest plant"))
+                .navigationBarTitleDisplayMode(.inline)
             }
-            .padding()
-            .navigationTitle(NSLocalizedString("收获植物", comment: "Harvest plant"))
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .onAppear {
+            plantScale = 1.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showCelebration = true
+            }
+        }
+    }
+    
+    private func infoRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .foregroundColor(.secondary)
+                .font(.system(size: 15))
+            Spacer()
+            Text(value)
+                .fontWeight(.semibold)
+                .font(.system(size: 15))
+        }
+    }
+}
+
+// MARK: - 庆祝粒子动画
+
+struct CelebrationParticles: View {
+    @State private var animate = false
+    
+    var body: some View {
+        GeometryReader { geo in
+            ForEach(0..<20, id: \.self) { i in
+                Circle()
+                    .fill(particleColor(i))
+                    .frame(width: CGFloat.random(in: 6...12), height: CGFloat.random(in: 6...12))
+                    .position(
+                        x: CGFloat.random(in: 0...geo.size.width),
+                        y: animate ? CGFloat.random(in: -50...200) : geo.size.height + 50
+                    )
+                    .opacity(animate ? 0 : 1)
+                    .animation(
+                        Animation.easeOut(duration: Double.random(in: 1.5...2.5))
+                            .repeatForever(autoreverses: false)
+                            .delay(Double(i) * 0.1),
+                        value: animate
+                    )
+            }
+        }
+        .onAppear { animate = true }
+    }
+    
+    private func particleColor(_ index: Int) -> Color {
+        let colors: [Color] = [.bloomPrimary, .bloomGold, .bloomSuccess, .pink, .orange, .yellow]
+        return colors[index % colors.count].opacity(Double.random(in: 0.6...0.9))
     }
 }

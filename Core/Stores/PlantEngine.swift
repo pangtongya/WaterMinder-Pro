@@ -84,12 +84,11 @@ final class PlantEngine: ObservableObject {
     }
 
     /// 统一删除记录入口（由 TodayRecordsCard 的滑动删除调用）
-    /// 整合了：删除记录、回退植物成长、同步 Widget/HealthKit
+    /// 整合了：回退植物成长、删除记录、同步 Widget/HealthKit（有失败提示）
     func deleteRecord(_ record: WaterRecord, waterStore: WaterStore, healthManager: HealthManager) async {
         let amount = record.amount
-        waterStore.delete(record)
 
-        // 回退植物的成长量（健康度与生长阶段）
+        // 1. 先回退植物状态（先改变植物，再删除记录）
         let beforeStage = plant.stage
         plant = PlantLifecycle.revertWatering(plant, amount: amount)
         persist()
@@ -100,10 +99,16 @@ final class PlantEngine: ObservableObject {
             lastStageUpCelebration = nil
         }
 
-        // 同步删除 HealthKit 样本（如果存在）
+        // 2. 再删除本地水记录（WaterStore 内部会触发 Widget 更新）
+        waterStore.delete(record)
+
+        // 3. 同步删除 HealthKit 样本（如果存在）
         if let uuid = record.hkSampleUUID, healthManager.isAuthorized {
             await healthManager.deleteWater(sampleUUID: uuid)
         }
+
+        // 4. 植物状态变化后显式通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     /// 今日达标时调用（由 UI 层根据 WaterStore.isGoalMetToday 驱动）
