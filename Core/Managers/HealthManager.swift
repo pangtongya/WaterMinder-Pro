@@ -60,6 +60,33 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         try await store.save(sample)
     }
 
+    /// 从 HealthKit 删除一条喝水样本（当用户在 App 内删除记录时反向同步）
+    func deleteWater(sampleUUID: UUID) async {
+        guard let type = waterType, let store else { return }
+        // 使用传统 HKSampleQuery + withCheckedContinuation 实现异步删除
+        await withCheckedContinuation { cont in
+            let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                HKQuery.predicateForObjects(with: [sampleUUID]),
+                HKQuery.predicateForSamples(withStart: Date.distantPast, end: Date(), options: [])
+            ])
+            let query = HKSampleQuery(
+                sampleType: type,
+                predicate: predicate,
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                if let samples = samples, !samples.isEmpty {
+                    store.delete(samples) { _, _ in
+                        cont.resume()
+                    }
+                } else {
+                    cont.resume()
+                }
+            }
+            store.execute(query)
+        }
+    }
+
     // MARK: - 读取喝水记录（用于双向同步）
 
     /// 从 Health App 读取指定时间范围内的喝水记录

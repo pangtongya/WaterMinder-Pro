@@ -266,7 +266,7 @@ struct GardenView: View {
             await plantEngine.waterPlant(cup: cup, waterStore: waterStore, healthManager: healthManager)
             // 水滴动画 + 触觉（UI 相关，仍在 View 层）
             splashTrigger += 1
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            Haptics.waterDrop()
         }
     }
 
@@ -282,6 +282,9 @@ struct GardenView: View {
 struct TodayRecordsCard: View {
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var plantEngine: PlantEngine
+    @EnvironmentObject var healthManager: HealthManager
+    @State private var recordToDelete: WaterRecord?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -321,6 +324,19 @@ struct TodayRecordsCard: View {
         .padding(18)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .alert(NSLocalizedString("删除这条记录？", comment: "Delete this record?"), isPresented: $showDeleteConfirm) {
+            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("删除", comment: "Delete"), role: .destructive) {
+                if let record = recordToDelete {
+                    Task {
+                        await plantEngine.deleteRecord(record, waterStore: waterStore, healthManager: healthManager)
+                    }
+                    Haptics.light()
+                }
+            }
+        } message: {
+            Text(NSLocalizedString("删除后将同步更新植物状态", comment: "Will update plant state after deletion"))
+        }
     }
 
     private func recordRow(_ record: WaterRecord) -> some View {
@@ -342,6 +358,14 @@ struct TodayRecordsCard: View {
                 .foregroundStyle(Color.bloomWater)
         }
         .padding(.vertical, 8)
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                recordToDelete = record
+                showDeleteConfirm = true
+            } label: {
+                Label(NSLocalizedString("删除", comment: "Delete"), systemImage: "trash")
+            }
+        }
     }
 }
 

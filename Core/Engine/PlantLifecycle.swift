@@ -21,6 +21,22 @@ enum PlantLifecycle {
         return advanceStageIfPossible(p)
     }
 
+    /// 用户删除了一条喝水记录，回退植物状态
+    /// - 减少对应健康度与成长值，不触发阶段升级（可能降级）
+    static func revertWatering(_ plant: Plant, amount: Int) -> Plant {
+        var p = plant
+        // 健康度回退（下限 0）
+        p.health = max(0, p.health - HealthCalculator.healthFromWater(amount: amount))
+        // 成长值回退（下限 0）
+        p.growthPoints = max(0, p.growthPoints - GrowthRules.growthFromWater(amount: amount))
+        // 根据当前成长值重新判断阶段（可能降级）
+        let targetStage = GrowthRules.stageFor(growthPoints: p.growthPoints)
+        if targetStage.rawValue < p.stage.rawValue {
+            p.stage = targetStage
+        }
+        return p
+    }
+
     // MARK: - 当天达标结算
 
     /// 当天饮水达标时，给予额外奖励

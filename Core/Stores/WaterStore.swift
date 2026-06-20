@@ -79,6 +79,8 @@ final class WaterStore: ObservableObject {
 
     func delete(_ record: WaterRecord) {
         records.removeAll { $0.id == record.id }
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()
     }
