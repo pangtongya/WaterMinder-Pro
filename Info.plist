@@ -61,6 +61,13 @@
 	</array>
 	<key>NSUbiquitousContainerName</key>
 	<string>iCloud.com.pangtong.bloom</string>
+	<key>MinimumOSVersion</key>
+	<string>17.0</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>

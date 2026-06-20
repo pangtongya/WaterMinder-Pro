@@ -173,7 +173,7 @@ struct PaywallView: View {
             // 服务条款 & 隐私政策
             HStack(spacing: 4) {
                 Button("Terms of Service".localized) {
-                    openURL("https://pangtongya.github.io/Bloom-Website/terms.html")
+                    openURL(AppConstants.URLs.termsOfService)
                 }
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
@@ -181,7 +181,7 @@ struct PaywallView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
                 Button("Privacy Policy".localized) {
-                    openURL("https://pangtongya.github.io/Bloom-Website/privacy-policy.html")
+                    openURL(AppConstants.URLs.privacyPolicy)
                 }
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)

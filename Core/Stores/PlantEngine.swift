@@ -170,8 +170,7 @@ final class PlantEngine: ObservableObject {
     /// 离线期间应用衰减（后台任务或 App 启动时调用）
     func applyOfflineDecay(hours: Int) {
         guard hours > 0 else { return }
-        let decayPerHour = 2.0
-        let totalDecay = min(plant.health, Double(hours) * decayPerHour)
+        let totalDecay = min(plant.health, Double(hours) * AppConstants.Decay.healthPerHour)
         plant.health -= totalDecay
         if plant.health <= 0 {
             plant = PlantLifecycle.wilt(plant)

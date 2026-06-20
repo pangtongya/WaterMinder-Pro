@@ -43,9 +43,13 @@ final class BackgroundTaskManager {
 
         do {
             try BGTaskScheduler.shared.submit(request)
+            #if DEBUG
             print("[BackgroundTask] 健康衰减任务已调度")
+            #endif
         } catch {
+            #if DEBUG
             print("[BackgroundTask] 调度健康衰减任务失败: \(error)")
+            #endif
         }
     }
 
@@ -58,7 +62,9 @@ final class BackgroundTaskManager {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
+            #if DEBUG
             print("[BackgroundTask] 调度Widget刷新任务失败: \(error)")
+            #endif
         }
     }
 

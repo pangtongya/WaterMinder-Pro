@@ -29,7 +29,9 @@ final class WidgetDataManager {
         isPaused: Bool
     ) {
         guard let defaults = defaults else {
+            #if DEBUG
             print("[WidgetDataManager] App Group not available")
+            #endif
             return
         }
         

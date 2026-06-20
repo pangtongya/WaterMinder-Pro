@@ -78,11 +78,13 @@ final class WaterStore: ObservableObject {
     }
 
     func delete(_ record: WaterRecord) {
-        records.removeAll { $0.id == record.id }
-        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
-        persist()
-        triggerSync()
+        if let idx = records.firstIndex(where: { $0.id == record.id }) {
+            records.remove(at: idx)
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+            WidgetCenter.shared.reloadAllTimelines()
+            persist()
+            triggerSync()
+        }
     }
 
     func deleteAll() {
@@ -307,11 +309,13 @@ final class WaterStore: ObservableObject {
         let archiveFilename = "water_records_archive_\(Int(cutoff.timeIntervalSince1970)).json"
         storage.save(oldRecords, filename: archiveFilename)
 
-        // 从内存中移除旧记录
-        records.removeAll { $0.createdAt < cutoff }
+        // 从内存中移除旧记录（保留需保留的，时间复杂度 O(n)）
+        records.removeAll(where: { $0.createdAt < cutoff })
         persist()
 
+        #if DEBUG
         print("[WaterStore] 归档了 \(oldRecords.count) 条旧记录到 \(archiveFilename)")
+        #endif
         return oldRecords.count
     }
 

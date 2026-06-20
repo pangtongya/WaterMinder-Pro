@@ -9,18 +9,20 @@ import Combine
 struct BloomApp: App {
     // 关键 store：立即加载（决定显示引导还是主界面）
     @StateObject private var userStore = UserStore()
-    
+
     // 其他 store：在 .task 中异步初始化
     @StateObject private var waterStore = WaterStore()
     @StateObject private var plantEngine = PlantEngine()
     @StateObject private var gardenStore = GardenStore()
     @StateObject private var achievementStore = AchievementStore()
-    @StateObject private var storeManager = StoreManager.shared
-    @StateObject private var notificationManager = NotificationManager.shared
-    @StateObject private var healthManager = HealthManager.shared
-    @StateObject private var cloudSyncManager = CloudSyncManager.shared
-    @StateObject private var themeManager = ThemeManager.shared
-    @StateObject private var healthSyncService = HealthSyncService.shared
+
+    // 单例 manager：用 @ObservedObject 避免 SwiftUI 错误地假设拥有它们
+    @ObservedObject private var storeManager = StoreManager.shared
+    @ObservedObject private var notificationManager = NotificationManager.shared
+    @ObservedObject private var healthManager = HealthManager.shared
+    @ObservedObject private var cloudSyncManager = CloudSyncManager.shared
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @ObservedObject private var healthSyncService = HealthSyncService.shared
     
     @State private var isReady = false
     @Environment(\.scenePhase) private var scenePhase

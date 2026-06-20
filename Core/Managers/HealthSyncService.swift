@@ -104,7 +104,9 @@ final class HealthSyncService: ObservableObject {
 
         } catch {
             lastSyncError = String(format: NSLocalizedString("同步失败：%@", comment: ""), error.localizedDescription)
+            #if DEBUG
             print("[HealthSync] Sync failed: \(error)")
+            #endif
         }
     }
 

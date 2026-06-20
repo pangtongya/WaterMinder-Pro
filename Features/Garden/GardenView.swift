@@ -40,11 +40,14 @@ struct GardenView: View {
                 PlantStatusCard()
                     .padding(.horizontal, 20)
 
-                // 3. 收获按钮（成熟时显示）
-                if plantEngine.plant.canHarvest {
-                    harvestButton
-                        .padding(.horizontal, 20)
-                }
+                // 3. 收获按钮（成熟时显示）或即将成熟提示
+            if plantEngine.plant.canHarvest {
+                harvestButton
+                    .padding(.horizontal, 20)
+            } else {
+                harvestHint
+                    .padding(.horizontal, 20)
+            }
 
                 // 4. 快速记录
                 QuickRecordBar()
@@ -228,6 +231,40 @@ struct GardenView: View {
         }
     }
 
+    /// 植物尚未成熟时的提示
+    private var harvestHint: some View {
+        let stage = plantEngine.plant.stage
+        let growthPoints = plantEngine.plant.growthPoints
+        let next = GrowthRules.nextStage(after: stage)
+        let remaining = GrowthRules.pointsToNextStage(currentStage: stage, growthPoints: growthPoints)
+
+        return HStack(spacing: 10) {
+            Image(systemName: "leaf.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.bloomPrimary.opacity(0.8))
+            VStack(alignment: .leading, spacing: 2) {
+                if let nextStage = next {
+                    Text(String(format: NSLocalizedString("再浇点水就能到「%@」", comment: "Hint text for next stage"), nextStage.name))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary.opacity(0.8))
+                    if let pts = remaining, pts > 0 {
+                        Text(String(format: NSLocalizedString("距离下一阶段还差约 %d 点成长值", comment: "Remaining growth points"), Int(pts)))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text(NSLocalizedString("植物正在健康成长中", comment: "Plant growing healthily hint"))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary.opacity(0.8))
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.bloomPrimary.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
 
     // MARK: - 分享
 

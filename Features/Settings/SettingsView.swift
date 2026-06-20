@@ -645,7 +645,7 @@ struct SettingsView: View {
                 }
             }
             Button {
-                openURL("https://pangtongya.github.io/Bloom-Website/privacy-policy.html")
+                openURL(AppConstants.URLs.privacyPolicy)
             } label: {
                 HStack {
                     Image(systemName: "hand.raised.fill")

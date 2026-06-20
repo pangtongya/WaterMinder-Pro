@@ -93,7 +93,9 @@ final class CloudSyncManager: ObservableObject {
                     isSyncAvailable = (status == .available)
                 }
             } catch {
+                #if DEBUG
                 print("[CloudSync] 账号状态检查失败: \(error)")
+                #endif
                 await MainActor.run {
                     isSyncAvailable = false
                 }
@@ -128,7 +130,9 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastError = "同步失败: \(error.localizedDescription)"
                 showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步喝水记录失败: \(error)")
+                #endif
             }
         }
 
@@ -157,7 +161,9 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastError = "同步植物失败: \(error.localizedDescription)"
                 showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步植物失败: \(error)")
+                #endif
             }
         }
 
@@ -189,7 +195,9 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastError = "同步花园失败: \(error.localizedDescription)"
                 showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步花园失败: \(error)")
+                #endif
             }
         }
 
@@ -199,7 +207,9 @@ final class CloudSyncManager: ObservableObject {
     /// 同步用户配置
     func syncUserProfile(_ profile: UserProfile) async {
         guard isSyncAvailable else {
+            #if DEBUG
             print("⚠️ [CloudSync] CloudKit 不可用，跳过用户配置同步")
+            #endif
             return
         }
         guard await isSyncAllowed() else { return }
@@ -222,7 +232,9 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastError = "同步配置失败: \(error.localizedDescription)"
                 showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步配置失败: \(error)")
+                #endif
             }
         }
 
@@ -250,7 +262,9 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastError = "同步成就失败: \(error.localizedDescription)"
                 showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步成就失败: \(error)")
+                #endif
             }
         }
 
@@ -265,7 +279,9 @@ final class CloudSyncManager: ObservableObject {
         do {
             return try await fetchAllRecords(recordType: "WaterRecord")
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载喝水记录失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -277,7 +293,9 @@ final class CloudSyncManager: ObservableObject {
             let plants: [Plant] = try await fetchAllRecords(recordType: "Plant")
             return plants.first
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载植物失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -288,7 +306,9 @@ final class CloudSyncManager: ObservableObject {
         do {
             return try await fetchAllRecords(recordType: "GardenItem")
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载花园失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -300,7 +320,9 @@ final class CloudSyncManager: ObservableObject {
             let profiles: [UserProfile] = try await fetchAllRecords(recordType: "UserProfile")
             return profiles.first
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载配置失败: \(error)")
+            #endif
             return nil
         }
     }

@@ -32,12 +32,16 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         guard HKHealthStore.isHealthDataAvailable(),
               let type = waterType,
               let store else { return false }
-        do {
-            try await store.requestAuthorization(toShare: [type], read: [type])
-            return isAuthorized
-        } catch {
-            print("[Health] 授权失败: \(error)")
-            return false
+        // 使用 withCheckedContinuation 兼容低版本 iOS，避免某些 iOS 版本上崩溃
+        return await withCheckedContinuation { cont in
+            store.requestAuthorization(toShare: [type], read: [type]) { success, error in
+                if let error {
+                    #if DEBUG
+                    print("[Health] 授权失败: \(error)")
+                    #endif
+                }
+                cont.resume(returning: success)
+            }
         }
     }
 
@@ -57,18 +61,24 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         guard let type = waterType, let store else { return }
         let quantity = HKQuantity(unit: .liter(), doubleValue: Double(amountML) / 1000.0)
         let sample = HKQuantitySample(type: type, quantity: quantity, start: date, end: date)
-        try await store.save(sample)
+        // 使用 withCheckedThrowingContinuation 兼容所有 iOS 17+ 版本
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+            store.save(sample) { _, error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume()
+                }
+            }
+        }
     }
 
     /// 从 HealthKit 删除一条喝水样本（当用户在 App 内删除记录时反向同步）
     func deleteWater(sampleUUID: UUID) async {
         guard let type = waterType, let store else { return }
         // 使用传统 HKSampleQuery + withCheckedContinuation 实现异步删除
-        await withCheckedContinuation { cont in
-            let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-                HKQuery.predicateForObjects(with: [sampleUUID]),
-                HKQuery.predicateForSamples(withStart: Date.distantPast, end: Date(), options: [])
-            ])
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            let predicate = HKQuery.predicateForObjects(with: [sampleUUID])
             let query = HKSampleQuery(
                 sampleType: type,
                 predicate: predicate,
@@ -108,7 +118,7 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         )
         let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
 
-        return try await withCheckedThrowingContinuation { cont in
+        return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<[HKQuantitySample], Error>) in
             let query = HKSampleQuery(
                 sampleType: type,
                 predicate: predicate,
@@ -123,5 +133,12 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
             }
             store.execute(query)
         }
+    }
+
+    /// 调试日志：仅 DEBUG 模式输出
+    private func logDebug(_ message: String) {
+        #if DEBUG
+        print("[Health] \(message)")
+        #endif
     }
 }

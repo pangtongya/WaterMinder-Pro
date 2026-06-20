@@ -44,4 +44,18 @@ enum AppConstants {
     enum NotificationIdentifiers {
         static let waterReminder = "waterReminder"
     }
+
+    // MARK: - 衰减常量（PlantEngine 与 BackgroundTaskManager 共享）
+    enum Decay {
+        /// 每小时衰减的健康度（后台任务和 plantEngine 共享此值）
+        static let healthPerHour: Double = 2.0
+        /// 植物长期缺水（超过此小时数）视为严重脱水
+        static let criticalHoursThreshold: Double = 24
+    }
+
+    // MARK: - URL 配置（隐私政策、服务条款等）
+    enum URLs {
+        static let privacyPolicy = "https://pangtongya.github.io/Bloom-Website/privacy-policy.html"
+        static let termsOfService = "https://pangtongya.github.io/Bloom-Website/terms.html"
+    }
 }

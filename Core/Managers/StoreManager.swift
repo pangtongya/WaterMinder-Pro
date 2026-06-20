@@ -72,7 +72,9 @@ final class StoreManager: ObservableObject {
                         }
                     } catch {
                         // 单笔交易验证失败，继续监听下一条
+                        #if DEBUG
                         print("[StoreManager] 交易验证失败: \(error)")
+                        #endif
                     }
                 }
                 // AsyncSequence 结束（理论上不会发生），短暂等待后重连
@@ -101,7 +103,9 @@ final class StoreManager: ObservableObject {
             let storeProducts = try await Product.products(for: BloomProduct.allIDs)
             products = storeProducts.sorted { $0.price < $1.price }
             if products.isEmpty {
+                #if DEBUG
                 print("⚠️ [StoreManager] App Store Connect 中未配置商品")
+                #endif
             }
         } catch {
             lastError = "无法加载商品：\(error.localizedDescription)"

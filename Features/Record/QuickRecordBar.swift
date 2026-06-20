@@ -132,7 +132,7 @@ struct QuickRecordBar: View {
         }
 
         // 5. 触觉反馈
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptics.waterDrop()
 
         // 6. 成功脉冲动画（视觉反馈）
         showSuccessPulse = true
