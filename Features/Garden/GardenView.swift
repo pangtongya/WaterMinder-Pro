@@ -21,6 +21,7 @@ struct GardenView: View {
     @State private var showHarvestSheet = false
     @State private var celebrateStage: GrowthStage?
     @State private var splashTrigger: Int = 0   // 水滴动画触发器
+    @State private var plantPressing = false    // 植物按压视觉反馈
 
 
     @State private var showPauseConfirm = false
@@ -155,10 +156,18 @@ struct GardenView: View {
 
             AnimatedPlantView(plant: plantEngine.plant)
                 .frame(width: 240, height: 320)
+                .scaleEffect(plantPressing ? 0.94 : 1.0)  // 按压时微缩
+                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: plantPressing)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 340)
+        .contentShape(Rectangle())
         .contentShape(Rectangle())  // 让整个区域可点击
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in plantPressing = true }
+                .onEnded { _ in plantPressing = false }
+        )
         .onTapGesture {
             waterPlant(.medium)
         }

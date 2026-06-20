@@ -112,12 +112,19 @@ struct CollectionView: View {
     }
 
     private func harvestedCard(_ item: GardenItem) -> some View {
-        VStack(spacing: 6) {
-            Text(item.species.symbol).font(.system(size: 32))
-            Text(item.name).font(.system(size: 13, weight: .semibold))
-            Text(item.species.localizedName).font(.system(size: 11)).foregroundStyle(.secondary)
+        VStack(spacing: 8) {
+            // 真实植物视觉（替代 emoji）
+            MiniPlantCanvas(speciesID: item.speciesID, stage: item.peakStage)
+                .frame(width: 100, height: 100)
+
+            Text(item.name)
+                .font(.system(size: 13, weight: .semibold))
+            Text(item.species.localizedName)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
             Text(String(format: L.daysToHarvest, item.daysToHarvest))
-                .font(.system(size: 10)).foregroundStyle(.tertiary)
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
@@ -154,16 +161,46 @@ struct CollectionView: View {
         let collected = gardenStore.hasCollected(speciesID: species.id)
         let locked = species.isPro && !storeManager.isPro
 
-        VStack(spacing: 4) {
-            Text(locked ? "🔒" : species.symbol).font(.system(size: 24))
-            Text(species.name).font(.system(size: 11, weight: .medium))
+        VStack(spacing: 6) {
+            ZStack {
+                // 真正的植物预览（替代 emoji）
+                MiniPlantCanvas(speciesID: species.id, stage: .harvestable)
+                    .frame(width: 80, height: 80)
+                    .opacity(locked ? 0.25 : 1.0)
+
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.orange)
+                        .padding(8)
+                        .background(Circle().fill(.orange.opacity(0.15)))
+                }
+            }
+
+            Text(species.name)
+                .font(.system(size: 11, weight: .medium))
+
             if collected {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 10)).foregroundStyle(.green)
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.green)
+                    Text("已收集".localized)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.green)
+                }
             } else if locked {
-                Text("Pro").font(.system(size: 9, weight: .bold)).foregroundStyle(.orange)
+                Text("Pro 解锁".localized)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.orange.opacity(0.15))
+                    .clipShape(Capsule())
             } else {
-                Text("未收集".localized).font(.system(size: 9)).foregroundStyle(.tertiary)
+                Text("未收集".localized)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.tertiary)
             }
         }
         .frame(maxWidth: .infinity)
@@ -173,5 +210,26 @@ struct CollectionView: View {
         .onTapGesture {
             if locked { showPaywall = true }
         }
+    }
+}
+
+// MARK: - 简化版植物视图（收藏页、图鉴、Widget 复用）
+
+/// 极简版植物绘制：用 PlantCanvas 的核心绘制逻辑，但尺寸更小、无动画
+/// 只在需要时实例化，避免浪费渲染资源
+struct MiniPlantCanvas: View {
+    let speciesID: String
+    let stage: GrowthStage
+
+    var body: some View {
+        let species = PlantLibrary.species(id: speciesID)
+        let mockPlant = Plant(
+            name: "",
+            speciesID: species.id,
+            stage: stage,
+            growthPoints: 500,
+            health: 85
+        )
+        PlantView(plant: mockPlant)
     }
 }
