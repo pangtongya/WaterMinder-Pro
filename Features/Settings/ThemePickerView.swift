@@ -28,7 +28,7 @@ struct ThemePickerView: View {
                 
                 // Pro 主题
                 themeSection(
-                    title: "Pro 主题".localized,
+                    title: "Pro Themes".localized,
                     themes: ThemeLibrary.pro,
                     isPro: true
                 )
@@ -38,7 +38,7 @@ struct ThemePickerView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("主题外观".localized)
+        .navigationTitle(L.themeAppearance)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             selectedThemeID = userStore.profile.selectedThemeID
@@ -181,12 +181,5 @@ struct ThemeCard: View {
             )
         }
         .disabled(isLocked)
-    }
-}
-
-#Preview {
-    NavigationStack {
-        ThemePickerView()
-            .environmentObject(UserStore())
     }
 }

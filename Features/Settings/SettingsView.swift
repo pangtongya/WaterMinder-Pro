@@ -25,6 +25,8 @@ struct SettingsView: View {
     @State private var showFilePicker = false
     @State private var showRestoreSuccess = false
     @State private var showRestoreError = false
+    @State private var showBackupSuccess = false
+    @State private var showBackupError = false
     @State private var errorMessage = ""
     @State private var exportedFileURL: URL?
     @State private var showExportSheet = false
@@ -103,13 +105,12 @@ struct SettingsView: View {
                     }
                 }
             }
-            .disabled(!userStore.isPro)
             // 关于
             aboutSection
         }
         .scrollContentBackground(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("设置".localized)
+        .navigationTitle(L.settings)
         .navigationBarTitleDisplayMode(.large)
         .onAppear { healthAuthorized = healthManager.isAuthorized }
         .sheet(isPresented: $showPaywall) {
@@ -119,6 +120,7 @@ struct SettingsView: View {
             AdvancedStatsView()
                 .environmentObject(waterStore)
                 .environmentObject(userStore)
+                .environmentObject(achievementStore)
         }
         .sheet(isPresented: $showExportSheet) {
             if let url = exportedFileURL {
@@ -143,41 +145,41 @@ struct SettingsView: View {
                 }
             }
         }
-        .alert("恢复成功".localized, isPresented: $showRestoreSuccess) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复成功".localized, isPresented: $showBackupSuccess) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text("数据已成功恢复".localized)
         }
-        .alert("恢复失败".localized, isPresented: $showRestoreError) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复失败".localized, isPresented: $showBackupError) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
         .alert("健康权限".localized, isPresented: $showHealthAlert) {
-            Button("取消", role: .cancel) {}
+            Button("取消".localized, role: .cancel) {}
             Button("去设置".localized) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 访问健康数据".localized)
         }
         .alert("通知权限".localized, isPresented: $showNotificationAlert) {
-            Button("取消", role: .cancel) {}
+            Button("取消".localized, role: .cancel) {}
             Button("去设置".localized) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 发送通知".localized)
         }
-        .alert("恢复购买成功", isPresented: $showRestoreSuccess) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复购买成功".localized, isPresented: $showRestoreSuccess) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
-            Text("感谢您的支持！Pro 权益已解锁。")
+            Text(L.proThankYou)
         }
-        .alert("恢复购买失败", isPresented: $showRestoreError) {
-            Button("好的", role: .cancel) {}
+        .alert("恢复购买失败".localized, isPresented: $showRestoreError) {
+            Button("好的".localized, role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
         .alert("暂停养护".localized, isPresented: $showPauseConfirm) {
-            Button("取消", role: .cancel) { }
-            Button("暂停", role: .destructive) {
+            Button("取消".localized, role: .cancel) { }
+            Button("暂停".localized, role: .destructive) {
                 plantEngine.pauseCare()
                 Haptics.light()
             }
@@ -189,7 +191,7 @@ struct SettingsView: View {
                 plantEngine.resumeCare()
                 Haptics.success()
             }
-            Button("取消", role: .cancel) { }
+            Button("取消".localized, role: .cancel) { }
         } message: {
             Text("确定要恢复养护吗？植物将重新开始生长。".localized)
         }
@@ -210,7 +212,7 @@ struct SettingsView: View {
             HStack {
                 Text("品种".localized)
                 Spacer()
-                Text(plantEngine.plant.species.name)
+                Text(plantEngine.plant.species.localizedName)
                     .foregroundStyle(.secondary)
                 Text(plantEngine.plant.species.symbol)
             }
@@ -225,7 +227,7 @@ struct SettingsView: View {
                             .foregroundColor(.green)
                         Text("恢复养护".localized)
                         Spacer()
-                        Text("剩余 \(plantEngine.plant.remainingPauseDays) 天")
+                        Text(String(format: NSLocalizedString("剩余 %d 天", comment: ""), plantEngine.plant.remainingPauseDays))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
@@ -297,7 +299,9 @@ struct SettingsView: View {
 
             if userStore.reminderEnabled {
                 Picker("提醒间隔", selection: intervalBinding) {
-                    ForEach([30, 60, 90, 120], id: \.self) { Text("每 \($0) 分钟").tag($0) }
+                    ForEach([30, 60, 90, 120], id: \.self) {
+                        Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), $0)).tag($0)
+                    }
                 }
             }
         } header: {
@@ -450,6 +454,9 @@ struct SettingsView: View {
 
     private var backupSection: some View {
         Section {
+            // 数据概览卡片
+            dataSummaryCard
+                .listRowBackground(Color(.systemGroupedBackground))
             // 导出按钮
             Button {
                 Task {
@@ -458,7 +465,8 @@ struct SettingsView: View {
                             waterStore: waterStore,
                             plantEngine: plantEngine,
                             gardenStore: gardenStore,
-                            userStore: userStore
+                            userStore: userStore,
+                            achievementStore: achievementStore
                         )
                         await MainActor.run {
                             exportedFileURL = fileURL
@@ -527,6 +535,55 @@ struct SettingsView: View {
         }
     }
 
+    // 数据概览卡片
+    private var dataSummaryCard: some View {
+        HStack(spacing: 0) {
+            summaryItem(
+                title: "喝水记录",
+                value: "\(waterStore.records.count)",
+                icon: "drop.fill",
+                color: .bloomWater
+            )
+            summaryItem(
+                title: "养成天数",
+                value: "\(daysSincePlanted)",
+                icon: "leaf.fill",
+                color: .green
+            )
+            summaryItem(
+                title: "成就",
+                value: "\(achievementStore.unlockedCount)/\(achievementStore.totalCount)",
+                icon: "trophy.fill",
+                color: .bloomGold
+            )
+            summaryItem(
+                title: "收藏品种",
+                value: "\(gardenStore.items.count)",
+                icon: "tray.full.fill",
+                color: .orange
+            )
+        }
+        .padding(.vertical, 8)
+    }
+
+    private func summaryItem(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .font(.system(size: 16))
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+            Text(title)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var daysSincePlanted: Int {
+        Calendar.current.dateComponents([.day], from: plantEngine.plant.plantedAt, to: Date()).day ?? 0
+    }
+
     // MARK: - Pro
 
     private var proSection: some View {
@@ -587,6 +644,20 @@ struct SettingsView: View {
                     ProgressView()
                 }
             }
+            Button {
+                openURL(AppConstants.URLs.privacyPolicy)
+            } label: {
+                HStack {
+                    Image(systemName: "hand.raised.fill")
+                        .foregroundStyle(.blue)
+                    Text("隐私政策".localized)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
         } header: {
             Text("关于".localized)
         }
@@ -594,24 +665,31 @@ struct SettingsView: View {
 
     // MARK: - 工具
 
+    private func openURL(_ urlString: String) {
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
+        }
+    }
+
     private func restoreBackup(from fileURL: URL) async {
         do {
             let backup = try await backupManager.importBackup(from: fileURL)
-            await backupManager.restoreData(
+            backupManager.restoreData(
                 from: backup,
                 waterStore: waterStore,
                 plantEngine: plantEngine,
                 gardenStore: gardenStore,
                 userStore: userStore,
+                achievementStore: achievementStore,
                 merge: true
             )
             await MainActor.run {
-                showRestoreSuccess = true
+                showBackupSuccess = true
             }
         } catch {
             await MainActor.run {
                 errorMessage = error.localizedDescription
-                showRestoreError = true
+                showBackupError = true
             }
         }
     }
@@ -642,19 +720,5 @@ extension Date {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
         return formatter.localizedString(for: self, relativeTo: Date())
-    }
-}
-
-#Preview {
-    NavigationStack {
-        SettingsView()
-            .environmentObject(UserStore())
-            .environmentObject(PlantEngine())
-            .environmentObject(GardenStore())
-            .environmentObject(WaterStore())
-            .environmentObject(NotificationManager.shared)
-            .environmentObject(HealthManager.shared)
-            .environmentObject(StoreManager.shared)
-            .environmentObject(CloudSyncManager.shared)
     }
 }

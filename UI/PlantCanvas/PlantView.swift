@@ -25,18 +25,24 @@ struct AnimatedPlantView: View {
     let plant: Plant
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 0.05, paused: false)) { timeline in
+        TimelineView(.animation(minimumInterval: 0.1, paused: false)) { timeline in
             PlantView(plant: plant, animationPhase: timeline.date.timeIntervalSinceReferenceDate)
         }
+        // drawingGroup() 将视图合成为单一图层，减少重绘次数
+        .drawingGroup()
     }
 }
 
 #Preview {
-    VStack(spacing: 40) {
-        AnimatedPlantView(plant: Plant(name: "小绿", stage: .harvestable, health: 90))
-            .frame(width: 200, height: 280)
-        AnimatedPlantView(plant: Plant(name: "蔫蔫", stage: .mature, health: 25))
-            .frame(width: 200, height: 280)
-    }
-    .padding()
+    AnimatedPlantView(plant: Plant(stage: .sprout, health: 85))
+        .frame(width: 300, height: 300)
+        .padding()
+        .background(Color(.systemBackground))
+}
+
+#Preview("Seedling") {
+    AnimatedPlantView(plant: Plant(stage: .seedling, health: 55))
+        .frame(width: 300, height: 300)
+        .padding()
+        .background(Color(.systemBackground))
 }

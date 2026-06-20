@@ -17,8 +17,8 @@ struct HistoryView: View {
     @State private var showPaywall = false
 
     enum Period: String, CaseIterable {
-        case week = "本周"
-        case month = "本月"
+        case week
+        case month
         var days: Int { self == .week ? 7 : 30 }
     }
 
@@ -31,7 +31,11 @@ struct HistoryView: View {
                 // 图表
                 VStack(spacing: 8) {
                     Picker("周期", selection: $period) {
-                        ForEach(Period.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                        ForEach(Period.allCases, id: \.self) { period in
+                            Text(period == .week
+                                 ? NSLocalizedString("本周", comment: "This week")
+                                 : NSLocalizedString("本月", comment: "This month")).tag(period)
+                        }
                     }
                     .pickerStyle(.segmented)
 
@@ -53,7 +57,7 @@ struct HistoryView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("喝水记录".localized)
+        .navigationTitle(L.waterLog)
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
@@ -66,11 +70,17 @@ struct HistoryView: View {
 
     private var statsCard: some View {
         HStack(spacing: 0) {
-            statItem(icon: "flame.fill", color: .orange, value: "\(waterStore.currentStreak)", label: "当前连胜")
+            statItem(icon: "flame.fill", color: .orange,
+                     value: "\(waterStore.currentStreak)",
+                     label: NSLocalizedString("当前连胜", comment: "Current streak"))
             Divider().frame(height: 40)
-            statItem(icon: "trophy.fill", color: .yellow, value: "\(waterStore.longestStreak)", label: "最长连胜")
+            statItem(icon: "trophy.fill", color: .yellow,
+                     value: "\(waterStore.longestStreak)",
+                     label: NSLocalizedString("最长连胜", comment: "Longest streak"))
             Divider().frame(height: 40)
-            statItem(icon: "drop.fill", color: .bloomWater, value: "\(waterStore.weekAverage)", label: "周均 ml")
+            statItem(icon: "drop.fill", color: .bloomWater,
+                     value: "\(waterStore.weekAverage)",
+                     label: NSLocalizedString("周均 ml", comment: "Weekly avg ml"))
         }
         .padding(.vertical, 14)
         .background(Color(.secondarySystemBackground))
@@ -96,7 +106,7 @@ struct HistoryView: View {
             if isPro {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack {
-                        Text("深度洞察".localized).font(.system(size: 15, weight: .semibold))
+                        Text(L.deepInsights).font(.system(size: 15, weight: .semibold))
                         Spacer()
                         Text("PRO").font(.system(size: 10, weight: .bold))
                             .foregroundStyle(.white)
@@ -107,23 +117,23 @@ struct HistoryView: View {
 
                     // 达标率
                     insightRow(
-                        label: "本期达标率",
+                        label: NSLocalizedString("本期达标率", comment: "Period achievement rate"),
                         value: "\(achievementRate)%",
                         color: achievementRate >= 60 ? .bloomSuccess : .bloomWarning,
-                        detail: "\(achievedDays) / \(totalDays) 天达标"
+                        detail: String(format: NSLocalizedString("%d / %d 天达标", comment: ""), achievedDays, totalDays)
                     )
 
                     // 平均完成度
                     insightRow(
-                        label: "平均目标完成度",
+                        label: NSLocalizedString("平均目标完成度", comment: "Average goal completion"),
                         value: "\(avgCompletionPercent)%",
                         color: avgCompletionPercent >= 70 ? .bloomSuccess : .bloomWater,
-                        detail: "平均每天 \(avgDailyMl) ml"
+                        detail: String(format: NSLocalizedString("平均每天 %d ml", comment: ""), avgDailyMl)
                     )
 
                     // 最佳一天
                     insightRow(
-                        label: "本期最佳",
+                        label: NSLocalizedString("本期最佳", comment: "Best day of the period"),
                         value: "\(bestDayAmount) ml",
                         color: .bloomGold,
                         detail: bestDayLabel
@@ -134,10 +144,13 @@ struct HistoryView: View {
                     // 成长历程
                     HStack(spacing: 8) {
                         Image(systemName: "leaf.fill").foregroundStyle(Color.bloomPrimary)
-                        Text("植物成长历程".localized)
+                        Text(L.plantGrowthJourney)
                             .font(.system(size: 13, weight: .medium))
                         Spacer()
-                        Text("\(plantEngine.plant.species.name) · \(plantEngine.plant.stage.name) · 种植 \(plantEngine.plant.ageInDays) 天")
+                        Text(String(format: NSLocalizedString("%@ · %@ · 种植 %d 天", comment: ""),
+                                    plantEngine.plant.species.localizedName,
+                                    plantEngine.plant.stage.name,
+                                    plantEngine.plant.ageInDays))
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                     }
@@ -151,7 +164,7 @@ struct HistoryView: View {
                     HStack {
                         Image(systemName: "lock.fill")
                             .foregroundStyle(Color.bloomGold)
-                        Text("深度数据洞察".localized).font(.system(size: 15, weight: .semibold))
+                        Text(L.deepDataInsights).font(.system(size: 15, weight: .semibold))
                         Spacer()
                         Text("PRO").font(.system(size: 10, weight: .bold))
                             .foregroundStyle(.white)
@@ -160,7 +173,7 @@ struct HistoryView: View {
                             .clipShape(Capsule())
                     }
 
-                    Text("解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。".localized)
+                    Text(L.deepInsightsExplain)
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -232,9 +245,12 @@ struct HistoryView: View {
     }
 
     private var bestDayLabel: String {
-        guard let best = periodData.max(by: { $0.amount < $1.amount }) else { return "暂无数据" }
+        guard let best = periodData.max(by: { $0.amount < $1.amount }) else {
+            return NSLocalizedString("暂无数据", comment: "No data")
+        }
         let f = DateFormatter()
-        f.dateFormat = period == .week ? "EEEE" : "M月d日"
+        f.locale = Locale.current
+        f.dateFormat = period == .week ? "EEEE" : (Locale.current.language.languageCode?.identifier == "zh" ? "M月d日" : "MMM d")
         return f.string(from: best.date)
     }
 
@@ -270,15 +286,5 @@ struct HistoryView: View {
         .chartYAxis {
             AxisMarks { _ in AxisGridLine(); AxisValueLabel() }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        HistoryView()
-            .environmentObject(WaterStore())
-            .environmentObject(UserStore())
-            .environmentObject(StoreManager.shared)
-            .environmentObject(PlantEngine())
     }
 }

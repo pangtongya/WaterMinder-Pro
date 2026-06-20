@@ -43,6 +43,13 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.pangtong.bloom.healthDecay</string>
+		<string>com.pangtong.bloom.widgetRefresh</string>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
@@ -54,10 +61,25 @@
 	</array>
 	<key>NSUbiquitousContainerName</key>
 	<string>iCloud.com.pangtong.bloom</string>
+	<key>MinimumOSVersion</key>
+	<string>17.0</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
 		<string>zh_CN</string>
+	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>WaterMinder Pro will read your water intake data from HealthKit to provide you with a comprehensive view of your hydration habits and help keep your plant healthy.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>WaterMinder Pro will save the water you record through the app to HealthKit so your hydration data stays in sync across all your devices.</string>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.pangtong.bloom</string>
 	</array>
 </dict>
 </plist>

@@ -10,6 +10,13 @@ enum Haptics {
         generator.prepare()
         generator.impactOccurred()
     }
+
+    /// Medium feedback for watering action
+    static func waterDrop() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.prepare()
+        generator.impactOccurred()
+    }
     
     /// Success feedback for positive actions
     static func success() {

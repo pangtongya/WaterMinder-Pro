@@ -61,12 +61,18 @@ final class AchievementStore: ObservableObject {
     }
     
     /// 更新花园成就进度
-    func updateGardenProgress(totalHarvests: Int) {
-        let gardenIds = ["garden_first_harvest", "garden_5_harvests", "garden_10_harvests",
+    func updateGardenProgress(totalHarvests: Int, uniqueSpecies: Int) {
+        let harvestIds = ["garden_first_harvest", "garden_5_harvests", "garden_10_harvests",
                         "garden_25_harvests", "garden_50_harvests"]
-        
-        for id in gardenIds {
+
+        for id in harvestIds {
             updateProgress(id: id, newProgress: totalHarvests)
+        }
+
+        // 品种收集成就
+        let speciesIds = ["garden_5_species", "garden_10_species", "garden_all_species"]
+        for id in speciesIds {
+            updateProgress(id: id, newProgress: uniqueSpecies)
         }
     }
     
@@ -133,6 +139,55 @@ final class AchievementStore: ObservableObject {
     var unlockPercentage: Double {
         guard totalCount > 0 else { return 0 }
         return Double(unlockedCount) / Double(totalCount) * 100
+    }
+
+    // MARK: - 云同步/备份恢复
+
+    /// 合并云端/备份成就数据（以本地为准，合并新解锁和更高进度）
+    func mergeWithCloudAchievements(_ cloudAchievements: [Achievement]) {
+        var updated = false
+        for cloudAchievement in cloudAchievements {
+            guard let localIndex = achievements.firstIndex(where: { $0.id == cloudAchievement.id }) else {
+                // 本地没有这个成就 → 直接添加
+                achievements.append(cloudAchievement)
+                updated = true
+                continue
+            }
+            var local = achievements[localIndex]
+            // 如果云端已解锁且本地没有，使用云端解锁时间
+            if cloudAchievement.isUnlocked && !local.isUnlocked {
+                local.unlockedAt = cloudAchievement.unlockedAt
+                local.progress = cloudAchievement.requirement
+                achievements[localIndex] = local
+                updated = true
+            } else {
+                // 取更高的进度
+                if cloudAchievement.progress > local.progress {
+                    local.progress = cloudAchievement.progress
+                    achievements[localIndex] = local
+                    updated = true
+                }
+                // 取更早的解锁时间（保留最早解锁记录）
+                if let localUnlocked = local.unlockedAt,
+                   let cloudUnlocked = cloudAchievement.unlockedAt,
+                   cloudUnlocked < localUnlocked {
+                    local.unlockedAt = cloudUnlocked
+                    achievements[localIndex] = local
+                    updated = true
+                }
+            }
+        }
+        if updated {
+            persist()
+        }
+    }
+
+    /// 用备份/云端成就替换所有本地成就
+    func replaceAllAchievements(with newAchievements: [Achievement]) {
+        // 如果备份是空的，则保留默认库，避免数据丢失
+        guard !newAchievements.isEmpty else { return }
+        achievements = newAchievements
+        persist()
     }
     
     // MARK: - 持久化

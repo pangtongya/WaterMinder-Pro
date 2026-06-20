@@ -8,7 +8,7 @@ final class WidgetDataManager {
     
     static let shared = WidgetDataManager()
     
-    private let appGroupIdentifier = "group.com.pangtong.bloom"
+    private let appGroupIdentifier = AppConstants.appGroupIdentifier
     private var defaults: UserDefaults?
     
     private init() {
@@ -18,28 +18,35 @@ final class WidgetDataManager {
     // MARK: - 更新 Widget 数据
     
     /// 更新 Widget 显示的数据
+    /// - Note: plantStageRawValue 传递 GrowthStage 的 rawValue (Int)，Widget 会自动本地化
     func updateWidgetData(
         currentIntake: Int,
         dailyGoal: Int,
         plantName: String,
         plantHealth: Double,
-        plantStage: String,
+        plantStageRawValue: Int,
         plantSymbol: String,
         isPaused: Bool
     ) {
         guard let defaults = defaults else {
+            #if DEBUG
             print("[WidgetDataManager] App Group not available")
+            #endif
             return
         }
         
-        defaults.set(currentIntake, forKey: "widget.todayIntake")
-        defaults.set(dailyGoal, forKey: "widget.dailyGoal")
-        defaults.set(plantName, forKey: "widget.plantName")
-        defaults.set(plantHealth, forKey: "widget.plantHealth")
-        defaults.set(plantStage, forKey: "widget.plantStage")
-        defaults.set(plantSymbol, forKey: "widget.plantSymbol")
-        defaults.set(isPaused, forKey: "widget.isPaused")
-        defaults.set(Date(), forKey: "widget.lastUpdated")
+        defaults.set(currentIntake, forKey: AppConstants.WidgetKeys.todayIntake)
+        defaults.set(dailyGoal, forKey: AppConstants.WidgetKeys.dailyGoal)
+        defaults.set(plantName, forKey: AppConstants.WidgetKeys.plantName)
+        defaults.set(plantHealth, forKey: AppConstants.WidgetKeys.plantHealth)
+        defaults.set(plantStageRawValue, forKey: AppConstants.WidgetKeys.plantStageRawValue)
+        defaults.set(plantSymbol, forKey: AppConstants.WidgetKeys.plantSymbol)
+        defaults.set(isPaused, forKey: AppConstants.WidgetKeys.isPaused)
+        defaults.set(Date(), forKey: AppConstants.WidgetKeys.lastUpdated)
+        
+        // 同时保存本地化的阶段名称（供 Widget 直接读取）
+        let localizedStage = GrowthStage(rawValue: plantStageRawValue)?.name ?? "Seed"
+        defaults.set(localizedStage, forKey: AppConstants.WidgetKeys.plantStage)
         
         // 强制同步
         defaults.synchronize()
@@ -50,14 +57,14 @@ final class WidgetDataManager {
         guard let defaults = defaults else { return }
         
         let keys = [
-            "widget.todayIntake",
-            "widget.dailyGoal",
-            "widget.plantName",
-            "widget.plantHealth",
-            "widget.plantStage",
-            "widget.plantSymbol",
-            "widget.isPaused",
-            "widget.lastUpdated"
+            AppConstants.WidgetKeys.todayIntake,
+            AppConstants.WidgetKeys.dailyGoal,
+            AppConstants.WidgetKeys.plantName,
+            AppConstants.WidgetKeys.plantHealth,
+            AppConstants.WidgetKeys.plantStageRawValue,
+            AppConstants.WidgetKeys.plantSymbol,
+            AppConstants.WidgetKeys.isPaused,
+            AppConstants.WidgetKeys.lastUpdated
         ]
         
         for key in keys {

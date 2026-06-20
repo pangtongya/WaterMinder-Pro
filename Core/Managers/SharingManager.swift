@@ -54,21 +54,24 @@ final class SharingManager: ObservableObject {
     
     private func renderToImage<V: View>(view: V, size: CGSize) async -> UIImage {
         let controller = UIHostingController(rootView: view.frame(width: size.width, height: size.height))
-        
+
+        // 强制使用浅色模式渲染（分享卡片无论系统什么主题都应该是明亮、色彩鲜艳的）
+        controller.view.overrideUserInterfaceStyle = .light
+
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
             return UIImage()
         }
-        
+
         window.addSubview(controller.view)
         controller.view.frame = CGRect(origin: .zero, size: size)
         controller.view.layoutIfNeeded()
-        
+
         let renderer = UIGraphicsImageRenderer(size: size)
         let image = renderer.image { _ in
             controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
         }
-        
+
         controller.view.removeFromSuperview()
         return image
     }
@@ -171,7 +174,7 @@ struct SharePlantCardView: View {
                 
                 // 健康度
                 VStack(spacing: 12) {
-                    Text("健康度")
+                    Text(L.health)
                         .font(.system(size: 24))
                         .foregroundColor(.white.opacity(0.8))
                     
@@ -186,14 +189,18 @@ struct SharePlantCardView: View {
                 
                 // 今日进度
                 HStack(spacing: 40) {
-                    StatItem(label: "今日喝水", value: "\(data.todayIntake)ml")
-                    StatItem(label: "目标", value: "\(data.dailyGoal)ml")
+                    StatItem(label: NSLocalizedString("今日喝水", comment: "Today's water intake"),
+                             value: "\(data.todayIntake)ml")
+                    StatItem(label: NSLocalizedString("目标", comment: "Goal"),
+                             value: "\(data.dailyGoal)ml")
                 }
                 
                 // 统计信息
                 HStack(spacing: 40) {
-                    StatItem(label: "总次数", value: "\(data.totalRecords)")
-                    StatItem(label: "总水量", value: "\(data.totalAmount / 1000)L")
+                    StatItem(label: NSLocalizedString("总次数", comment: "Total records"),
+                             value: "\(data.totalRecords)")
+                    StatItem(label: NSLocalizedString("总水量", comment: "Total amount"),
+                             value: "\(data.totalAmount / 1000)L")
                 }
                 
                 Spacer()
@@ -202,7 +209,7 @@ struct SharePlantCardView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "heart.fill")
                         .foregroundColor(.white)
-                    Text("用 Bloom 养成喝水好习惯")
+                    Text(L.bloomTagline)
                         .font(.system(size: 24))
                         .foregroundColor(.white)
                 }
@@ -232,7 +239,7 @@ struct ShareAchievementCardView: View {
                 
                 // 成就信息
                 VStack(spacing: 20) {
-                    Text("成就解锁！")
+                    Text(L.achievementUnlocked)
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(.white)
                     
@@ -251,7 +258,7 @@ struct ShareAchievementCardView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "heart.fill")
                         .foregroundColor(.white)
-                    Text("用 Bloom 养成喝水好习惯")
+                    Text(L.bloomTagline)
                         .font(.system(size: 24))
                         .foregroundColor(.white)
                 }

@@ -49,6 +49,12 @@ struct RootView: View {
                 offlineBanner
             }
         }
+        .overlay(alignment: .top) {
+            SyncToastView(state: cloudSyncManager.syncToastState) {
+                // 用户手动关闭 Toast（失败状态）→ 重置状态
+                cloudSyncManager.resetToastState()
+            }
+        }
     }
     
     private var offlineBanner: some View {
@@ -56,7 +62,7 @@ struct RootView: View {
             HStack {
                 Image(systemName: "wifi.slash")
                     .foregroundColor(.white)
-                Text("离线模式 - 数据已本地保存")
+                Text(NSLocalizedString("离线模式 - 数据已本地保存", comment: "Offline mode - data saved locally"))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
                 Spacer()
@@ -90,13 +96,4 @@ struct RootView: View {
             gardenStore.mergeWithCloudItems(cloudItems)
         }
     }
-}
-
-#Preview {
-    RootView()
-        .environmentObject(UserStore())
-        .environmentObject(PlantEngine())
-        .environmentObject(WaterStore())
-        .environmentObject(GardenStore())
-        .environmentObject(CloudSyncManager.shared)
 }

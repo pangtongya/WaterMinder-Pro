@@ -12,6 +12,8 @@ struct QuickRecordBar: View {
     @EnvironmentObject var healthManager: HealthManager
 
     @State private var lastAmount: Int = 0  // 记录最近一次水量（用于水滴动画）
+    @State private var showSuccessPulse: Bool = false  // 成功喝水后的脉冲动画
+    @State private var pressedCup: CupType? = nil  // 当前按下的杯型（用于按压反馈）
 
     var body: some View {
         VStack(spacing: 16) {
@@ -28,6 +30,15 @@ struct QuickRecordBar: View {
         .padding(.horizontal, 16)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay {
+            // 成功喝水后的脉冲光环
+            if showSuccessPulse {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.bloomWater.opacity(0.6), lineWidth: 3)
+                    .padding(-4)
+                    .transition(.opacity)
+            }
+        }
     }
 
     // MARK: - 杯型按钮
@@ -38,13 +49,17 @@ struct QuickRecordBar: View {
         } label: {
             VStack(spacing: 6) {
                 ZStack {
+                    // 背景圆（按压时放大）
                     Circle()
-                        .fill(Color.bloomWater.opacity(0.12))
-                        .frame(width: 52, height: 52)
+                        .fill(Color.bloomWater.opacity(pressedCup == cup ? 0.25 : 0.12))
+                        .frame(width: pressedCup == cup ? 56 : 52, height: pressedCup == cup ? 56 : 52)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: pressedCup)
 
                     Image(systemName: cup.icon)
                         .font(.system(size: 22))
                         .foregroundStyle(Color.bloomWater)
+                        .scaleEffect(pressedCup == cup ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: pressedCup)
                 }
 
                 Text("\(cup.defaultAmount)")
@@ -57,7 +72,12 @@ struct QuickRecordBar: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(cup.rawValue) \(cup.defaultAmount) 毫升")
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in pressedCup = cup }
+                .onEnded { _ in pressedCup = nil }
+        )
+        .accessibilityLabel("\(cup.localizedName) \(cup.defaultAmount) ml")
     }
 
     // MARK: - 进度提示
@@ -78,8 +98,8 @@ struct QuickRecordBar: View {
 
     private var progressText: String {
         waterStore.isGoalMetToday
-            ? "今日目标达成！"
-            : "还差 \(waterStore.remaining) ml"
+            ? NSLocalizedString("今日目标达成！", comment: "Goal achieved")
+            : String(format: NSLocalizedString("还差 %d ml", comment: "Remaining ml"), waterStore.remaining)
     }
 
     private var progressColor: Color {
@@ -112,7 +132,18 @@ struct QuickRecordBar: View {
         }
 
         // 5. 触觉反馈
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptics.waterDrop()
+
+        // 6. 成功脉冲动画（视觉反馈）
+        showSuccessPulse = true
+        withAnimation(.easeOut(duration: 0.3)) {
+            showSuccessPulse = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.easeIn(duration: 0.2)) {
+                showSuccessPulse = false
+            }
+        }
     }
 }
 
@@ -122,4 +153,5 @@ struct QuickRecordBar: View {
         .environmentObject(PlantEngine())
         .environmentObject(HealthManager.shared)
         .padding()
+        .background(Color(.systemBackground))
 }

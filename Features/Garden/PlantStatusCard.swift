@@ -18,7 +18,7 @@ struct PlantStatusCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(plantEngine.plant.name)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
-                    Text("\(plantEngine.plant.species.name) · \(plantEngine.plant.stage.name)")
+                    Text("\(plantEngine.plant.species.localizedName) · \(plantEngine.plant.stage.name)")
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
@@ -61,7 +61,7 @@ struct PlantStatusCard: View {
     private var healthBar: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("健康度")
+                Text(L.health)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -91,7 +91,7 @@ struct PlantStatusCard: View {
     // MARK: - 连胜 + 里程碑
 
     /// 里程碑天数及其奖励描述
-    private static let milestones: [(days: Int, title: String, emoji: String)] = [
+    private static let milestones: [(days: Int, titleKey: String, emoji: String)] = [
         (3,   "初露锋芒",   "🌱"),
         (7,   "坚持一周",   "🌿"),
         (14,  "两周达人",   "🪴"),
@@ -111,12 +111,12 @@ struct PlantStatusCard: View {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(.orange)
-                Text("连续 \(streak) 天达标")
+                Text(String(format: NSLocalizedString("连续 %d 天达标", comment: ""), streak))
                     .font(.system(size: 12, weight: .medium))
                 Spacer()
                 // 最近达成里程碑
                 if let last = passedMilestones.last {
-                    Text("\(last.emoji) \(last.title)")
+                    Text("\(last.emoji) \(NSLocalizedString(last.titleKey, comment: "Milestone title"))")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Color.bloomGold)
                         .padding(.horizontal, 6)
@@ -128,7 +128,8 @@ struct PlantStatusCard: View {
             // 下一里程碑提示
             if let next = nextMilestone {
                 HStack(spacing: 4) {
-                    Text("再坚持 \(next.days - streak) 天 → \(next.emoji) \(next.title)")
+                    Text(String(format: NSLocalizedString("再坚持 %d 天 → %@ %@", comment: ""),
+                              next.days - streak, next.emoji, NSLocalizedString(next.titleKey, comment: "Milestone title")))
                         .font(.system(size: 11))
                         .foregroundStyle(.tertiary)
                 }
@@ -148,16 +149,16 @@ struct PlantStatusCard: View {
 
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(isMax ? "已满级" : "成长进度")
+                Text(isMax ? NSLocalizedString("已满级", comment: "Max level") : NSLocalizedString("成长进度", comment: "Growth progress"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Spacer()
                 if let next = nextName {
-                    Text("下一阶段：\(next)")
+                    Text(String(format: NSLocalizedString("下一阶段：%@", comment: ""), next))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 } else {
-                    Text("可以收获了！")
+                    Text(L.readyToHarvest)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Color.bloomGold)
                 }
@@ -183,4 +184,5 @@ struct PlantStatusCard: View {
         .environmentObject(PlantEngine())
         .environmentObject(WaterStore())
         .padding()
+        .background(Color(.systemBackground))
 }

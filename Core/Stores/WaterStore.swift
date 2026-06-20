@@ -29,8 +29,47 @@ final class WaterStore: ObservableObject {
     func add(amount: Int, cupType: CupType = .medium) -> WaterRecord {
         let record = WaterRecord(amount: amount, cupType: cupType)
         records.insert(record, at: 0)
-        
-        // Refresh widgets
+
+        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group）
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        WidgetCenter.shared.reloadAllTimelines()
+        persist()
+        triggerSync()
+        updateAchievements()
+        return record
+    }
+
+    /// 从 HealthKit 同步记录时使用（带 HK UUID 去重）
+    /// - Returns: 新增的记录数量（0 表示无新增）
+    @discardableResult
+    func addIfNotExists(
+        amount: Int,
+        date: Date,
+        cupType: CupType = .medium,
+        hkSampleUUID: UUID
+    ) -> WaterRecord? {
+        // 1. HK UUID 去重（最精确）
+        if records.contains(where: { $0.hkSampleUUID == hkSampleUUID }) {
+            return nil
+        }
+        // 2. 时间+水量去重（兜底：同分钟同水量不重复）
+        let cal = Calendar.current
+        let rounded = cal.date(bySettingHour: cal.component(.hour, from: date),
+                               minute: cal.component(.minute, from: date),
+                               second: 0, of: date)!
+        if records.contains(where: {
+            cal.isDate($0.createdAt, equalTo: rounded, toGranularity: .minute)
+            && $0.amount == amount
+        }) {
+            return nil
+        }
+        let record = WaterRecord(
+            amount: amount,
+            cupType: cupType,
+            hkSampleUUID: hkSampleUUID
+        )
+        records.insert(record, at: 0)
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
         persist()
         triggerSync()
@@ -39,9 +78,13 @@ final class WaterStore: ObservableObject {
     }
 
     func delete(_ record: WaterRecord) {
-        records.removeAll { $0.id == record.id }
-        persist()
-        triggerSync()
+        if let idx = records.firstIndex(where: { $0.id == record.id }) {
+            records.remove(at: idx)
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+            WidgetCenter.shared.reloadAllTimelines()
+            persist()
+            triggerSync()
+        }
     }
 
     func deleteAll() {
@@ -240,10 +283,48 @@ final class WaterStore: ObservableObject {
     }
 
     // MARK: - 备份恢复
-    
+
     /// 替换所有记录（用于恢复备份）
     func replaceAllRecords(with newRecords: [WaterRecord]) {
         records = newRecords
         persist()
+    }
+
+    // MARK: - 数据归档（控制内存占用）
+
+    /// 归档超过指定天数的旧记录（保留最近 N 天数据）
+    /// - Parameter keepDays: 保留最近多少天的数据（默认 90 天）
+    /// - Returns: 被归档的记录数量
+    @discardableResult
+    func archiveOldRecords(keepDays: Int = 90) -> Int {
+        let cal = Calendar.current
+        guard let cutoff = cal.date(byAdding: .day, value: -keepDays, to: Date()) else {
+            return 0
+        }
+
+        let oldRecords = records.filter { $0.createdAt < cutoff }
+        guard !oldRecords.isEmpty else { return 0 }
+
+        // 将旧记录归档到单独文件
+        let archiveFilename = "water_records_archive_\(Int(cutoff.timeIntervalSince1970)).json"
+        storage.save(oldRecords, filename: archiveFilename)
+
+        // 从内存中移除旧记录（保留需保留的，时间复杂度 O(n)）
+        records.removeAll(where: { $0.createdAt < cutoff })
+        persist()
+
+        #if DEBUG
+        print("[WaterStore] 归档了 \(oldRecords.count) 条旧记录到 \(archiveFilename)")
+        #endif
+        return oldRecords.count
+    }
+
+    /// 应用启动时自动检查并归档（由 App 启动流程调用）
+    func autoArchiveIfNeeded() {
+        let archived = archiveOldRecords(keepDays: 90)
+        if archived > 0 {
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }

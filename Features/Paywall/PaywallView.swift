@@ -79,10 +79,10 @@ struct PaywallView: View {
                     Button("关闭".localized) { dismiss() }
                 }
             }
-            .alert("恢复成功", isPresented: $showRestoreSuccess) {
-                Button("太好了") { dismiss() }
+            .alert("恢复成功".localized, isPresented: $showRestoreSuccess) {
+                Button("太好了".localized) { dismiss() }
             } message: {
-                Text("感谢您的支持！Pro 权益已解锁。")
+                Text(L.proThankYou)
             }
         }
     }
@@ -108,10 +108,10 @@ struct PaywallView: View {
 
     private var benefitsList: some View {
         VStack(alignment: .leading, spacing: 14) {
-            benefitRow(icon: "📊", title: "高级统计".localized, desc: "完整的数据分析和可视化报告")
-            benefitRow(icon: "🎨", title: "自定义主题".localized, desc: "解锁所有 Pro 主题和外观")
-            benefitRow(icon: "🌱", title: "无限植物品种".localized, desc: "解锁全部7种植物，打造梦幻花园")
-            benefitRow(icon: "☁️", title: "多设备同步".localized, desc: "CloudKit 数据同步和备份")
+            benefitRow(icon: "📊", title: "Advanced Statistics".localized, desc: "Complete data analysis and visualization reports")
+            benefitRow(icon: "🎨", title: "Custom Themes".localized, desc: "Unlock all Pro themes and appearances")
+            benefitRow(icon: "🌱", title: "Unlimited Plants".localized, desc: "Unlock all 7 plant species for your dream garden")
+            benefitRow(icon: "☁️", title: "Multi-device Sync".localized, desc: "CloudKit data sync and backup")
         }
         .padding(18)
         .background(Color(.secondarySystemBackground))
@@ -128,6 +128,12 @@ struct PaywallView: View {
             Spacer()
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(Color.bloomSuccess)
+        }
+    }
+
+    private func openURL(_ urlString: String) {
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
         }
     }
 
@@ -163,12 +169,40 @@ struct PaywallView: View {
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+
+            // 服务条款 & 隐私政策
+            HStack(spacing: 4) {
+                Button("Terms of Service".localized) {
+                    openURL(AppConstants.URLs.termsOfService)
+                }
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+                Text("·")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+                Button("Privacy Policy".localized) {
+                    openURL(AppConstants.URLs.privacyPolicy)
+                }
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+            }
         }
     }
 
     private func productCard(_ product: Product) -> some View {
         let isSelected = selectedProduct?.id == product.id
         let isLifetime = product.id == BloomProduct.lifetimeID
+        let isYearly = product.id == BloomProduct.yearlyID
+
+        // 计算终身相对于年订阅的节省（如果有年订阅商品）
+        let yearlyProduct = storeManager.products.first { $0.id == BloomProduct.yearlyID }
+        let savingsPercent: Int? = {
+            guard let yearly = yearlyProduct, isLifetime else { return nil }
+            let yearlyCostPer3Years = (yearly.price as NSDecimalNumber).doubleValue * 3
+            let lifetimePrice = (product.price as NSDecimalNumber).doubleValue
+            let savings = (yearlyCostPer3Years - lifetimePrice) / yearlyCostPer3Years * 100
+            return Int(max(0, savings))
+        }()
 
         return Button {
             selectedProduct = product
@@ -177,21 +211,35 @@ struct PaywallView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(isLifetime ? "终身买断" : "Pro 年订阅")
+                        Text(isLifetime ? "Lifetime Purchase" : "Pro Yearly")
                             .font(.system(size: 16, weight: .bold))
                         if isLifetime {
-                            Text("最划算".localized)
+                            Text("BEST VALUE".localized)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Color.bloomGold)
                                 .clipShape(Capsule())
+                        } else if isYearly {
+                            Text("POPULAR".localized)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.bloomPrimary)
+                                .clipShape(Capsule())
                         }
                     }
-                    Text(isLifetime ? "一次购买，永久解锁" : "全年无限养护")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
+                    if let savings = savingsPercent, savings > 0 {
+                        Text(String(format: "Save %d%% vs subscription".localized, savings))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.bloomSuccess)
+                    } else {
+                        Text(isLifetime ? "One-time purchase, permanent unlock".localized : "Unlimited care all year")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Text(product.displayPrice)

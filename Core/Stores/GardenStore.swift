@@ -61,9 +61,12 @@ final class GardenStore: ObservableObject {
     /// 更新成就进度（在收获后调用）
     private func updateAchievements() {
         guard let achievementStore = achievementStore else { return }
-        
-        // 更新花园成就（总收获次数）
-        achievementStore.updateGardenProgress(totalHarvests: items.count)
+
+        // 更新花园成就（总收获次数 + 品种收集数）
+        achievementStore.updateGardenProgress(
+            totalHarvests: items.count,
+            uniqueSpecies: uniqueSpeciesCount
+        )
     }
 
     // MARK: - 云端数据合并
@@ -95,15 +98,30 @@ final class GardenStore: ObservableObject {
     /// 检查是否可以收获新植物
     func canHarvest(isPro: Bool) -> (allowed: Bool, current: Int, limit: Int) {
         let current = items.count
-        
+
         // Pro 用户无限制
         if isPro {
             return (true, current, Int.max)
         }
-        
+
         // 免费用户有限制
         let allowed = current < Self.freeUserGardenLimit
         return (allowed, current, Self.freeUserGardenLimit)
+    }
+
+    /// 统一收获入口（由 GardenView 调用）
+    /// 检查权限 → 调用 plantEngine.harvest() → 加入花园
+    /// 返回是否成功（false 表示被限制或无植物可收）
+    @discardableResult
+    func harvestPlant(plantEngine: PlantEngine, isPro: Bool) -> Bool {
+        let check = canHarvest(isPro: isPro)
+        guard check.allowed else { return false }
+
+        if let item = plantEngine.harvest() {
+            add(item)
+            return true
+        }
+        return false
     }
     
     /// 获取花园使用状态描述

@@ -9,3 +9,6 @@
 /* HealthKit Permissions */
 "NSHealthShareUsageDescription" = "Read water intake data from Health app to help care for your plant.";
 "NSHealthUpdateUsageDescription" = "Save water intake to Health app for complete health records.";
+
+/* Notification Permission */
+"NSUserNotificationUsageDescription" = "WaterMinder Pro sends friendly reminders so you stay hydrated throughout the day and grow a thriving plant.";

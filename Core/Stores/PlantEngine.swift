@@ -1,4 +1,3 @@
-import WidgetKit
 // PlantEngine.swift
 // ⭐ 植物生命引擎 —— 整个 app 的心脏
 //
@@ -28,6 +27,19 @@ final class PlantEngine: ObservableObject {
 
     init() {
         plant = storage.load(Plant.self, filename: filename) ?? Plant()
+
+        // 监听后台任务触发的离线衰减
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOfflineDecayNotification(_:)),
+            name: .applyOfflineDecay,
+            object: nil
+        )
+    }
+
+    @objc private func handleOfflineDecayNotification(_ notification: Notification) {
+        guard let hours = notification.userInfo?["hours"] as? Int else { return }
+        applyOfflineDecay(hours: hours)
     }
 
     /// 今天是否已发放达标奖励（对比存储的日期是否为今天）
@@ -54,6 +66,46 @@ final class PlantEngine: ObservableObject {
         return nil
     }
 
+    /// 统一浇水入口（由 GardenView 调用）
+    /// 整合了：记录喝水、更新植物、检测目标达成、同步 HealthKit
+    func waterPlant(cup: CupType, waterStore: WaterStore, healthManager: HealthManager) async {
+        let amount = cup.defaultAmount
+
+        waterStore.add(amount: amount, cupType: cup)
+        _ = water(amount: amount)
+
+        if waterStore.isGoalMetToday {
+            processGoalMet()
+        }
+
+        if healthManager.isAuthorized {
+            try? await healthManager.saveWater(amount)
+        }
+    }
+
+    /// 统一删除记录入口（由 TodayRecordsCard 的滑动删除调用）
+    /// 整合了：删除记录、回退植物成长、同步 Widget/HealthKit
+    func deleteRecord(_ record: WaterRecord, waterStore: WaterStore, healthManager: HealthManager) async {
+        let amount = record.amount
+        waterStore.delete(record)
+
+        // 回退植物的成长量（健康度与生长阶段）
+        let beforeStage = plant.stage
+        plant = PlantLifecycle.revertWatering(plant, amount: amount)
+        persist()
+        triggerSync()
+
+        // 如果阶段回退了，清除庆祝状态
+        if plant.stage.rawValue < beforeStage.rawValue {
+            lastStageUpCelebration = nil
+        }
+
+        // 同步删除 HealthKit 样本（如果存在）
+        if let uuid = record.hkSampleUUID, healthManager.isAuthorized {
+            await healthManager.deleteWater(sampleUUID: uuid)
+        }
+    }
+
     /// 今日达标时调用（由 UI 层根据 WaterStore.isGoalMetToday 驱动）
     func processGoalMet() {
         guard !goalBonusAppliedToday else { return }
@@ -67,12 +119,20 @@ final class PlantEngine: ObservableObject {
         if plant.stage.rawValue > oldStage.rawValue {
             lastStageUpCelebration = plant.stage
         }
+
+        // 植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     // MARK: - 每日结算（app 启动 / 跨天时调用）
 
     /// 检查自上次结算以来断水的天数，应用衰减
     func processOverdueDays() {
+        // 自动恢复：暂停超过14天 → 自动解除暂停
+        if plant.isPauseExpired {
+            resumeCare()
+        }
+
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let lastActive = lastActiveDay
@@ -86,6 +146,7 @@ final class PlantEngine: ObservableObject {
         let gap = cal.dateComponents([.day], from: lastActive, to: today).day ?? 0
         if gap > 0 {
             // gap 天未达标（每一天都算断水）
+            // 暂停养护期间 PlantLifecycle.applyDailyDecay 已跳过，这里不再检查
             plant = PlantLifecycle.applyDailyDecay(plant, consecutiveMissedDays: gap)
 
             // 健康度归零 → 枯萎重置
@@ -96,11 +157,29 @@ final class PlantEngine: ObservableObject {
         lastActiveDay = today
         persist()
         triggerSync()
+
+        // 植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     /// 喝水/打开 app 时标记今天活跃
     func markActiveToday() {
         lastActiveDay = Calendar.current.startOfDay(for: Date())
+    }
+
+    /// 离线期间应用衰减（后台任务或 App 启动时调用）
+    func applyOfflineDecay(hours: Int) {
+        guard hours > 0 else { return }
+        let totalDecay = min(plant.health, Double(hours) * AppConstants.Decay.healthPerHour)
+        plant.health -= totalDecay
+        if plant.health <= 0 {
+            plant = PlantLifecycle.wilt(plant)
+        }
+        persist()
+        triggerSync()
+
+        // 植物健康度变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
     // MARK: - 收获
@@ -112,6 +191,9 @@ final class PlantEngine: ObservableObject {
         plant = reset
         persist()
         triggerSync()
+
+        // 收获后植物状态变化，通知 Widget 更新
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         return item
     }
 

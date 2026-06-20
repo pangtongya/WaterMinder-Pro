@@ -8,17 +8,21 @@ struct WaterRecord: Identifiable, Codable, Equatable, Hashable {
     let createdAt: Date
     let amount: Int          // 毫升
     let cupType: CupType
+    /// 来自 HealthKit 的样本 UUID（用于去重，避免同一健康记录被重复写入）
+    var hkSampleUUID: UUID?
 
     init(
         id: UUID = UUID(),
         createdAt: Date = Date(),
         amount: Int,
-        cupType: CupType = .medium
+        cupType: CupType = .medium,
+        hkSampleUUID: UUID? = nil
     ) {
         self.id = id
         self.createdAt = createdAt
         self.amount = amount
         self.cupType = cupType
+        self.hkSampleUUID = hkSampleUUID
     }
 
     // MARK: - 格式化
@@ -46,10 +50,10 @@ struct WaterRecord: Identifiable, Codable, Equatable, Hashable {
 // MARK: - CupType 杯型
 
 enum CupType: String, CaseIterable, Codable {
-    case small  = "小杯"
-    case medium = "中杯"
-    case large  = "大杯"
-    case bottle = "水瓶"
+    case small  = "Small Cup"
+    case medium = "Medium Cup"
+    case large  = "Large Cup"
+    case bottle = "Bottle"
 
     var icon: String {
         switch self {
@@ -68,29 +72,34 @@ enum CupType: String, CaseIterable, Codable {
         case .bottle: return 750
         }
     }
+    
+    /// 本地化的名称
+    var localizedName: String {
+        switch self {
+        case .small:  return NSLocalizedString("小杯", comment: "Small cup")
+        case .medium: return NSLocalizedString("中杯", comment: "Medium cup")
+        case .large:  return NSLocalizedString("大杯", comment: "Large cup")
+        case .bottle: return NSLocalizedString("水瓶", comment: "Bottle")
+        }
+    }
 }
 
 // MARK: - 数据验证
 
 extension WaterRecord: Validatable {
     func validate() throws {
-        // 水量必须在合理范围内（50ml - 5000ml）
         guard amount >= 50 && amount <= 5000 else {
             throw PersistenceError.validationFailed(
                 "WaterRecord",
                 "Invalid amount: \(amount)ml (must be 50-5000ml)"
             )
         }
-        
-        // 创建时间不能是未来（允许 1 分钟误差）
         guard createdAt <= Date().addingTimeInterval(60) else {
             throw PersistenceError.validationFailed(
                 "WaterRecord",
                 "Future date detected: \(createdAt)"
             )
         }
-        
-        // ID 不能是空的
         guard id != UUID() || id.uuidString.count > 0 else {
             throw PersistenceError.validationFailed(
                 "WaterRecord",

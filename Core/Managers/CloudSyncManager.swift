@@ -26,13 +26,45 @@ final class CloudSyncManager: ObservableObject {
     
     /// 同步错误信息
     @Published private(set) var lastError: String?
-    
+
+    /// 基于现有状态自动计算的 Toast 显示状态
+    /// RootView 监听此属性即可，无需订阅多个 @Published
+    @Published private(set) var syncToastState: SyncToastState = .idle
+
+    /// Toast 自动消失计时器（防止 syncToastState 一直停留在 success/failed）
+    private var toastResetTimer: Timer?
+
+    /// 重置 Toast 状态为 idle（在 Toast 视图关闭后调用）
+    func resetToastState() {
+        syncToastState = .idle
+    }
+
+    private func showSyncToast(_ state: SyncToastState) {
+        toastResetTimer?.invalidate()
+        syncToastState = state
+
+        // 成功状态：4 秒后自动回到 idle（3 秒 toast 显示 + 0.35 秒动画 + 0.65 秒缓冲）
+        if case .success = state {
+            toastResetTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { [weak self] _ in
+                Task { @MainActor in
+                    self?.syncToastState = .idle
+                }
+            }
+        }
+        // 失败状态：不自动消失，等用户手动点关闭
+    }
+
     private let container: CKContainer
     private let database: CKDatabase
     private let containerName = "iCloud.com.pangtong.bloom"
     
     /// 用户是否有权使用同步（Pro 用户）
     var isProProvider: () -> Bool = { false }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        toastResetTimer?.invalidate()
+    }
     
     private init() {
         container = CKContainer(identifier: containerName)
@@ -47,7 +79,7 @@ final class CloudSyncManager: ObservableObject {
         )
         
         Task {
-            await checkAccountStatus()
+            checkAccountStatus()
         }
     }
     
@@ -61,7 +93,9 @@ final class CloudSyncManager: ObservableObject {
                     isSyncAvailable = (status == .available)
                 }
             } catch {
+                #if DEBUG
                 print("[CloudSync] 账号状态检查失败: \(error)")
+                #endif
                 await MainActor.run {
                     isSyncAvailable = false
                 }
@@ -74,129 +108,166 @@ final class CloudSyncManager: ObservableObject {
     /// 同步喝水记录
     func syncWaterRecords(_ records: [WaterRecord]) async {
         guard await isSyncAllowed() else { return }
-        await MainActor.run { isSyncing = true }
-        
+        await MainActor.run {
+            isSyncing = true
+            showSyncToast(.syncing)
+        }
+
         do {
             let cloudRecords: [WaterRecord] = try await fetchAllRecords(recordType: "WaterRecord")
             let merged = mergeWaterRecords(local: records, cloud: cloudRecords)
-            
+
             for record in merged {
                 try await saveWaterRecord(record)
             }
-            
+
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                showSyncToast(.success(Date()))
             }
         } catch {
             await MainActor.run {
                 lastError = "同步失败: \(error.localizedDescription)"
+                showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步喝水记录失败: \(error)")
+                #endif
             }
         }
-        
+
         await MainActor.run { isSyncing = false }
     }
     
     /// 同步植物状态
     func syncPlant(_ plant: Plant) async {
         guard await isSyncAllowed() else { return }
-        await MainActor.run { isSyncing = true }
-        
+        await MainActor.run {
+            isSyncing = true
+            showSyncToast(.syncing)
+        }
+
         do {
             let cloudPlants: [Plant] = try await fetchAllRecords(recordType: "Plant")
             let latest = mergePlant(local: plant, cloud: cloudPlants)
             try await savePlant(latest)
-            
+
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                showSyncToast(.success(Date()))
             }
         } catch {
             await MainActor.run {
                 lastError = "同步植物失败: \(error.localizedDescription)"
+                showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步植物失败: \(error)")
+                #endif
             }
         }
-        
+
         await MainActor.run { isSyncing = false }
     }
-    
+
     /// 同步花园收藏
     func syncGardenItems(_ items: [GardenItem]) async {
         guard await isSyncAllowed() else { return }
-        await MainActor.run { isSyncing = true }
-        
+        await MainActor.run {
+            isSyncing = true
+            showSyncToast(.syncing)
+        }
+
         do {
             let cloudItems: [GardenItem] = try await fetchAllRecords(recordType: "GardenItem")
             let merged = mergeGardenItems(local: items, cloud: cloudItems)
-            
+
             for item in merged {
                 try await saveGardenItem(item)
             }
-            
+
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                showSyncToast(.success(Date()))
             }
         } catch {
             await MainActor.run {
                 lastError = "同步花园失败: \(error.localizedDescription)"
+                showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步花园失败: \(error)")
+                #endif
             }
         }
-        
+
         await MainActor.run { isSyncing = false }
     }
-    
+
     /// 同步用户配置
     func syncUserProfile(_ profile: UserProfile) async {
         guard isSyncAvailable else {
+            #if DEBUG
             print("⚠️ [CloudSync] CloudKit 不可用，跳过用户配置同步")
+            #endif
             return
         }
         guard await isSyncAllowed() else { return }
-        await MainActor.run { isSyncing = true }
-        
+        await MainActor.run {
+            isSyncing = true
+            showSyncToast(.syncing)
+        }
+
         do {
             let cloudProfiles: [UserProfile] = try await fetchAllRecords(recordType: "UserProfile")
             let latest = mergeUserProfile(local: profile, cloud: cloudProfiles)
             try await saveUserProfile(latest)
-            
+
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                showSyncToast(.success(Date()))
             }
         } catch {
             await MainActor.run {
                 lastError = "同步配置失败: \(error.localizedDescription)"
+                showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步配置失败: \(error)")
+                #endif
             }
         }
-        
+
         await MainActor.run { isSyncing = false }
     }
-    
+
     func syncAchievements(_ achievements: [Achievement]) async {
         guard await isSyncAllowed() else { return }
-        await MainActor.run { isSyncing = true }
-        
+        await MainActor.run {
+            isSyncing = true
+            showSyncToast(.syncing)
+        }
+
         do {
             let cloudAchievements: [Achievement] = try await fetchAllRecords(recordType: "Achievement")
             let merged = mergeAchievements(local: achievements, cloud: cloudAchievements)
             try await saveAchievements(merged)
-            
+
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                showSyncToast(.success(Date()))
             }
         } catch {
             await MainActor.run {
                 lastError = "同步成就失败: \(error.localizedDescription)"
+                showSyncToast(.failed(error.localizedDescription))
+                #if DEBUG
                 print("[CloudSync] 同步成就失败: \(error)")
+                #endif
             }
         }
-        
+
         await MainActor.run { isSyncing = false }
     }
     
@@ -208,7 +279,9 @@ final class CloudSyncManager: ObservableObject {
         do {
             return try await fetchAllRecords(recordType: "WaterRecord")
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载喝水记录失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -220,7 +293,9 @@ final class CloudSyncManager: ObservableObject {
             let plants: [Plant] = try await fetchAllRecords(recordType: "Plant")
             return plants.first
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载植物失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -231,7 +306,9 @@ final class CloudSyncManager: ObservableObject {
         do {
             return try await fetchAllRecords(recordType: "GardenItem")
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载花园失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -243,7 +320,9 @@ final class CloudSyncManager: ObservableObject {
             let profiles: [UserProfile] = try await fetchAllRecords(recordType: "UserProfile")
             return profiles.first
         } catch {
+            #if DEBUG
             print("[CloudSync] 下载配置失败: \(error)")
+            #endif
             return nil
         }
     }
@@ -391,8 +470,8 @@ final class CloudSyncManager: ObservableObject {
     }
     
     private func saveAchievements(_ achievements: [Achievement]) async throws {
-        let records = achievements.map { achievement in
-            var record = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
+        let records: [CKRecord] = achievements.map { achievement in
+            let record = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
             record["title"] = achievement.title
             record["description"] = achievement.description
             record["icon"] = achievement.icon
@@ -402,7 +481,7 @@ final class CloudSyncManager: ObservableObject {
             record["unlockedAt"] = achievement.unlockedAt as NSDate?
             return record
         }
-        
-        try await database.modifyRecords(saving: records, deleting: [])
+
+        _ = try await database.modifyRecords(saving: records, deleting: [])
     }
 }

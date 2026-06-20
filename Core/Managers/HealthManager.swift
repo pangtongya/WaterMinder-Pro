@@ -32,13 +32,27 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         guard HKHealthStore.isHealthDataAvailable(),
               let type = waterType,
               let store else { return false }
-        do {
-            try await store.requestAuthorization(toShare: [type], read: [type])
-            return isAuthorized
-        } catch {
-            print("[Health] 授权失败: \(error)")
-            return false
+        // 使用 withCheckedContinuation 兼容低版本 iOS，避免某些 iOS 版本上崩溃
+        return await withCheckedContinuation { cont in
+            store.requestAuthorization(toShare: [type], read: [type]) { success, error in
+                if let error {
+                    #if DEBUG
+                    print("[Health] 授权失败: \(error)")
+                    #endif
+                }
+                cont.resume(returning: success)
+            }
         }
+    }
+
+    func requestAuthorizationIfNeeded() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType else { return false }
+        let status = store?.authorizationStatus(for: type) ?? .notDetermined
+        if status == .notDetermined {
+            return await requestAuthorization()
+        }
+        return status == .sharingAuthorized
     }
 
     // MARK: - 写入喝水记录
@@ -47,6 +61,84 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         guard let type = waterType, let store else { return }
         let quantity = HKQuantity(unit: .liter(), doubleValue: Double(amountML) / 1000.0)
         let sample = HKQuantitySample(type: type, quantity: quantity, start: date, end: date)
-        try await store.save(sample)
+        // 使用 withCheckedThrowingContinuation 兼容所有 iOS 17+ 版本
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+            store.save(sample) { _, error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume()
+                }
+            }
+        }
+    }
+
+    /// 从 HealthKit 删除一条喝水样本（当用户在 App 内删除记录时反向同步）
+    func deleteWater(sampleUUID: UUID) async {
+        guard let type = waterType, let store else { return }
+        // 使用传统 HKSampleQuery + withCheckedContinuation 实现异步删除
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            let predicate = HKQuery.predicateForObjects(with: [sampleUUID])
+            let query = HKSampleQuery(
+                sampleType: type,
+                predicate: predicate,
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                if let samples = samples, !samples.isEmpty {
+                    store.delete(samples) { _, _ in
+                        cont.resume()
+                    }
+                } else {
+                    cont.resume()
+                }
+            }
+            store.execute(query)
+        }
+    }
+
+    // MARK: - 读取喝水记录（用于双向同步）
+
+    /// 从 Health App 读取指定时间范围内的喝水记录
+    /// - Parameters:
+    ///   - from: 起始时间（不含）
+    ///   - to: 结束时间（含）
+    /// - Returns: HKQuantitySample 数组，按时间倒序
+    func fetchWaterRecords(from start: Date, to end: Date) async throws -> [HKQuantitySample] {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType,
+              let store else {
+            return []
+        }
+
+        let predicate = HKQuery.predicateForSamples(
+            withStart: start,
+            end: end,
+            options: .strictStartDate
+        )
+        let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+
+        return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<[HKQuantitySample], Error>) in
+            let query = HKSampleQuery(
+                sampleType: type,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [sort]
+            ) { _, samples, error in
+                if let error {
+                    cont.resume(throwing: error)
+                } else {
+                    cont.resume(returning: samples as? [HKQuantitySample] ?? [])
+                }
+            }
+            store.execute(query)
+        }
+    }
+
+    /// 调试日志：仅 DEBUG 模式输出
+    private func logDebug(_ message: String) {
+        #if DEBUG
+        print("[Health] \(message)")
+        #endif
     }
 }

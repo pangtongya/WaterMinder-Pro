@@ -2,25 +2,36 @@
 // @main 入口 —— 阶段1 最小骨架，阶段3 重写完整根视图
 
 import SwiftUI
+import WidgetKit
+import Combine
 
 @main
 struct BloomApp: App {
     // 关键 store：立即加载（决定显示引导还是主界面）
     @StateObject private var userStore = UserStore()
-    
+
     // 其他 store：在 .task 中异步初始化
     @StateObject private var waterStore = WaterStore()
     @StateObject private var plantEngine = PlantEngine()
     @StateObject private var gardenStore = GardenStore()
     @StateObject private var achievementStore = AchievementStore()
-    @StateObject private var storeManager = StoreManager.shared
-    @StateObject private var notificationManager = NotificationManager.shared
-    @StateObject private var healthManager = HealthManager.shared
-    @StateObject private var cloudSyncManager = CloudSyncManager.shared
-    @StateObject private var themeManager = ThemeManager.shared
+
+    // 单例 manager：用 @ObservedObject 避免 SwiftUI 错误地假设拥有它们
+    @ObservedObject private var storeManager = StoreManager.shared
+    @ObservedObject private var notificationManager = NotificationManager.shared
+    @ObservedObject private var healthManager = HealthManager.shared
+    @ObservedObject private var cloudSyncManager = CloudSyncManager.shared
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @ObservedObject private var healthSyncService = HealthSyncService.shared
     
     @State private var isReady = false
-
+    @Environment(\.scenePhase) private var scenePhase
+    
+    init() {
+        // 注册后台任务（尽早注册）
+        BackgroundTaskManager.shared.registerBackgroundTasks()
+    }
+    
     var body: some Scene {
         WindowGroup {
             Group {
@@ -41,10 +52,28 @@ struct BloomApp: App {
             .environmentObject(healthManager)
             .environmentObject(cloudSyncManager)
             .environmentObject(themeManager)
+            .environmentObject(healthSyncService)
             .preferredColorScheme(userStore.colorScheme)
+            .environment(\.scenePhase, scenePhase)
             .task {
                 // 异步完成所有初始化
                 await initializeApp()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.refreshWidget)) { _ in
+                // 接收 Widget 数据刷新通知：写数据到 App Group，然后 reload Widget
+                WidgetRefresher.shared.refresh(
+                    waterStore: waterStore,
+                    userStore: userStore,
+                    plantEngine: plantEngine
+                )
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .background {
+                    // App 进入后台时调度后台任务
+                    BackgroundTaskManager.shared.scheduleHealthDecayTask()
+                    BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
+                }
             }
         }
     }
@@ -54,11 +83,29 @@ struct BloomApp: App {
     private func initializeApp() async {
         // 1. 注入 store 间的依赖
         wireStores()
-        
+
         // 2. 加载保存的主题
         themeManager.loadSavedTheme(isPro: userStore.isPro)
-        
-        // 3. 标记就绪（显示 RootView）
+
+        // 3. 数据归档（启动时检查，超过 90 天的旧记录移至归档文件）
+        waterStore.autoArchiveIfNeeded()
+
+        // 4. 请求 HealthKit 授权（仅在未决定时弹窗）
+        await healthManager.requestAuthorizationIfNeeded()
+
+        // 5. 同步 HealthKit 数据（如果有权限）
+        if healthManager.isAuthorized {
+            await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
+        }
+
+        // 6. 首次 Widget 数据同步（让 Widget 立即有数据）
+        WidgetRefresher.shared.refresh(
+            waterStore: waterStore,
+            userStore: userStore,
+            plantEngine: plantEngine
+        )
+
+        // 7. 标记就绪（显示 RootView）
         isReady = true
     }
     

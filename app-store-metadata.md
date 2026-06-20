@@ -12,7 +12,7 @@
 - **Chinese:** 喝水养成，养成你的植物
 
 ### Bundle ID
-`com.yourcompany.bloom` (replace with your actual bundle ID)
+`com.pangtong.bloom` (matches project configuration)
 
 ### Version
 1.0.0 (Initial Release)
@@ -147,9 +147,9 @@ Free (with In-App Purchases)
 
 ### In-App Purchases
 
-#### Bloom Pro - Monthly
-- **Product ID:** `com.yourcompany.bloom.pro.monthly`
-- **Price:** $2.99 / ¥18
+#### Bloom Pro - Yearly
+- **Product ID:** `com.pangtong.bloom.pro.yearly` (matches `StoreManager.swift`)
+- **Price:** $19.99 / ¥128
 - **Type:** Auto-Renewable Subscription
 - **Features:**
   - Advanced Analytics
@@ -157,11 +157,11 @@ Free (with In-App Purchases)
   - Ad-Free Experience
   - iCloud Sync & Backup
 
-#### Bloom Pro - Yearly (Best Value)
-- **Product ID:** `com.yourcompany.bloom.pro.yearly`
-- **Price:** $19.99 / ¥128
-- **Type:** Auto-Renewable Subscription
-- **Features:** Same as Monthly (save 44%)
+#### Bloom Pro - Lifetime (Best Value)
+- **Product ID:** `com.pangtong.bloom.pro.lifetime` (matches `StoreManager.swift`)
+- **Price:** $49.99 / ¥298
+- **Type:** Non-Consumable
+- **Features:** All Pro features, forever (no recurring charge)
 
 ---
 
@@ -207,7 +207,7 @@ Free (with In-App Purchases)
 **None** - We don't collect anonymous data either
 
 ### Privacy Policy URL
-`https://your-website.com/privacy-policy.html` (host the privacy-policy.html file)
+`https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html` (host the privacy-policy.html file)
 
 ---
 
@@ -293,13 +293,13 @@ Test credentials: Not required
 ## 📞 Support Information
 
 ### Support URL
-`https://your-website.com/support`
+`https://pangtongya.github.io/Bloom-Website/support.html`
 
 ### Marketing URL (optional)
-`https://your-website.com/bloom`
+`https://pangtongya.github.io/Bloom-Website`
 
 ### Contact Email
-`support@yourcompany.com`
+`pongtom@qq.com`
 
 ---
 

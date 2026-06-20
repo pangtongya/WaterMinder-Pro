@@ -14,7 +14,11 @@ struct OnboardingView: View {
 
     @State private var step = 1
     @State private var plantName = "小绿"
-    @State private var selectedGoal = 2000
+    /// 每日目标默认值：根据用户语言/地区自动推荐（US→8oz标准≈2400ml，其他→2000ml）
+    @State private var selectedGoal = {
+        let locale = Locale.current.identifier
+        return locale.contains("US") ? 2400 : 2000
+    }()
     @State private var demoWatered = false  // 第1步浇水演示
 
     var body: some View {
@@ -76,7 +80,7 @@ struct OnboardingView: View {
 
             Spacer()
 
-            nextButton(title: demoWatered ? "开始养护" : "先浇一次水试试") {
+            nextButton(title: demoWatered ? "开始养护".localized : "先浇一次水试试".localized) {
                 if demoWatered {
                     withAnimation { step = 2 }
                 } else {
@@ -91,7 +95,7 @@ struct OnboardingView: View {
     private var demoPlant: some View {
         // 演示植物：浇水前蔫，浇水后绽放
         let demoPlant = Plant(
-            name: "小绿",
+            name: "小绿".localized,
             stage: demoWatered ? .seedling : .seed,
             health: demoWatered ? 90 : 40
         )
@@ -126,7 +130,7 @@ struct OnboardingView: View {
                     .padding(14)
                     .background(Color(.tertiarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .onChange(of: plantName) { _ in
+                    .onChange(of: plantName) { _, _ in
                         if plantName.count > 8 { plantName = String(plantName.prefix(8)) }
                     }
             }
@@ -138,22 +142,35 @@ struct OnboardingView: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
-                    ForEach([1500, 2000, 2500, 3000], id: \.self) { goal in
+                    ForEach(Locale.current.identifier.contains("US") ? [1800, 2400, 3000, 3600] : [1500, 2000, 2500, 3000], id: \.self) { goal in
                         Button {
                             Haptics.light()
                             selectedGoal = goal
                         } label: {
-                            Text("\(goal)")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .foregroundStyle(selectedGoal == goal ? .white : .primary)
-                                .background(selectedGoal == goal ? Color.bloomPrimary : Color(.tertiarySystemBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            VStack(spacing: 2) {
+                                Text("\(goal)")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                if Locale.current.identifier.contains("US") {
+                                    Text("\(Int(Double(goal) / 29.574))oz")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(selectedGoal == goal ? .white.opacity(0.7) : .secondary)
+                                } else {
+                                    Text("ml")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(selectedGoal == goal ? .white.opacity(0.7) : .secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .foregroundStyle(selectedGoal == goal ? .white : .primary)
+                            .background(selectedGoal == goal ? Color.bloomPrimary : Color(.tertiarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                     }
                 }
-                Text("ml / 天 · 建议成人每日 2000ml".localized)
+                Text(Locale.current.identifier.contains("US")
+                     ? NSLocalizedString("基于美国标准：每天 8 杯 × 8oz ≈ 2400ml，可根据个人情况调整", comment: "")
+                     : NSLocalizedString("基于中国卫健委建议：每日 2000ml，可根据个人情况调整", comment: ""))
                     .font(.system(size: 12))
                     .foregroundStyle(.tertiary)
             }
@@ -178,10 +195,9 @@ struct OnboardingView: View {
                 .font(.system(size: 56))
 
             VStack(spacing: 10) {
-                Text(String(format: "让 %@ 在渴的时候", plantName))
+                Text(String(format: NSLocalizedString("让 %@ 在渴的时候", comment: ""), plantName))
                     .font(.system(size: 24, weight: .bold))
-                    .textContentType(.none)
-                Text("能告诉你")
+                Text(NSLocalizedString("能告诉你", comment: "Can tell you"))
                     .font(.system(size: 24, weight: .bold))
 
                 Text("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。".localized)
@@ -194,7 +210,7 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 12) {
-                nextButton(title: "开启通知") {
+                nextButton(title: "开启通知".localized) {
                     finishOnboarding(enableNotification: true)
                 }
 
@@ -222,7 +238,7 @@ struct OnboardingView: View {
         // 种下新植物（用用户起的名字和目标）
         plantEngine.plantNew(
             speciesID: PlantSpecies.sunflower.id,
-            name: plantName.isEmpty ? "小绿" : plantName
+            name: plantName.isEmpty ? "小绿".localized : plantName
         )
 
         // 通知权限
@@ -258,11 +274,4 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
     }
-}
-
-#Preview {
-    OnboardingView()
-        .environmentObject(UserStore())
-        .environmentObject(PlantEngine())
-        .environmentObject(NotificationManager.shared)
 }

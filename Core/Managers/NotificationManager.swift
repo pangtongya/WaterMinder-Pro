@@ -33,7 +33,9 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
         do {
             return try await center.requestAuthorization(options: [.alert, .sound, .badge])
         } catch {
+            #if DEBUG
             print("[Notification] 授权失败: \(error)")
+            #endif
             return false
         }
     }
@@ -74,7 +76,9 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
         
         // 如果在免打扰时段，不排程
         guard !isInQuietHours(currentHour) else {
+            #if DEBUG
             print("[Notification] 免打扰时段，跳过排程")
+            #endif
             return
         }
 
@@ -104,7 +108,9 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
             )
             center.add(request) { error in
                 if let error = error {
+                    #if DEBUG
                     print("[Notification] 调度失败 #\(i): \(error)")
+                    #endif
                 }
             }
         }

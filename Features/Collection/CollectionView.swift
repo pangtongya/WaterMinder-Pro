@@ -36,7 +36,7 @@ struct CollectionView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("我的花园".localized)
+        .navigationTitle(L.myGarden)
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showPaywall) {
             PaywallView()
@@ -48,11 +48,11 @@ struct CollectionView: View {
 
     private var overviewCard: some View {
         HStack(spacing: 0) {
-            overviewStat(value: "\(gardenStore.totalCount)", label: "已收获", icon: "🌸")
+            overviewStat(value: "\(gardenStore.totalCount)", label: "Harvested".localized, icon: "🌸")
             Divider().frame(height: 40)
-            overviewStat(value: "\(gardenStore.uniqueSpeciesCount)", label: "品种数", icon: "🌿")
+            overviewStat(value: "\(gardenStore.uniqueSpeciesCount)", label: "Species".localized, icon: "🌿")
             Divider().frame(height: 40)
-            overviewStat(value: "\(PlantLibrary.all.count)", label: "图鉴总数", icon: "📖")
+            overviewStat(value: "\(PlantLibrary.all.count)", label: "Total".localized, icon: "📖")
         }
         .padding(.vertical, 16)
         .background(Color(.secondarySystemBackground))
@@ -84,7 +84,7 @@ struct CollectionView: View {
 
             Text(plantEngine.plant.name)
                 .font(.system(size: 16, weight: .semibold))
-            Text("\(plantEngine.plant.species.name) · \(plantEngine.plant.stage.name)")
+            Text("\(plantEngine.plant.species.localizedName) · \(plantEngine.plant.stage.name)")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
         }
         .padding(18)
@@ -115,8 +115,8 @@ struct CollectionView: View {
         VStack(spacing: 6) {
             Text(item.species.symbol).font(.system(size: 32))
             Text(item.name).font(.system(size: 13, weight: .semibold))
-            Text(item.species.name).font(.system(size: 11)).foregroundStyle(.secondary)
-            Text("养护 \(item.daysToHarvest) 天")
+            Text(item.species.localizedName).font(.system(size: 11)).foregroundStyle(.secondary)
+            Text(String(format: L.daysToHarvest, item.daysToHarvest))
                 .font(.system(size: 10)).foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
@@ -173,14 +173,5 @@ struct CollectionView: View {
         .onTapGesture {
             if locked { showPaywall = true }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        CollectionView()
-            .environmentObject(GardenStore())
-            .environmentObject(PlantEngine())
-            .environmentObject(StoreManager.shared)
     }
 }

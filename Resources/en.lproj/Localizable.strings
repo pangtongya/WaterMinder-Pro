@@ -1,652 +1,124 @@
 /*
   Localizable.strings (English)
   Bloom
+  A complete rewrite of the English localization file.
+  All keys use the "key" = "value"; format with proper escaping.
 */
 
-"健康度" = "健康度";
-"用 Bloom 养成喝水好习惯" = "用 Bloom 养成喝水好习惯";
-"成就解锁！" = "成就解锁！";
-"data.plantSymbol)
-                    .font(.system(size: 120))
-                
-                // 植物信息
-                VStack(spacing: 16) {
-                    Text(data.plantName)
-                        .font(.system(size: 56, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text(data.plantStage)
-                        .font(.system(size: 32))
-                        .foregroundColor(.white.opacity(0.9))
-                }
-                
-                // 健康度
-                VStack(spacing: 12" = "data.plantSymbol)
-                    .font(.system(size: 120))
-                
-                // 植物信息
-                VStack(spacing: 16) {
-                    Text(data.plantName)
-                        .font(.system(size: 56, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text(data.plantStage)
-                        .font(.system(size: 32))
-                        .foregroundColor(.white.opacity(0.9))
-                }
-                
-                // 健康度
-                VStack(spacing: 12";
-"植物健康" = "植物健康";
-"状态" = "状态";
-"更新于 \(data.lastUpdated, style: .time)" = "更新于 \(data.lastUpdated, style: .time)";
-"data.lastUpdated, style: .time)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            // 右侧：进度环
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 8)
-                
-                Circle()
-                    .trim(from: 0, to: data.progressPercentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.bloom, Color.bloomPrimary],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 2" = "data.lastUpdated, style: .time)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            // 右侧：进度环
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 8)
-                
-                Circle()
-                    .trim(from: 0, to: data.progressPercentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.bloom, Color.bloomPrimary],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 2";
-"喝水趋势" = "喝水趋势";
-"最佳喝水时间" = "最佳喝水时间";
-"上午 9-10 点是你喝水最频繁的时段，继续保持！" = "上午 9-10 点是你喝水最频繁的时段，继续保持！";
-"每周习惯" = "每周习惯";
-"周三、周五是你的喝水高峰日" = "周三、周五是你的喝水高峰日";
-"成就进度" = "成就进度";
-"已解锁" = "已解锁";
-"高级统计" = "高级统计";
-"range.rawValue).tag(range)
-            }
-        }
-        .pickerStyle(.segmented)
-    }
-    
-    // MARK: - 核心统计卡片
-    
-    private var statsOverview: some View {
-        let stats = calculateStats()
-        
-        return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12" = "range.rawValue).tag(range)
-            }
-        }
-        .pickerStyle(.segmented)
-    }
-    
-    // MARK: - 核心统计卡片
-    
-    private var statsOverview: some View {
-        let stats = calculateStats()
-        
-        return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12";
-"成就" = "成就";
-"数据已成功恢复" = "数据已成功恢复";
-"请在系统设置中允许 Bloom 访问健康数据" = "请在系统设置中允许 Bloom 访问健康数据";
-"请在系统设置中允许 Bloom 发送通知" = "请在系统设置中允许 Bloom 发送通知";
-"暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。" = "暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。";
-"确定要恢复养护吗？植物将重新开始生长。" = "确定要恢复养护吗？植物将重新开始生长。";
-"植物名字" = "植物名字";
-"品种" = "品种";
-"恢复养护" = "Resume Care";
-"剩余 (plantEngine.plant.remainingPauseDays) 天" = "剩余 (plantEngine.plant.remainingPauseDays) 天";
-"暂停养护" = "Pause Care";
-"出差/旅行" = "出差/旅行";
-"我的植物" = "我的植物";
-"每日目标" = "每日目标";
-"建议成人每日饮水 2000ml" = "建议成人每日饮水 2000ml";
-"每 \($0) 分钟" = "每 \($0) 分钟";
-"提醒" = "提醒";
-"开启后，植物口渴时会提醒你来浇水" = "开启后，植物口渴时会提醒你来浇水";
-"连接健康 App" = "连接健康 App";
-"健康 App" = "健康 App";
-"主题颜色" = "主题颜色";
-"外观" = "外观";
-"iCloud 同步" = "iCloud 同步";
-"未登录" = "未登录";
-"自动同步到 iCloud，多设备数据保持一致" = "自动同步到 iCloud，多设备数据保持一致";
-"导出数据备份" = "导出数据备份";
-"从备份恢复" = "从备份恢复";
-"上次备份" = "上次备份";
-"数据备份" = "数据备份";
-"导出 JSON 文件可保存到 Files App，用于数据备份或迁移" = "导出 JSON 文件可保存到 Files App，用于数据备份或迁移";
-"Bloom Pro 已解锁" = "Bloom Pro 已解锁";
-"升级 Bloom Pro" = "升级 Bloom Pro";
-"解锁更多品种" = "解锁更多品种";
-"版本" = "版本";
-"关于" = "关于";
-"去设置" = "去设置";
-"恢复" = "恢复";
-"恢复购买" = "恢复购买";
+// MARK: - Garden (主界面)
+"健康度" = "Health";
+"植物健康" = "Plant Health";
+"状态" = "Status";
+"今日记录" = "Today's Log";
+"我的植物" = "My Plant";
+"正在养护" = "Currently Growing";
+"暂停养护中" = "Care Paused";
+"可以收获了！" = "Ready to Harvest!";
+"长大啦！" = "It Grew!";
+"继续守护" = "Keep Nurturing";
+"收获 %@" = "Harvest %@";
+"剩余 %@ 天" = "%@ days left";
+"%@ 还没喝到水" = "%@ hasn't been watered yet";
+"免费用户最多保存 %d 株植物。升级 Pro 解锁无限花园！" = "Free users can save up to %d plants. Upgrade to Pro for unlimited garden!";
+"暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。" = "Your plant won't wither while paused, up to 14 days. Great for business trips or travel.";
+"进入了「%@」阶段" = "Reached the %@ stage";
+
+// MARK: - Statistics (统计)
+"喝水趋势" = "Water Intake Trend";
+"最佳喝水时间" = "Peak Hydration Time";
+"每周习惯" = "Weekly Habits";
+"成就进度" = "Achievement Progress";
+"已解锁" = "Unlocked";
+"高级统计" = "Advanced Insights";
+"深度洞察" = "Deep Insights";
+"植物成长历程" = "Plant Growth Journey";
+"深度数据洞察" = "Deep Data Insights";
+"解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。" = "Unlock goal achievement rate, average completion, growth history and more to build healthier hydration habits scientifically.";
+
+// MARK: - Achievements (成就)
+"成就" = "Achievements";
+"成就解锁！" = "Achievement Unlocked!";
+"太棒了！" = "Amazing!";
+"连续 %d 天达标" = "%d-day streak achieved";
+"再坚持 %d 天 → %@ %@" = "Keep going for %d more days → %@ %@";
+"下一阶段：%@" = "Next Stage: %@";
+
+// MARK: - Settings (设置)
 "设置" = "Settings";
-"恢复成功" = "恢复成功";
-"恢复失败" = "恢复失败";
-"健康权限" = "健康权限";
-"通知权限" = "通知权限";
-"plantEngine.plant.species.name)
-                    .foregroundStyle(.secondary)
-                Text(plantEngine.plant.species.symbol)
-            }
+"每日目标" = "Daily Goal";
+"建议成人每日饮水 2000ml" = "Recommended 2000ml/day for adults";
+"每 %d 分钟" = "Every %d minutes";
+"提醒" = "Reminders";
+"开启后，植物口渴时会提醒你来浇水" = "When enabled, your plant will remind you to water it";
+"连接健康 App" = "Connect to Health App";
+"健康 App" = "Health App";
+"主题颜色" = "Theme Color";
+"外观" = "Appearance";
+"主题外观" = "Theme Appearance";
+"选择你喜欢的主题外观" = "Choose your favorite theme appearance";
+"iCloud 同步" = "iCloud Sync";
+"未登录" = "Not Signed In";
+"自动同步到 iCloud，多设备数据保持一致" = "Auto-sync to iCloud for consistency across devices";
+"数据备份" = "Data Backup";
+"导出数据备份" = "Export Data Backup";
+"从备份恢复" = "Restore from Backup";
+"上次备份" = "Last Backup";
+"导出 JSON 文件可保存到 Files App，用于数据备份或迁移" = "Export JSON to Files App for backup or migration";
+"Bloom Pro 已解锁" = "Bloom Pro Unlocked";
+"升级 Bloom Pro" = "Upgrade to Bloom Pro";
+"解锁更多品种" = "Unlock More Species";
+"版本" = "Version";
+"关于" = "About";
+"植物名字" = "Plant Name";
+"品种" = "Species";
+"暂停养护" = "Pause Care";
+"恢复养护" = "Resume Care";
+"出差/旅行" = "Business / Travel";
+"去设置" = "Go to Settings";
+"恢复" = "Restore";
+"恢复购买" = "Restore Purchases";
+"恢复成功" = "Restore Successful";
+"恢复失败" = "Restore Failed";
+"恢复购买成功" = "Restore Successful";
+"恢复购买失败" = "Restore Failed";
+"未找到已购买的记录" = "No previous purchases found";
+"数据已成功恢复" = "Data restored successfully";
+"请在系统设置中允许 Bloom 访问健康数据" = "Please allow Bloom to access Health Data in Settings";
+"请在系统设置中允许 Bloom 发送通知" = "Please allow Bloom to send notifications in Settings";
+"健康权限" = "Health Permission";
+"通知权限" = "Notification Permission";
+"确定要恢复养护吗？植物将重新开始生长。" = "Resume care? Your plant will start growing again.";
+"感谢您的支持！Pro 权益已解锁。" = "Thank you for your support! Pro features are now unlocked.";
 
-            // 暂停/恢复养护
-            if plantEngine.plant.isPaused {
-                Button(role: .destructive" = "plantEngine.plant.species.name)
-                    .foregroundStyle(.secondary)
-                Text(plantEngine.plant.species.symbol)
-            }
-
-            // 暂停/恢复养护
-            if plantEngine.plant.isPaused {
-                Button(role: .destructive";
-"选择你喜欢的主题外观" = "选择你喜欢的主题外观";
-"主题外观" = "主题外观";
-"正在养护" = "正在养护";
-"收获墙" = "收获墙";
-"养护 \(item.daysToHarvest) 天" = "养护 \(item.daysToHarvest) 天";
-"品种图鉴" = "品种图鉴";
-"未收集" = "未收集";
+// MARK: - Collection (花园收藏)
+"收获墙" = "Harvest Wall";
+"品种图鉴" = "Species Collection";
+"未收集" = "Not Collected";
 "我的花园" = "My Garden";
-"icon).font(.system(size: 20))
-            Text(value).font(.system(size: 20, weight: .bold, design: .rounded))
-            Text(label).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - 当前植物
-
-    private var currentPlantCard: some View {
-        VStack(spacing: 12" = "icon).font(.system(size: 20))
-            Text(value).font(.system(size: 20, weight: .bold, design: .rounded))
-            Text(label).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - 当前植物
-
-    private var currentPlantCard: some View {
-        VStack(spacing: 12";
-"太棒了！" = "太棒了！";
-"achievement.title)
-                    .font(.system(size: 14, weight: .semibold))
-                    .lineLimit(1)
-                
-                Text(achievement.description)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
-            
-            // 进度条
-            if !achievement.isUnlocked {
-                ProgressView(value: achievement.progressPercentage)
-                    .tint(.bloomPrimary" = "achievement.title)
-                    .font(.system(size: 14, weight: .semibold))
-                    .lineLimit(1)
-                
-                Text(achievement.description)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
-            
-            // 进度条
-            if !achievement.isUnlocked {
-                ProgressView(value: achievement.progressPercentage)
-                    .tint(.bloomPrimary";
-"连续 \(streak) 天达标" = "连续 \(streak) 天达标";
-"再坚持 \(next.days - streak) 天 → \(next.emoji) \(next.title)" = "再坚持 \(next.days - streak) 天 → \(next.emoji) \(next.title)";
-"下一阶段：\(next)" = "下一阶段：\(next)";
-"可以收获了！" = "可以收获了！";
-"HealthCalculator.statusMessage(plantEngine.plant.health))
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(healthColor)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            // 健康度进度条
-            healthBar
-
-            // 成长进度（距离下一阶段）
-            growthProgressBar
-
-            // 连胜 + 里程碑
-            if waterStore.currentStreak > 0 {
-                streakRow
-            }
-        }
-        .padding(18)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-    }
-
-    // MARK: - 子视图
-
-    private var stageBadge: some View {
-        Text(plantEngine.plant.stage.emoji)
-            .font(.system(size: 24))
-            .padding(8)
-            .background(Color.bloomPrimary.opacity(0.12))
-            .clipShape(Circle())
-    }
-
-    private var healthBar: some View {
-        VStack(alignment: .leading, spacing: 4" = "HealthCalculator.statusMessage(plantEngine.plant.health))
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(healthColor)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            // 健康度进度条
-            healthBar
-
-            // 成长进度（距离下一阶段）
-            growthProgressBar
-
-            // 连胜 + 里程碑
-            if waterStore.currentStreak > 0 {
-                streakRow
-            }
-        }
-        .padding(18)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-    }
-
-    // MARK: - 子视图
-
-    private var stageBadge: some View {
-        Text(plantEngine.plant.stage.emoji)
-            .font(.system(size: 24))
-            .padding(8)
-            .background(Color.bloomPrimary.opacity(0.12))
-            .clipShape(Circle())
-    }
-
-    private var healthBar: some View {
-        VStack(alignment: .leading, spacing: 4";
-"免费用户最多保存 \(GardenStore.freeUserGardenLimit) 株植物。升级 Pro 解锁无限花园！" = "免费用户最多保存 \(GardenStore.freeUserGardenLimit) 株植物。升级 Pro 解锁无限花园！";
-"暂停养护中" = "暂停养护中";
-"剩余 \(plantEngine.plant.remainingPauseDays) 天" = "剩余 \(plantEngine.plant.remainingPauseDays) 天";
-"收获 \(plantEngine.plant.name)" = "收获 \(plantEngine.plant.name)";
-"今日记录" = "今日记录";
-"\(plantEngine.plant.name) 还没喝到水" = "\(plantEngine.plant.name) 还没喝到水";
-"长大啦！" = "长大啦！";
-"进入了「\(stage.name)」阶段" = "进入了「\(stage.name)」阶段";
-"继续守护" = "继续守护";
-"升级 Pro" = "Upgrade to Pro";
+"养护 %d 天" = "%d days to harvest";
 "花园已满" = "Garden Full";
-"record.timeString)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(record.formattedAmount)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.bloomWater)
-        }
-        .padding(.vertical, 8)
-    }
-}
 
-// MARK: - 阶段升级庆祝
-
-struct StageUpCelebration: View {
-    let stage: GrowthStage
-    let onDismiss: () -> Void
-
-    @State private var appear = false
-
-    var body: some View {
-        ZStack {
-            // 半透明遮罩
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
-                .onTapGesture { onDismiss() }
-
-            VStack(spacing: 18) {
-                // emoji + 光环
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color.bloomGold.opacity(0.5), .clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 70
-                            )
-                        )
-                        .frame(width: 140, height: 140)
-                        .scaleEffect(appear ? 1.0 : 0.4)
-
-                    Text(stage.emoji)
-                        .font(.system(size: 76))
-                        .scaleEffect(appear ? 1.0 : 0.3" = "record.timeString)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(record.formattedAmount)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.bloomWater)
-        }
-        .padding(.vertical, 8)
-    }
-}
-
-// MARK: - 阶段升级庆祝
-
-struct StageUpCelebration: View {
-    let stage: GrowthStage
-    let onDismiss: () -> Void
-
-    @State private var appear = false
-
-    var body: some View {
-        ZStack {
-            // 半透明遮罩
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
-                .onTapGesture { onDismiss() }
-
-            VStack(spacing: 18) {
-                // emoji + 光环
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color.bloomGold.opacity(0.5), .clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 70
-                            )
-                        )
-                        .frame(width: 140, height: 140)
-                        .scaleEffect(appear ? 1.0 : 0.4)
-
-                    Text(stage.emoji)
-                        .font(.system(size: 76))
-                        .scaleEffect(appear ? 1.0 : 0.3";
-"深度洞察" = "深度洞察";
-"植物成长历程" = "植物成长历程";
-"\(plantEngine.plant.species.name) · \(plantEngine.plant.stage.name) · 种植 \(plantEngine.plant.ageInDays) 天" = "\(plantEngine.plant.species.name) · \(plantEngine.plant.stage.name) · 种植 \(plantEngine.plant.ageInDays) 天";
-"深度数据洞察" = "深度数据洞察";
-"解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。" = "解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。";
+// MARK: - Paywall (付费墙)
 "解锁 Bloom Pro" = "Unlock Bloom Pro";
 "喝水记录" = "Water Log";
-"$0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+"解锁更多生命" = "Unlock More Lives";
+"养出更美的花园，收集全部品种" = "Grow a more beautiful garden, collect all species";
+"升级 Pro" = "Upgrade to Pro";
+"无限植物品种" = "Unlimited Plant Species";
+"解锁全部7种植物，打造梦幻花园" = "Unlock all 7 plants and build your dream garden";
+"订阅自动续期，可随时在系统设置中取消" = "Subscription auto-renews, cancel anytime in Settings";
+"最划算" = "Best Value";
+"关闭" = "Close";
+"正在加载..." = "Loading...";
 
-                    chartView
-                        .frame(height: 200)
-                }
-                .padding(16)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .padding(.horizontal, 20)
-
-                // Pro 深度洞察（免费用户看到锁定卡片）
-                proInsightCard
-                    .padding(.horizontal, 20)
-
-                Spacer(minLength: 80)
-            }
-            .padding(.top, 4)
-        }
-        .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground)" = "$0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-
-                    chartView
-                        .frame(height: 200)
-                }
-                .padding(16)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .padding(.horizontal, 20)
-
-                // Pro 深度洞察（免费用户看到锁定卡片）
-                proInsightCard
-                    .padding(.horizontal, 20)
-
-                Spacer(minLength: 80)
-            }
-            .padding(.top, 4)
-        }
-        .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground)";
-"value).font(.system(size: 20, weight: .bold, design: .rounded))
-            }
-            Text(label).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Pro 深度洞察卡
-
-    private var proInsightCard: some View {
-        Group {
-            if isPro {
-                VStack(alignment: .leading, spacing: 14" = "value).font(.system(size: 20, weight: .bold, design: .rounded))
-            }
-            Text(label).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Pro 深度洞察卡
-
-    private var proInsightCard: some View {
-        Group {
-            if isPro {
-                VStack(alignment: .leading, spacing: 14";
-"label).font(.system(size: 13)).foregroundStyle(.secondary)
-                Text(detail).font(.system(size: 11)).foregroundStyle(.tertiary)
-            }
-            Spacer()
-            Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
-        }
-    }
-
-    // MARK: - 统计计算
-
-    private var periodData: [(date: Date, amount: Int)] {
-        let cal = Calendar.current
-        let end = Date()
-        let start = cal.date(byAdding: .day, value: -(period.days - 1), to: end) ?? Date()
-        return waterStore.dailyTotals(from: start, to: end)
-    }
-
-    private var totalDays: Int { periodData.count }
-
-    private var achievedDays: Int {
-        periodData.filter { $0.amount >= userStore.dailyGoal }.count
-    }
-
-    private var achievementRate: Int {
-        guard totalDays > 0 else { return 0 }
-        return Int(Double(achievedDays) / Double(totalDays) * 100)
-    }
-
-    private var avgDailyMl: Int {
-        guard totalDays > 0 else { return 0 }
-        return periodData.reduce(0) { $0 + $1.amount } / totalDays
-    }
-
-    private var avgCompletionPercent: Int {
-        guard userStore.dailyGoal > 0 else { return 0 }
-        return min(Int(Double(avgDailyMl) / Double(userStore.dailyGoal) * 100), 999)
-    }
-
-    private var bestDayAmount: Int {
-        periodData.map(\.amount).max() ?? 0
-    }
-
-    private var bestDayLabel: String {
-        guard let best = periodData.max(by: { $0.amount < $1.amount }" = "label).font(.system(size: 13)).foregroundStyle(.secondary)
-                Text(detail).font(.system(size: 11)).foregroundStyle(.tertiary)
-            }
-            Spacer()
-            Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
-        }
-    }
-
-    // MARK: - 统计计算
-
-    private var periodData: [(date: Date, amount: Int)] {
-        let cal = Calendar.current
-        let end = Date()
-        let start = cal.date(byAdding: .day, value: -(period.days - 1), to: end) ?? Date()
-        return waterStore.dailyTotals(from: start, to: end)
-    }
-
-    private var totalDays: Int { periodData.count }
-
-    private var achievedDays: Int {
-        periodData.filter { $0.amount >= userStore.dailyGoal }.count
-    }
-
-    private var achievementRate: Int {
-        guard totalDays > 0 else { return 0 }
-        return Int(Double(achievedDays) / Double(totalDays) * 100)
-    }
-
-    private var avgDailyMl: Int {
-        guard totalDays > 0 else { return 0 }
-        return periodData.reduce(0) { $0 + $1.amount } / totalDays
-    }
-
-    private var avgCompletionPercent: Int {
-        guard userStore.dailyGoal > 0 else { return 0 }
-        return min(Int(Double(avgDailyMl) / Double(userStore.dailyGoal) * 100), 999)
-    }
-
-    private var bestDayAmount: Int {
-        periodData.map(\.amount).max() ?? 0
-    }
-
-    private var bestDayLabel: String {
-        guard let best = periodData.max(by: { $0.amount < $1.amount }";
-"⚠️ 沙盒测试模式" = "⚠️ 沙盒测试模式";
-"🧪 开发模式" = "🧪 开发模式";
-"请在 App Store Connect 配置商品后测试" = "请在 App Store Connect 配置商品后测试";
-"或在 Scheme 中添加 BLOOM_DEV_MODE=1 环境变量" = "或在 Scheme 中添加 BLOOM_DEV_MODE=1 环境变量";
+// MARK: - Dev / IAP
+"⚠️ 沙盒测试模式" = "⚠️ Sandbox Mode";
+"🧪 开发模式" = "🧪 Dev Mode";
+"请在 App Store Connect 配置商品后测试" = "Please configure products in App Store Connect before testing";
+"或在 Scheme 中添加 BLOOM_DEV_MODE=1 环境变量" = "Or add BLOOM_DEV_MODE=1 env variable in your scheme";
 "暂未配置内购商品" = "IAP Products Not Configured";
-"解锁更多生命" = "解锁更多生命";
-"养出更美的花园，收集全部品种" = "养出更美的花园，收集全部品种";
-"订阅自动续期，可随时在系统设置中取消" = "订阅自动续期，可随时在系统设置中取消";
-"最划算" = "最划算";
-"关闭" = "关闭";
-"product.displayPrice)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-            }
-            .padding(16)
-            .background(isSelected ? Color.bloomPrimary.opacity(0.1) : Color(.secondarySystemBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.bloomPrimary : Color.clear, lineWidth: 2)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .disabled(storeManager.isPurchasing)
-        .overlay {
-            if storeManager.isPurchasing && isSelected {
-                ProgressView()
-            }
-        }
-    }
 
-    private func purchase(_ product: Product) async {
-        await storeManager.purchase(product)
-        // 购买成功后关闭
-        if storeManager.isPro {
-            Haptics.success()
-            dismiss()
-        }
-    }
-}
-
-#Preview {
-    PaywallView()
-        .environmentObject(StoreManager.shared" = "product.displayPrice)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-            }
-            .padding(16)
-            .background(isSelected ? Color.bloomPrimary.opacity(0.1) : Color(.secondarySystemBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.bloomPrimary : Color.clear, lineWidth: 2)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .disabled(storeManager.isPurchasing)
-        .overlay {
-            if storeManager.isPurchasing && isSelected {
-                ProgressView()
-            }
-        }
-    }
-
-    private func purchase(_ product: Product) async {
-        await storeManager.purchase(product)
-        // 购买成功后关闭
-        if storeManager.isPro {
-            Haptics.success()
-            dismiss()
-        }
-    }
-}
-
-#Preview {
-    PaywallView()
-        .environmentObject(StoreManager.shared";
+// MARK: - Onboarding (引导)
 "养活一株植物" = "Keep a Plant Alive";
 "只需要你好好喝水" = "Just by Drinking Water Regularly";
 "你每喝一口水，它就长大一点" = "It grows with every sip you drink";
@@ -654,77 +126,279 @@ struct StageUpCelebration: View {
 "给它起个名字" = "Give it a name";
 "每日喝水目标" = "Daily Water Goal";
 "ml / 天 · 建议成人每日 2000ml" = "ml/day · Recommended 2000ml for adults";
-"让 \(plantName) 在渴的时候" = "Let \(plantName) when it's thirsty";
+"让 %@ 在渴的时候" = "Let %@ when it's thirsty";
 "能告诉你" = "Can tell you";
-"开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。" = "开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。";
+"开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。" = "Enable notifications so your plant can tell you when it's thirsty.\nYou can skip this, but you might forget about it.";
 "暂不开启" = "Not Now";
-"title)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bloomPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-    }
-}
+"用 Bloom 养成喝水好习惯" = "Build good hydration habits with Bloom";
+"开始养护" = "Start Caring";
+"先浇一次水试试" = "Try Watering Once";
+"下一步" = "Next";
+"开启通知" = "Enable Notifications";
 
-// MARK: - 触觉反馈工具
+// MARK: - Tabs (标签栏)
+"花园" = "Garden";
+"记录" = "Log";
+"收藏" = "Collection";
 
-enum Haptics {
-    static func light() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-    }
-    static func medium() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-    }
-    static func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-    }
-}
+// MARK: - Network (网络状态)
+"离线模式 - 数据已本地保存" = "Offline Mode - Data saved locally";
 
-#Preview {
-    OnboardingView()
-        .environmentObject(UserStore())
-        .environmentObject(PlantEngine())
-        .environmentObject(NotificationManager.shared" = "title)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bloomPrimary)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-    }
-}
+// MARK: - Widget
+"更新于" = "Updated at";
 
-// MARK: - 触觉反馈工具
+// MARK: - Notification (通知文案)
+"🌱 %@ 想喝点水了" = "🌱 %@ is thirsty";
+"它正等着你呢，来一口吧" = "It's waiting for you, take a sip";
+"💧 该浇水啦" = "💧 Time to water";
+"%@ 长得正欢，别让它干着" = "%@ is growing well, don't let it dry";
+"🌿 %@ 在向你招手" = "🌿 %@ is waving at you";
+"喝杯水，它会更有精神" = "Drink water, it will feel better";
+"🪴 你的小植物在期盼" = "🪴 Your plant is looking forward";
+"一口水，换来它的笑容" = "A sip for its smile";
+"🥀 %@ 有点蔫了……" = "🥀 %@ is wilting...";
+"它渴了好久了，快来救救它" = "It's been thirsty for a long time, come save it";
+"🍂 它快撑不住了" = "🍂 It can barely hold on";
+"%@ 需要你，现在就喝一口吧" = "%@ needs you, drink now";
+"😟 %@ 无精打采" = "😟 %@ is listless";
+"叶子都垂下来了，快给它浇水" = "Leaves are drooping, water it quickly";
+"💧 它在等你" = "💧 It's waiting";
+"%@ 已经等很久了，别让它失望" = "%@ has waited too long, don't disappoint";
+"💔 %@ 快要枯萎了" = "💔 %@ is about to wither";
+"再不喝水就来不及了！求求你" = "It's too late if you don't drink! Please";
+"🆘 紧急求救" = "🆘 Emergency";
+"%@ 命悬一线，立刻喝杯水吧" = "%@ is dying, drink now";
+"🎉 %@ 今天喝饱啦" = "🎉 %@ is full today";
+"它精神焕发，明天也要继续哦" = "It's refreshed, keep going tomorrow";
+"🌸 今天完成得真好" = "🌸 Great job today";
+"%@ 因为你又长大了一点" = "%@ grew a little because of you";
+"喝水时间" = "Water Time";
+"该喝水啦！💧" = "Time to drink! 💧";
 
-enum Haptics {
-    static func light() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-    }
-    static func medium() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-    }
-    static func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-    }
-}
+// MARK: - Statistics Detail (统计详情)
+"平均每日" = "Average Daily";
+"达标率" = "Goal Rate";
+"总喝水量" = "Total Intake";
+"最长连续" = "Longest Streak";
+"天" = "days";
+"实际" = "Actual";
+"平均" = "Average";
+"目标" = "Goal";
+"暂无足够数据分析高峰时段" = "Not enough data for peak hours";
+"%s 是你喝水最频繁的时段，继续保持！" = "%s is your peak hydration time, keep it up!";
+"暂无足够数据分析每周习惯" = "Not enough data for weekly habits";
+"周%s 是你的喝水高峰日" = "Week %s is your peak day";
+"最近解锁" = "Recently Unlocked";
+"平均 %dml / 天（达到目标的 %d%%），继续保持！" = "Average %dml/day (%d%% of goal), keep going!";
+"平均 %dml / 天（达到目标的 %d%%），还差 %dml 达标" = "Average %dml/day (%d%% of goal), %dml more to reach goal";
+"平均 %dml / 天（达到目标的 %d%%），建议增加喝水频次" = "Average %dml/day (%d%% of goal), suggest increasing frequency";
+"新记录" = "New Record";
 
-#Preview {
-    OnboardingView()
-        .environmentObject(UserStore())
-        .environmentObject(PlantEngine())
-        .environmentObject(NotificationManager.shared";
+// MARK: - Garden Details (花园详情)
+"剩余 %d 天" = "%d days left";
 
-// Missing strings added during final audit
-"花园限制提示 %d 株植物" = "Free users can save up to %d plants. Upgrade to Pro for unlimited garden!";
-"剩余 %d 天" = "%d days remaining";
-"恢复购买成功" = "Restore Successful";
-"恢复购买失败" = "Restore Failed";
-"未找到已购买的记录" = "No previous purchases found";
-"感谢您的支持！Pro 权益已解锁。" = "Thank you for your support! Pro features unlocked.";
-"无限植物品种" = "Unlimited Plant Species";
-"解锁全部7种植物，打造梦幻花园" = "Unlock all 7 plants and build your dream garden";
-"正在加载..." = "Loading...";
+// MARK: - Health Status (健康状态)
+"它快要枯萎了……快救救它" = "It's about to wither... Save it";
+"它有点蔫了，需要喝水" = "It's wilting, needs water";
+"它状态还行" = "It's doing okay";
+"它生机勃勃！" = "It's vibrant!";
+
+// MARK: - Achievements (成就详情)
+"喝水达人" = "Hydration Master";
+"坚持不懈" = "Consistency Champion";
+"花园大师" = "Garden Expert";
+"社交分享" = "Social Sharing";
+"重要里程碑" = "Important Milestones";
+"第一口水" = "First Sip";
+"完成第一次喝水记录" = "Complete your first water log";
+"初入门径" = "Getting Started";
+"累计喝水10次" = "Log 10 drinks";
+"饮水习惯" = "Hydration Habit";
+"累计喝水50次" = "Log 50 drinks";
+"百杯成就" = "Century Cup";
+"累计喝水100次" = "Log 100 drinks";
+"喝水大师" = "Hydration Master";
+"累计喝水500次" = "Log 500 drinks";
+"千杯不醉" = "Thousand Cups";
+"累计喝水1000次" = "Log 1000 drinks";
+"三日坚持" = "Three Day Streak";
+"连续3天完成喝水目标" = "Complete goal for 3 consecutive days";
+"一周达人" = "Weekly Champion";
+"连续7天完成喝水目标" = "Complete goal for 7 consecutive days";
+"两周习惯" = "Two Week Habit";
+"连续14天完成喝水目标" = "Complete goal for 14 consecutive days";
+"月度挑战" = "Monthly Challenge";
+"连续30天完成喝水目标" = "Complete goal for 30 consecutive days";
+"双月坚守" = "Two Month Dedication";
+"初露锋芒" = "First Sprout";
+"坚持一周" = "One Week Strong";
+"两周达人" = "Two Week Expert";
+"三周传奇" = "Three Week Legend";
+"满月之约" = "Full Moon Promise";
+"百日不辍" = "Hundred Day Journey";
+"连续60天完成喝水目标" = "Complete goal for 60 consecutive days";
+"百日筑基" = "Hundred Day Foundation";
+"连续100天完成喝水目标" = "Complete goal for 100 consecutive days";
+"首次收获" = "First Harvest";
+"第一次收获植物到花园" = "Harvest your first plant to the garden";
+"花园新手" = "Garden Novice";
+"累计收获5次" = "Harvest 5 times";
+"园丁认证" = "Certified Gardener";
+"累计收获10次" = "Harvest 10 times";
+"花园大师" = "Garden Master";
+"累计收获25次" = "Harvest 25 times";
+"传奇园丁" = "Legendary Gardener";
+"累计收获50次" = "Harvest 50 times";
+"品种收集家" = "Species Collector";
+"收集5种不同植物品种" = "Collect 5 different plant species";
+"收集7种不同植物品种" = "Collect 7 different plant species";
+"植物学家" = "Botanist";
+"全品种大师" = "Master Collector";
+"收集所有植物品种" = "Collect all plant species";
+"初次分享" = "First Share";
+"第一次分享植物状态" = "Share your plant status for the first time";
+"社交达人" = "Social Expert";
+"累计分享10次" = "Share 10 times";
+"万水千山" = "Ten Thousand Waters";
+"累计喝水10000ml" = "Log 10000ml total";
+"五万成就" = "Fifty Thousand Achievement";
+"累计喝水50000ml" = "Log 50000ml total";
+"十万喝水王" = "Hundred Thousand Champion";
+"累计喝水100000ml" = "Log 100000ml total";
+
+// MARK: - Additional UI strings (其他界面字符串)
+"已满级" = "Max Level";
+"成长进度" = "Growth Progress";
+"当前连胜" = "Current Streak";
+"最长连胜" = "Longest Streak";
+"周均 ml" = "Weekly Avg ml";
+"本期达标率" = "Period Achievement Rate";
+"%d / %d 天达标" = "%d / %d days achieved";
+"平均目标完成度" = "Average Goal Completion";
+"平均每天 %d ml" = "Average %d ml per day";
+"本期最佳" = "Best Day";
+"%@ · %@ · 种植 %d 天" = "%@ · %@ · %d days old";
+"暂无数据" = "No Data";
+"%@ 已成熟！" = "%@ is mature!";
+"阶段:" = "Stage:";
+"天数:" = "Days:";
+"%d 天" = "%d days";
+"今日目标达成！" = "Goal Achieved!";
+"还差 %d ml" = "%d ml to go";
+"恭喜！你的植物已经成长到 %@ 阶段" = "Congratulations! Your plant has grown to %@ stage";
+"收获并保存到收藏" = "Harvest and Save";
+"收获植物" = "Harvest Plant";
+"取消" = "Cancel";
+"好的" = "OK";
+"太好了" = "Great!";
+"暂停" = "Pause";
+"今日喝水" = "Today's Water Intake";
+"目标" = "Goal";
+"总次数" = "Total Records";
+"总水量" = "Total Amount";
+"同步中..." = "Syncing...";
+"iCloud 同步成功" = "iCloud Sync Success";
+"iCloud 同步失败" = "iCloud Sync Failed";
+"正在保存数据到 iCloud" = "Saving data to iCloud...";
+"你的数据已同步到所有设备" = "Your data is synced to all devices";
+"本周" = "This Week";
+"本月" = "This Month";
+"相比订阅节省 %d%%" = "Save %d%% compared to subscription";
+"基于美国标准：每天 8 杯 × 8oz ≈ 2400ml，可根据个人情况调整" = "Based on US standard: 8 cups × 8oz ≈ 2400ml, adjust to your needs";
+"基于中国卫健委建议：每日 2000ml，可根据个人情况调整" = "Based on China's health guidelines: 2000ml/day, adjust to your needs";
+"同步失败：%@" = "Sync failed: %@";
+
+// MARK: - Paywall (新增)
+"一次购买，永久解锁" = "One-time purchase, permanent unlock";
+"全年无限养护" = "Unlimited care all year";
+"高级统计" = "Advanced Statistics";
+"完整的数据分析和可视化报告" = "Complete data analysis and visualization reports";
+"自定义主题" = "Custom Themes";
+"解锁所有 Pro 主题和外观" = "Unlock all Pro themes and appearances";
+"无限植物品种" = "Unlimited Plants";
+"解锁全部7种植物，打造梦幻花园" = "Unlock all 7 plant species for your dream garden";
+"多设备同步" = "Multi-device Sync";
+"CloudKit 数据同步和备份" = "CloudKit data sync and backup";
+"终身买断" = "Lifetime Purchase";
+"Pro 年订阅" = "Pro Yearly";
+"最划算" = "Best Value";
+"最受欢迎" = "Popular";
+"服务条款" = "Terms of Service";
+"隐私政策" = "Privacy Policy";
+
+// MARK: - Collection (新增)
+"已收获" = "Harvested";
+"品种数" = "Species";
+"图鉴总数" = "Total";
+
+// MARK: - Theme (新增)
+"Pro 主题" = "Pro Themes";
+"免费主题" = "Free Themes";
+"已拥有" = "Owned";
+"解锁" = "Unlock";
+
+// MARK: - CupType (新增)
+"小杯" = "Small Cup";
+"中杯" = "Medium Cup";
+"大杯" = "Large Cup";
+"水瓶" = "Bottle";
+
+// MARK: - Growth Stage (新增)
+"种子" = "Seed";
+"发芽" = "Sprout";
+"幼苗" = "Seedling";
+"成长期" = "Growing";
+"成熟" = "Mature";
+"开花" = "Blooming";
+
+// MARK: - Plant Health (新增)
+"植物渴了" = "Plant is thirsty";
+"植物状态一般" = "Plant is okay";
+"植物状态不错" = "Plant is doing well";
+"植物很健康" = "Plant is healthy";
+"植物快枯萎了" = "Plant is wilting";
+
+// MARK: - Additional (新增)
+"Pro Themes" = "Pro Themes";
+"Free Themes" = "Free Themes";
+"Plant Health" = "Plant Health";
+"Status" = "Status";
+"Updated at" = "Updated at";
+"Paused" = "Paused";
+"Pause Care" = "Pause Care";
+"ml" = "ml";
+"Bloom Progress" = "Bloom Progress";
+"View your hydration progress and plant status" = "View your hydration progress and plant status";
+"No Data" = "No Data";
+"Harvested" = "Harvested";
+"Species" = "Species";
+"Total" = "Total";
+"Complete data analysis and visualization reports" = "Complete data analysis and visualization reports";
+"Unlock all Pro themes and appearances" = "Unlock all Pro themes and appearances";
+"Unlock all 7 plant species for your dream garden" = "Unlock all 7 plant species for your dream garden";
+"CloudKit data sync and backup" = "CloudKit data sync and backup";
+"Lifetime Purchase" = "Lifetime Purchase";
+"Pro Yearly" = "Pro Yearly";
+"Best Value" = "Best Value";
+"Popular" = "Popular";
+"Terms of Service" = "Terms of Service";
+"Privacy Policy" = "Privacy Policy";
+"One-time purchase, permanent unlock" = "One-time purchase, permanent unlock";
+"Unlimited care all year" = "Unlimited care all year";
+"Save %d%% vs subscription" = "Save %d%% vs subscription";
+"Unsupported backup version: %@" = "Unsupported backup version: %@";
+"Backup file not found" = "Backup file not found";
+"Invalid backup data format" = "Invalid backup data format";
+"Backup file is corrupted (checksum verification failed)" = "Backup file is corrupted (checksum verification failed)";
+"Export failed: %@" = "Export failed: %@";
+"Import failed: %@" = "Import failed: %@";
+"Unable to access document directory" = "Unable to access document directory";
+"File not found: %@" = "File not found: %@";
+"Read failed (%@): %@" = "Read failed (%@): %@";
+"Write failed (%@): %@" = "Write failed (%@): %@";
+"Decode failed (%@): %@" = "Decode failed (%@): %@";
+"Encode failed (%@): %@" = "Encode failed (%@): %@";
+"Data corrupted: %@" = "Data corrupted: %@";
+"Data validation failed (%@): %@" = "Data validation failed (%@): %@";
+"Backup failed (%@): %@" = "Backup failed (%@): %@";
+"Recovery failed (%@): %@" = "Recovery failed (%@): %@";
