@@ -22,14 +22,22 @@ final class BackgroundTaskManager {
             forTaskWithIdentifier: Self.healthDecayTaskIdentifier,
             using: nil
         ) { task in
-            self.handleHealthDecayTask(task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleHealthDecayTask(refreshTask)
         }
 
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: Self.widgetRefreshTaskIdentifier,
             using: nil
         ) { task in
-            self.handleWidgetRefreshTask(task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleWidgetRefreshTask(refreshTask)
         }
     }
 

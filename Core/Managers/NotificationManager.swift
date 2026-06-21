@@ -74,21 +74,23 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
     ///   - health: 植物健康度，用于挑选情感文案
     ///   - plantName: 植物名字
     ///   - isPaused: 是否暂停养护（暂停期间不发送）
-    func scheduleSmartReminder(intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
+    func scheduleSmartReminder(intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) async {
         guard !isPaused else {
             cancelReminders()
             return
         }
 
-        cancelReminders()
+        guard await isAuthorized else {
+            cancelReminders()
+            return
+        }
 
-        let safeInterval = max(15, intervalMinutes) // 最少 15 分钟，避免骚扰
         let calendar = Calendar.current
         var next = Date()
         var scheduled = 0
 
         while scheduled < maxScheduled {
-            guard let advanced = calendar.date(byAdding: .minute, value: safeInterval, to: next) else {
+            guard let advanced = calendar.date(byAdding: .minute, value: max(15, intervalMinutes), to: next) else {
                 break
             }
             next = advanced
@@ -116,7 +118,7 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
                 content: nc,
                 trigger: trigger
             )
-            center.add(request)
+            try? await center.add(request)
             scheduled += 1
         }
     }
@@ -169,9 +171,9 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
     // MARK: - 重新排程（喝水后可调用，让文案跟上植物状态）
 
     /// 若已开启提醒，根据最新健康度刷新排程（喝水后可调用，让文案跟上植物状态）
-    func refreshIfNeeded(enabled: Bool, intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
+    func refreshIfNeeded(enabled: Bool, intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) async {
         guard enabled else { return }
-        scheduleSmartReminder(
+        await scheduleSmartReminder(
             intervalMinutes: intervalMinutes,
             health: health,
             plantName: plantName,
