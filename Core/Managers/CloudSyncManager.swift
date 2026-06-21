@@ -367,6 +367,11 @@ final class CloudSyncManager: ObservableObject {
         ckRecord["data"] = try JSONEncoder().encode(record)
         ckRecord["lastModified"] = Date()
         ckRecord["sortKey"] = record.createdAt.timeIntervalSince1970
+        // hkSampleUUID 作为独立查询字段：便于通过 NSPredicate 在云端精确定位同一条 HealthKit 样本，
+        // 解决"不同设备上同一杯水分成两条不同记录"的问题
+        if let hkSampleUUID = record.hkSampleUUID {
+            ckRecord["hkSampleUUID"] = hkSampleUUID.uuidString as CKRecordValue
+        }
         _ = try await database.save(ckRecord)
     }
     
@@ -394,24 +399,46 @@ final class CloudSyncManager: ObservableObject {
     
     // MARK: - 数据合并策略
     
+    /// 多设备合并喝水记录：hkSampleUUID 优先 → id 次优先 → createdAt 兜底
+    /// 关键修复：从 HealthKit 导入的同一条样本在不同设备上 WaterRecord.id 不同，但 hkSampleUUID 相同，
+    /// 必须按 hkSampleUUID 去重，否则用户会看到"同一杯水"被计为两次。
     private func mergeWaterRecords(local: [WaterRecord], cloud: [WaterRecord]) -> [WaterRecord] {
-        var dict: [UUID: WaterRecord] = [:]
-        
+        // 先按 hkSampleUUID 建立索引（来自 HealthKit 的样本可以精确去重）
+        var byHKUUID: [UUID: WaterRecord] = [:]
+        // 按 id 建立其他记录（非 HealthKit 来源）的索引
+        var byID: [UUID: WaterRecord] = [:]
+
+        // 1) 加载云端数据到两张索引
         for record in cloud {
-            dict[record.id] = record
-        }
-        
-        for record in local {
-            if let existing = dict[record.id] {
-                if record.createdAt > existing.createdAt {
-                    dict[record.id] = record
-                }
+            if let hk = record.hkSampleUUID {
+                byHKUUID[hk] = record
             } else {
-                dict[record.id] = record
+                byID[record.id] = record
             }
         }
-        
-        return Array(dict.values).sorted { $0.createdAt > $1.createdAt }
+
+        // 2) 本地记录与云端合并
+        for record in local {
+            if let hk = record.hkSampleUUID {
+                // HealthKit 来源：若云端已有同一样本，保留 createdAt 较新的（避免时间漂移）
+                if let existing = byHKUUID[hk] {
+                    byHKUUID[hk] = record.createdAt >= existing.createdAt ? record : existing
+                } else {
+                    byHKUUID[hk] = record
+                }
+            } else {
+                // 非 HealthKit 来源：按 id 去重，保留 createdAt 较新的
+                if let existing = byID[record.id] {
+                    byID[record.id] = record.createdAt >= existing.createdAt ? record : existing
+                } else {
+                    byID[record.id] = record
+                }
+            }
+        }
+
+        // 3) 合并两张索引，按 createdAt 倒序
+        let all = Array(byHKUUID.values) + Array(byID.values)
+        return all.sorted { $0.createdAt > $1.createdAt }
     }
     
     /// 多设备合并植物：优先 health 更高 / stage 更成熟者，只在两者相同时才用 lastWateredAt 破局
