@@ -83,10 +83,11 @@ final class HealthCalculatorTests: XCTestCase {
         XCTAssertEqual(result, 80, accuracy: 0.01) // 健康度不变
     }
 
-    func test刚好48小时仍不衰减() {
+    func test刚好48小时开始衰减() {
+        // 刚好 48 小时：gracePeriodEnd == Date()，所以 Date() < gracePeriodEnd 为 false
         let planted = Calendar.current.date(byAdding: .second, value: -48 * 60 * 60, to: Date())!
         let result = HealthCalculator.applyDailyDecay(currentHealth: 80, consecutiveMissedDays: 1, plantedAt: planted)
-        XCTAssertEqual(result, 80, accuracy: 0.01)
+        XCTAssertEqual(result, 75, accuracy: 0.01) // 开始衰减
     }
 
     func test超过48小时开始衰减() {
