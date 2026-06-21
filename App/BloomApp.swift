@@ -68,13 +68,31 @@ struct BloomApp: App {
                 )
                 WidgetCenter.shared.reloadAllTimelines()
             }
-            .onChange(of: scenePhase) { newPhase in
+            .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .background {
-                    // App 进入后台时调度后台任务
+                    // 进入后台：1. 写入 lastActiveDate（为后台任务的健康衰减做准备）
+                    UserDefaults.standard.set(
+                        Date().timeIntervalSince1970,
+                        forKey: AppConstants.UserDefaultsKeys.lastActiveDate
+                    )
+                    // 2. 调度后台任务（植物健康衰减 + Widget 刷新）
                     BackgroundTaskManager.shared.scheduleHealthDecayTask()
                     BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
                 } else if newPhase == .active {
-                    // App 回到前台时重新排程通知（每天都能收到提醒的关键）
+                    // 回到前台：1. 刷新 HealthKit 同步
+                    Task { @MainActor in
+                        if healthManager.isAuthorized {
+                            await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
+                        }
+                    }
+                    // 2. 刷新 Widget 数据
+                    WidgetRefresher.shared.refresh(
+                        waterStore: waterStore,
+                        userStore: userStore,
+                        plantEngine: plantEngine
+                    )
+                    WidgetCenter.shared.reloadAllTimelines()
+                    // 3. 重新排程通知（每天都能收到提醒的关键）
                     if userStore.reminderEnabled {
                         Task {
                             await notificationManager.requestAuthorizationIfNeeded()
