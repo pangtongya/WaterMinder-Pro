@@ -145,7 +145,15 @@ struct BloomApp: App {
             )
         }
 
-        // 8. 标记就绪（显示 RootView）
+        // 8. 关键：启动时刷新成就（根据已有记录重新计算一次，
+        //    确保老用户升级后成就能正确显示）
+        achievementStore.refreshFromCurrentRecords(
+            totalRecords: waterStore.records.count,
+            totalAmount: waterStore.records.reduce(0) { $0 + $1.amount },
+            longestStreak: waterStore.longestStreak
+        )
+
+        // 9. 标记就绪（显示 RootView）
         isReady = true
     }
     
