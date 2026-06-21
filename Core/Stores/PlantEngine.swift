@@ -324,4 +324,15 @@ final class PlantEngine: ObservableObject {
         plant = newPlant
         persist()
     }
+    
+    // MARK: - 撤销支持
+    
+    /// 恢复植物状态（用于撤销删除记录）
+    /// - Parameter previousPlant: 删除前的植物状态
+    func restorePlantState(_ previousPlant: Plant) {
+        plant = previousPlant
+        persist()
+        // 不触发云同步，避免覆盖其他设备的状态
+        // 如果用户需要同步，下次正常操作时会自动同步
+    }
 }

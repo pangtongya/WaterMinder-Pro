@@ -426,9 +426,14 @@ struct TodayRecordsCard: View {
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var plantEngine: PlantEngine
     @EnvironmentObject var healthManager: HealthManager
+    
     @State private var recordToDelete: WaterRecord?
     @State private var showDeleteConfirm = false
-
+    @State private var showUndoSnackbar = false
+    @State private var deletedRecord: WaterRecord?
+    @State private var plantStateBeforeDelete: Plant?
+    @State private var undoWorkItem: DispatchWorkItem?
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -441,7 +446,7 @@ struct TodayRecordsCard: View {
                         .foregroundStyle(Color.bloomWater)
                 }
             }
-
+            
             if waterStore.todayRecords.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "drop")
@@ -463,25 +468,92 @@ struct TodayRecordsCard: View {
                     }
                 }
             }
+            
+            // 撤销 Snackbar
+            if showUndoSnackbar, let deleted = deletedRecord {
+                UndoSnackbarView(
+                    deletedRecord: deleted,
+                    onUndo: performUndo,
+                    onDismiss: dismissUndoSnackbar
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .padding(18)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .animation(.easeInOut(duration: 0.3), value: showUndoSnackbar)
         .alert(NSLocalizedString("删除这条记录？", comment: "Delete this record?"), isPresented: $showDeleteConfirm) {
             Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
             Button(NSLocalizedString("删除", comment: "Delete"), role: .destructive) {
                 if let record = recordToDelete {
-                    Task {
-                        await plantEngine.deleteRecord(record, waterStore: waterStore, healthManager: healthManager)
-                    }
-                    Haptics.light()
+                    performDelete(record)
                 }
             }
         } message: {
             Text(NSLocalizedString("删除后将同步更新植物状态", comment: "Will update plant state after deletion"))
         }
     }
-
+    
+    // MARK: - 删除记录（带撤销功能）
+    
+    private func performDelete(_ record: WaterRecord) {
+        // 保存删除前的植物状态
+        plantStateBeforeDelete = plantEngine.plant
+        deletedRecord = record
+        
+        // 执行删除
+        Task {
+            await plantEngine.deleteRecord(record, waterStore: waterStore, healthManager: healthManager)
+        }
+        
+        // 显示撤销 Snackbar
+        withAnimation {
+            showUndoSnackbar = true
+        }
+        
+        // 5秒后自动消失
+        let workItem = DispatchWorkItem {
+            dismissUndoSnackbar()
+        }
+        undoWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: workItem)
+        
+        Haptics.light()
+    }
+    
+    // MARK: - 撤销删除
+    
+    private func performUndo() {
+        guard let record = deletedRecord, let previousPlant = plantStateBeforeDelete else { return }
+        
+        // 取消自动消失
+        undoWorkItem?.cancel()
+        
+        // 恢复记录
+        waterStore.add(record)
+        
+        // 恢复植物状态
+        plantEngine.restorePlantState(previousPlant)
+        
+        // 移除 Snackbar
+        withAnimation {
+            showUndoSnackbar = false
+        }
+        
+        Haptics.success()
+    }
+    
+    // MARK: - 消失撤销 Snackbar
+    
+    private func dismissUndoSnackbar() {
+        withAnimation {
+            showUndoSnackbar = false
+        }
+        deletedRecord = nil
+        plantStateBeforeDelete = nil
+    }
+    
     private func recordRow(_ record: WaterRecord) -> some View {
         HStack(spacing: 12) {
             ZStack {
@@ -509,6 +581,40 @@ struct TodayRecordsCard: View {
                 Label(NSLocalizedString("删除", comment: "Delete"), systemImage: "trash")
             }
         }
+    }
+}
+
+// MARK: - 撤销 Snackbar
+
+struct UndoSnackbarView: View {
+    let deletedRecord: WaterRecord
+    let onUndo: () -> Void
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.bloomSuccess)
+            
+            Text(String(format: NSLocalizedString("已删除 %@", comment: "Deleted [amount]"), deletedRecord.formattedAmount))
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.primary)
+            
+            Spacer()
+            
+            Button {
+                onUndo()
+            } label: {
+                Text(NSLocalizedString("撤销", comment: "Undo"))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.bloomPrimary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 
