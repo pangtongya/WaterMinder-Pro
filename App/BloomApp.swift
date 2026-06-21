@@ -163,6 +163,9 @@ struct BloomApp: App {
         storeManager.onProUnlocked = { [weak userStore] productID in
             userStore?.unlockPro(productID: productID)
         }
+        storeManager.onProRevoked = { [weak userStore] in
+            userStore?.revokePro()
+        }
         
         // 注入 CloudSync 依赖
         cloudSyncManager.isProProvider = { [weak userStore] in
