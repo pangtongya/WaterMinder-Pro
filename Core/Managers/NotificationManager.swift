@@ -66,72 +66,14 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
 
     // MARK: - 喝水提醒（智能排程）
 
-    /// 设置喝水提醒，文案随植物状态变化
+    /// 用日历时间排程（iOS 推荐的可靠方式）
+    /// 在 8:00 - 22:00 范围内按 interval 均匀分发，跳过免打扰时段
+    /// 每次调用都会先清除旧的排程，确保不会与之前的配置残留冲突
     /// - Parameters:
-    ///   - intervalMinutes: 提醒间隔（分钟）
-    ///   - health: 植物健康度
+    ///   - intervalMinutes: 提醒间隔（分钟），最少 15 分钟
+    ///   - health: 植物健康度，用于挑选情感文案
     ///   - plantName: 植物名字
-    ///   - isPaused: 是否暂停养护
-    func scheduleReminder(intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
-        // 暂停养护期间不发送通知
-        guard !isPaused else {
-            cancelReminders()
-            return
-        }
-
-        cancelReminders()
-
-        let interval = TimeInterval(max(15, intervalMinutes) * 60) // 最少 15 分钟，防止骚扰
-
-        // 计算当前时间到夜间免打扰开始还有多久
-        let now = Date()
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: now)
-
-        // 如果在免打扰时段，不排程
-        guard !isInQuietHours(currentHour) else {
-            #if DEBUG
-            print("[Notification] 免打扰时段，跳过排程")
-            #endif
-            return
-        }
-
-        // 排程 maxScheduled 条错峰通知，文案各不相同
-        for i in 0..<maxScheduled {
-            let content = NotificationContent.pick(for: health, plantName: plantName)
-            let nc = UNMutableNotificationContent()
-            nc.title = content.title
-            nc.body = content.body
-            nc.sound = .default
-
-            // 智能跳过免打扰时段
-            let fireInterval = interval * Double(i + 1)
-            let fireDate = now.addingTimeInterval(fireInterval)
-            let fireHour = calendar.component(.hour, from: fireDate)
-
-            // 如果触发时间在免打扰时段，跳过该条通知
-            if isInQuietHours(fireHour) {
-                continue
-            }
-
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: fireInterval, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: "\(idPrefix)\(i)",
-                content: nc,
-                trigger: trigger
-            )
-            center.add(request) { error in
-                if let error = error {
-                    #if DEBUG
-                    print("[Notification] 调度失败 #\(i): \(error)")
-                    #endif
-                }
-            }
-        }
-    }
-
-    /// 用日历时间排程（更可靠，跨天不受影响）
-    /// 进入前台时调用：在 8:00 - 22:00 范围内按间隔均匀分发
+    ///   - isPaused: 是否暂停养护（暂停期间不发送）
     func scheduleSmartReminder(intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
         guard !isPaused else {
             cancelReminders()
@@ -140,14 +82,17 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
 
         cancelReminders()
 
-        let safeInterval = max(15, intervalMinutes) // 最少 15 分钟
+        let safeInterval = max(15, intervalMinutes) // 最少 15 分钟，避免骚扰
         let calendar = Calendar.current
         var next = Date()
+        var scheduled = 0
 
-        for i in 0..<maxScheduled {
-            next = calendar.date(byAdding: .minute, value: safeInterval * (i + 1), to: next) ?? Date()
+        while scheduled < maxScheduled {
+            guard let advanced = calendar.date(byAdding: .minute, value: safeInterval, to: next) else {
+                break
+            }
+            next = advanced
             let hour = calendar.component(.hour, from: next)
-            let mins = calendar.component(.minute, from: next)
 
             // 跳过免打扰时段（22:00 - 次日 08:00）
             if isInQuietHours(hour) { continue }
@@ -158,18 +103,21 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
             nc.body = content.body
             nc.sound = .default
 
-            // 用日历时间触发（比 TimeInterval 更精确
-            var components = DateComponents()
-            components.hour = hour
-            components.minute = mins
+            // 使用完整日期组件（year + month + day + hour + minute）
+            // 只写 hour:minute 会导致系统匹配"下一次出现该时分"，在跨天时无法保证日期正确
+            let components = calendar.dateComponents(
+                [.year, .month, .day, .hour, .minute],
+                from: next
+            )
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
 
             let request = UNNotificationRequest(
-                identifier: "\(idPrefix)\(i)",
+                identifier: "\(idPrefix)\(scheduled)",
                 content: nc,
                 trigger: trigger
             )
             center.add(request)
+            scheduled += 1
         }
     }
     
@@ -220,10 +168,10 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
 
     // MARK: - 重新排程（喝水后可调用，让文案跟上植物状态）
 
-    /// 若已开启提醒，根据最新健康度刷新排程
+    /// 若已开启提醒，根据最新健康度刷新排程（喝水后可调用，让文案跟上植物状态）
     func refreshIfNeeded(enabled: Bool, intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
         guard enabled else { return }
-        scheduleReminder(
+        scheduleSmartReminder(
             intervalMinutes: intervalMinutes,
             health: health,
             plantName: plantName,
