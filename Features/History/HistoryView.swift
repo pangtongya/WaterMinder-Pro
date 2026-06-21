@@ -108,7 +108,7 @@ struct HistoryView: View {
                     HStack {
                         Text(L.deepInsights).font(.system(size: 15, weight: .semibold))
                         Spacer()
-                        Text("PRO").font(.system(size: 10, weight: .bold))
+                        Text("PRO".localized).font(.system(size: 10, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Color.bloomGold)
@@ -166,7 +166,7 @@ struct HistoryView: View {
                             .foregroundStyle(Color.bloomGold)
                         Text(L.deepDataInsights).font(.system(size: 15, weight: .semibold))
                         Spacer()
-                        Text("PRO").font(.system(size: 10, weight: .bold))
+                        Text("PRO".localized).font(.system(size: 10, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Color.bloomGold)

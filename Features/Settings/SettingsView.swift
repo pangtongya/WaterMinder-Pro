@@ -94,7 +94,7 @@ struct SettingsView: View {
                     }
                     Spacer()
                     if !userStore.isPro {
-                        Text("Pro")
+                        Text("Pro".localized)
                             .font(.caption)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -446,7 +446,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text("iCloud")
+            Text("iCloud".localized)
         } footer: {
             Text("自动同步到 iCloud，多设备数据保持一致".localized)
         }
@@ -613,7 +613,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text("Bloom Pro")
+            Text("Bloom Pro".localized)
         }
     }
 

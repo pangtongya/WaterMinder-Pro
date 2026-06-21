@@ -49,7 +49,7 @@ extension View {
         self.overlay(
             Group {
                 if !isPro {
-                    Text("Pro")
+                    Text("Pro".localized)
                         .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
