@@ -293,10 +293,20 @@ final class WaterStore: ObservableObject {
 
     // MARK: - 云端数据合并
     
-    /// 合并云端喝水记录（去重）
+    /// 合并云端喝水记录（去重）：hkSampleUUID 优先 → id 次优先
+    /// 多设备 HealthKit 同步时，同一 HealthKit 样本在不同设备上 WaterRecord.id 不同，
+    /// 必须按 hkSampleUUID 去重，否则会产生重复记录。
     func mergeWithCloudRecords(_ cloudRecords: [WaterRecord]) {
-        let existingIDs = Set(records.map(\.id))
-        let newRecords = cloudRecords.filter { !existingIDs.contains($0.id) }
+        let localHKUUIDs = Set(records.compactMap(\.hkSampleUUID))
+        let localIDs = Set(records.map(\.id))
+
+        let newRecords = cloudRecords.filter { cloud in
+            if let hk = cloud.hkSampleUUID, localHKUUIDs.contains(hk) {
+                return false  // 本地已存在同一条 HealthKit 样本
+            }
+            return !localIDs.contains(cloud.id)
+        }
+
         if !newRecords.isEmpty {
             records.append(contentsOf: newRecords)
             records.sort { $0.createdAt > $1.createdAt }
