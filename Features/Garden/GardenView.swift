@@ -22,6 +22,7 @@ struct GardenView: View {
     @State private var celebrateStage: GrowthStage?
     @State private var splashTrigger: Int = 0   // 水滴动画触发器
     @State private var plantPressing = false    // 植物按压视觉反馈
+    @State private var showWilt = false         // 植物枯萎提示动画
 
 
     @State private var showPauseConfirm = false
@@ -73,6 +74,13 @@ struct GardenView: View {
                 Haptics.success()
             }
         }
+        // 枯萎提示：监听 engine 发布的枯萎事件
+        .onChange(of: plantEngine.justWilted) { _, wilted in
+            if wilted {
+                showWilt = true
+                Haptics.error()
+            }
+        }
         .overlay {
             if let stage = celebrateStage {
                 StageUpCelebration(stage: stage) {
@@ -81,8 +89,17 @@ struct GardenView: View {
                 }
                 .transition(.opacity)
             }
+            // 枯萎提示：显示在植物区上方
+            if showWilt {
+                WiltCelebration {
+                    withAnimation { showWilt = false }
+                    plantEngine.consumeWilt()
+                }
+                .transition(.opacity)
+            }
         }
         .animation(.easeInOut(duration: 0.25), value: celebrateStage)
+        .animation(.easeInOut(duration: 0.25), value: showWilt)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -477,6 +494,143 @@ struct StageUpCelebration: View {
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
                 appear = true
+            }
+        }
+    }
+}
+
+// MARK: - 植物枯萎提示（情感反馈的另一面，提醒用户要更勤喝水）
+
+struct WiltCelebration: View {
+    let onDismiss: () -> Void
+    @State private var appear = false
+    @State private var leavesFalling = false
+
+    var body: some View {
+        ZStack {
+            // 半透明遮罩
+            Color.black.opacity(0.55)
+                .ignoresSafeArea()
+                .onTapGesture { onDismiss() }
+
+            VStack(spacing: 16) {
+                // 枯萎的植物图标 + 落叶粒子
+                ZStack {
+                    // 灰暗的背景光环
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color.brown.opacity(0.45), .clear],
+                                center: .center,
+                                startRadius: 10,
+                                endRadius: 80
+                            )
+                        )
+                        .frame(width: 140, height: 140)
+                        .scaleEffect(appear ? 1.0 : 0.4)
+
+                    // 枯萎植物（低垂的叶子）
+                    VStack(spacing: 0) {
+                        HStack(spacing: -10) {
+                            Circle()
+                                .fill(Color.brown)
+                                .frame(width: 32, height: 32)
+                                .rotationEffect(.degrees(leavesFalling ? -25 : -10))
+                                .offset(y: leavesFalling ? 20 : 0)
+                            Circle()
+                                .fill(Color.brown.opacity(0.8))
+                                .frame(width: 28, height: 28)
+                                .rotationEffect(.degrees(leavesFalling ? 20 : 10))
+                                .offset(y: leavesFalling ? 15 : 0)
+                        }
+                        // 主茎
+                        Rectangle()
+                            .fill(Color.brown.opacity(0.85))
+                            .frame(width: 10, height: 60)
+                            .rotationEffect(.degrees(leavesFalling ? 8 : 2))
+                            .offset(y: -8)
+                    }
+                    .scaleEffect(appear ? 1.0 : 0.3)
+                    .opacity(appear ? 1 : 0)
+
+                    // 散落的叶片
+                    ForEach(0..<5, id: \.self) { i in
+                        Circle()
+                            .fill(Color.brown.opacity(0.6))
+                            .frame(width: 6, height: 6)
+                            .offset(
+                                x: leavesFalling ? CGFloat(i * 8 - 16) : 0,
+                                y: leavesFalling ? 80 : 0
+                            )
+                            .opacity(leavesFalling ? 0 : 1)
+                            .animation(
+                                Animation.easeIn(duration: 1.2)
+                                    .delay(Double(i) * 0.15),
+                                value: leavesFalling
+                            )
+                    }
+                }
+
+                // 主标题：温和的"枯萎"提示
+                Text(NSLocalizedString("植物枯萎了", comment: "Plant wilted"))
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .opacity(appear ? 1 : 0)
+
+                // 副标题：温和的提醒
+                Text(NSLocalizedString("没关系，从种子重新开始吧", comment: "It's okay, start over from a seed"))
+                    .font(.system(size: 14))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(.horizontal, 32)
+                    .opacity(appear ? 1 : 0)
+
+                // 提示卡片：健康度说明
+                HStack(spacing: 10) {
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color.bloomWater)
+                    Text(NSLocalizedString("坚持每天喝水，植物就不会再枯萎啦", comment: "Daily hydration tip"))
+                        .font(.system(size: 13))
+                        .foregroundStyle(.white.opacity(0.9))
+                    Spacer()
+                }
+                .padding(12)
+                .background(Color.white.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.horizontal, 20)
+                .opacity(appear ? 1 : 0)
+
+                // 继续按钮
+                Button {
+                    onDismiss()
+                } label: {
+                    Text(NSLocalizedString("我知道了", comment: "Got it"))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.white)
+                        .padding(.horizontal, 48)
+                        .padding(.vertical, 12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.bloomPrimary, Color.bloomDeep],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .opacity(appear ? 1 : 0)
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.55)) {
+                appear = true
+            }
+            // 延迟一会儿让叶子落下
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.easeInOut(duration: 1.2)) {
+                    leavesFalling = true
+                }
             }
         }
     }
