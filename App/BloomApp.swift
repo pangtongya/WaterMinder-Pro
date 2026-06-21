@@ -73,6 +73,19 @@ struct BloomApp: App {
                     // App 进入后台时调度后台任务
                     BackgroundTaskManager.shared.scheduleHealthDecayTask()
                     BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
+                } else if newPhase == .active {
+                    // App 回到前台时重新排程通知（每天都能收到提醒的关键）
+                    if userStore.reminderEnabled {
+                        Task {
+                            await notificationManager.requestAuthorizationIfNeeded()
+                        }
+                        notificationManager.scheduleSmartReminder(
+                            intervalMinutes: userStore.reminderInterval,
+                            health: plantEngine.plant.health,
+                            plantName: plantEngine.plant.name,
+                            isPaused: plantEngine.plant.isPaused
+                        )
+                    }
                 }
             }
         }
@@ -105,7 +118,18 @@ struct BloomApp: App {
             plantEngine: plantEngine
         )
 
-        // 7. 标记就绪（显示 RootView）
+        // 7. 关键：如果用户开启了提醒，启动时重新排程（否则第二天可能就没有提醒了）
+        if userStore.reminderEnabled {
+            await notificationManager.requestAuthorizationIfNeeded()
+            notificationManager.scheduleSmartReminder(
+                intervalMinutes: userStore.reminderInterval,
+                health: plantEngine.plant.health,
+                plantName: plantEngine.plant.name,
+                isPaused: plantEngine.plant.isPaused
+            )
+        }
+
+        // 8. 标记就绪（显示 RootView）
         isReady = true
     }
     
