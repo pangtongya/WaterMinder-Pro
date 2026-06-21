@@ -86,6 +86,13 @@ final class UserStore: ObservableObject {
         triggerSync()
     }
 
+    /// 撤销 Pro 权限（App Store 退款触发）
+    func revokePro() {
+        KeychainManager.shared.saveBool(false, for: "bloom.isPro")
+        profile.isPro = false
+        triggerSync()
+    }
+
     /// 重置（设置页用，不删喝水记录和植物）
     func resetSettings() {
         profile = UserProfile(hasCompletedOnboarding: true)

@@ -40,6 +40,8 @@ final class StoreManager: ObservableObject {
 
     /// 解锁 Pro 的回调（购买成功后通知 UserStore）
     var onProUnlocked: ((String) -> Void)?
+    /// 撤销 Pro 的回调（退款成功后通知 UserStore）
+    var onProRevoked: (() -> Void)?
 
     private init() {
         startTransactionListener()
@@ -193,8 +195,19 @@ final class StoreManager: ObservableObject {
     }
 
     private func deliverTransaction(_ transaction: Transaction) async {
-        KeychainManager.shared.saveBool(true, for: "bloom.isPro")
-        onProUnlocked?(transaction.productID)
+        // 检查是否为退款交易（App Store 支持随时退款）
+        if let revocationDate = transaction.revocationDate {
+            #if DEBUG
+            print("[StoreManager] 检测到退款交易，退款日期: \(revocationDate)")
+            #endif
+            // 退款：从 Keychain 撤销 Pro 权限，通知 UserStore
+            KeychainManager.shared.saveBool(false, for: "bloom.isPro")
+            onProRevoked?()
+        } else {
+            // 正常购买：授予 Pro 权限
+            KeychainManager.shared.saveBool(true, for: "bloom.isPro")
+            onProUnlocked?(transaction.productID)
+        }
     }
 
     // MARK: - 错误
