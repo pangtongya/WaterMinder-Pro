@@ -335,21 +335,23 @@
 // MARK: - Misc (补充)
 "养成天数" = "养成天数";
 "收藏品种" = "收藏品种";
-"Lifetime Purchase" = "Lifetime Purchase";
-"Pro Yearly" = "Pro Yearly";
-"BEST VALUE" = "BEST VALUE";
-"POPULAR" = "POPULAR";
-"Save %d%% vs subscription" = "Save %d%% vs subscription";
-"Terms of Service" = "Terms of Service";
-"Privacy Policy" = "Privacy Policy";
-"Advanced Statistics" = "Advanced Statistics";
-"Complete data analysis and visualization reports" = "Complete data analysis and visualization reports";
-"Custom Themes" = "Custom Themes";
-"Unlock all Pro themes and appearances" = "Unlock all Pro themes and appearances";
-"Unlimited Plants" = "Unlimited Plants";
-"Unlock all 7 plant species for your dream garden" = "Unlock all 7 plant species for your dream garden";
-"Multi-device Sync" = "Multi-device Sync";
-"CloudKit data sync and backup" = "CloudKit data sync and backup";
+"Lifetime Purchase" = "终身买断";
+"Pro Yearly" = "Pro 年度";
+"BEST VALUE" = "超值的";
+"POPULAR" = "热门";
+"Save %d%% vs subscription" = "比订阅省 %d%%";
+"Terms of Service" = "服务条款";
+"Privacy Policy" = "隐私政策";
+"Advanced Statistics" = "高级统计";
+"Complete data analysis and visualization reports" = "完整的数据分析和可视化报告";
+"Custom Themes" = "自定义主题";
+"Unlock all Pro themes and appearances" = "解锁所有 Pro 主题和外观";
+"Unlimited Plants" = "无限植物";
+"Unlock all 7 plant species for your dream garden" = "解锁全部 7 种植物，打造你的梦想花园";
+"Multi-device Sync" = "多设备同步";
+"CloudKit data sync and backup" = "CloudKit 数据同步和备份";
+"Unlock all premium features" = "解锁全部高级功能";
+"1 Year" = "1 年";
 
 // MARK: - Paywall (新增)
 "一次购买，永久解锁" = "一次购买，永久解锁";
