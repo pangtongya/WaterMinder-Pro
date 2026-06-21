@@ -12,6 +12,9 @@ final class WaterStore: ObservableObject {
     /// 当日目标（从 UserStore 同步，避免循环依赖，用闭包注入）
     var dailyGoalProvider: () -> Int = { 2000 }
 
+    /// HealthKit 管理器（由 BloomApp 注入，用于自动同步写入并回写 UUID）
+    weak var healthManager: HealthManager?
+
     private let storage = PersistenceManager.shared
     private let filename = "water_records.json"
     private let cloudSync = CloudSyncManager.shared
@@ -29,6 +32,25 @@ final class WaterStore: ObservableObject {
     func add(amount: Int, cupType: CupType = .medium) -> WaterRecord {
         let record = WaterRecord(amount: amount, cupType: cupType)
         records.insert(record, at: 0)
+
+        // HealthKit 自动同步 + 回写 UUID（双向同步：删除记录时可反向删除 HealthKit 样本）
+        if let healthManager = healthManager, healthManager.isAuthorized {
+            let recordID = record.id
+            Task { @MainActor in
+                do {
+                    let uuid = try await healthManager.saveWater(amount)
+                    if let idx = records.firstIndex(where: { $0.id == recordID }) {
+                        records[idx].hkSampleUUID = uuid
+                        persist()
+                        triggerSync()
+                    }
+                } catch {
+                    #if DEBUG
+                    print("[WaterStore] 保存 HealthKit UUID 失败: \(error)")
+                    #endif
+                }
+            }
+        }
 
         // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group）
         NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)

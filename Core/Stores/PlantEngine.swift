@@ -86,13 +86,8 @@ final class PlantEngine: ObservableObject {
         if canGrow {
             _ = water(amount: amount)
         }
-
         if waterStore.isGoalMetToday {
             processGoalMet()
-        }
-
-        if healthManager.isAuthorized {
-            try? await healthManager.saveWater(amount)
         }
         return true
     }

@@ -153,6 +153,7 @@ struct BloomApp: App {
         
         // 注入成就系统依赖
         waterStore.achievementStore = achievementStore
+        waterStore.healthManager = healthManager
         gardenStore.achievementStore = achievementStore
         SharingManager.shared.achievementStore = achievementStore
     }

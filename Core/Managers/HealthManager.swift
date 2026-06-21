@@ -57,20 +57,25 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
 
     // MARK: - 写入喝水记录
 
-    func saveWater(_ amountML: Int, date: Date = Date()) async throws {
-        guard let type = waterType, let store else { return }
+    /// 写入一条喝水记录到 Health App，并返回样本 UUID，以便后续反向同步删除
+    @discardableResult
+    func saveWater(_ amountML: Int, date: Date = Date()) async throws -> UUID {
+        guard let type = waterType, let store else { throw HealthError.unavailable }
         let quantity = HKQuantity(unit: .liter(), doubleValue: Double(amountML) / 1000.0)
         let sample = HKQuantitySample(type: type, quantity: quantity, start: date, end: date)
-        // 使用 withCheckedThrowingContinuation 兼容所有 iOS 17+ 版本
-        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+        return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<UUID, Error>) in
             store.save(sample) { _, error in
                 if let error {
                     cont.resume(throwing: error)
                 } else {
-                    cont.resume()
+                    cont.resume(returning: sample.uuid)
                 }
             }
         }
+    }
+
+    enum HealthError: Error {
+        case unavailable
     }
 
     /// 从 HealthKit 删除一条喝水样本（当用户在 App 内删除记录时反向同步）
