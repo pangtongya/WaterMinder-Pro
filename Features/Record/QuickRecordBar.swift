@@ -14,6 +14,8 @@ struct QuickRecordBar: View {
     @State private var lastAmount: Int = 0  // 记录最近一次水量（用于水滴动画）
     @State private var showSuccessPulse: Bool = false  // 成功喝水后的脉冲动画
     @State private var pressedCup: CupType? = nil  // 当前按下的杯型（用于按压反馈）
+    @State private var showAmountBubble: CupType? = nil  // 显示水量气泡
+    @State private var bubbleTimer: Timer? = nil
 
     var body: some View {
         VStack(spacing: 16) {
@@ -70,6 +72,21 @@ struct QuickRecordBar: View {
                     .foregroundStyle(.tertiary)
             }
             .frame(maxWidth: .infinity)
+            .overlay(alignment: .top) {
+                // 水量气泡（点击后显示）
+                if showAmountBubble == cup {
+                    Text("+\(cup.defaultAmount)ml")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Color.bloomWater)
+                        .clipShape(Capsule())
+                        .offset(y: -8)
+                        .transition(.scale.combined(with: .opacity))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showAmountBubble)
+                }
+            }
         }
         .buttonStyle(.plain)
         .simultaneousGesture(
@@ -115,26 +132,35 @@ struct QuickRecordBar: View {
         let amount = cup.defaultAmount
         lastAmount = amount
 
-        // 1. 记录喝水数据
+        // 1. 显示水量气泡
+        showAmountBubble = cup
+        bubbleTimer?.invalidate()
+        bubbleTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+            withAnimation {
+                showAmountBubble = nil
+            }
+        }
+
+        // 2. 记录喝水数据
         waterStore.add(amount: amount, cupType: cup)
 
-        // 2. 喂给植物（核心：植物恢复生机）
+        // 3. 喂给植物（核心：植物恢复生机）
         plantEngine.water(amount: amount)
 
-        // 3. 达标结算
+        // 4. 达标结算
         if waterStore.isGoalMetToday {
             plantEngine.processGoalMet()
         }
 
-        // 4. 同步到健康App
+        // 5. 同步到健康App
         if healthManager.isAuthorized {
             Task { try? await healthManager.saveWater(amount) }
         }
 
-        // 5. 触觉反馈
+        // 6. 触觉反馈
         Haptics.waterDrop()
 
-        // 6. 成功脉冲动画（视觉反馈）
+        // 7. 成功脉冲动画（视觉反馈）
         showSuccessPulse = true
         withAnimation(.easeOut(duration: 0.3)) {
             showSuccessPulse = true
