@@ -66,6 +66,36 @@ final class WaterStore: ObservableObject {
         updateAchievements()
         return record
     }
+    
+    /// 恢复已删除的记录（用于撤销功能）
+    /// - Parameter record: 要恢复的记录（保持原始 id 和时间戳）
+    func restore(record: WaterRecord) {
+        // 避免重复添加
+        guard !records.contains(where: { $0.id == record.id }) else { return }
+        
+        records.insert(record, at: 0)
+        
+        // HealthKit 同步（如果原记录有关联的 HK UUID，尝试删除后重新保存）
+        if let healthManager = healthManager, healthManager.isAuthorized {
+            Task {
+                do {
+                    let uuid = try await healthManager.saveWater(record.amount)
+                    if let idx = records.firstIndex(where: { $0.id == record.id }) {
+                        records[idx].hkSampleUUID = uuid
+                    }
+                } catch {
+                    #if DEBUG
+                    print("[WaterStore] 恢复记录时保存 HealthKit 失败: \(error)")
+                    #endif
+                }
+            }
+        }
+        
+        persist()
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        triggerSync()
+        updateAchievements()
+    }
 
     /// 从 HealthKit 同步记录时使用（带 HK UUID 去重）
     /// - Returns: 新增的记录数量（0 表示无新增）

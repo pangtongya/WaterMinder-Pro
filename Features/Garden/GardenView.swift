@@ -530,8 +530,8 @@ struct TodayRecordsCard: View {
         // 取消自动消失
         undoWorkItem?.cancel()
         
-        // 恢复记录
-        waterStore.add(record)
+        // 恢复记录（直接插入，不创建新记录）
+        waterStore.restore(record: record)
         
         // 恢复植物状态
         plantEngine.restorePlantState(previousPlant)
