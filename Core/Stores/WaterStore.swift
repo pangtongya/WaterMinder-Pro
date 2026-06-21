@@ -55,13 +55,46 @@ final class WaterStore: ObservableObject {
             }
         }
 
-        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group）
-        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
+        // 先持久化记录
         persist()
+        
+        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group 后刷新 Widget）
+        // 注意：必须在 persist() 后发送通知，确保数据已保存
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        
         triggerSync()
         updateAchievements()
         return record
+    }
+    
+    /// 恢复已删除的记录（用于撤销功能）
+    /// - Parameter record: 要恢复的记录（保持原始 id 和时间戳）
+    func restore(record: WaterRecord) {
+        // 避免重复添加
+        guard !records.contains(where: { $0.id == record.id }) else { return }
+        
+        records.insert(record, at: 0)
+        
+        // HealthKit 同步（如果原记录有关联的 HK UUID，尝试删除后重新保存）
+        if let healthManager = healthManager, healthManager.isAuthorized {
+            Task {
+                do {
+                    let uuid = try await healthManager.saveWater(record.amount)
+                    if let idx = records.firstIndex(where: { $0.id == record.id }) {
+                        records[idx].hkSampleUUID = uuid
+                    }
+                } catch {
+                    #if DEBUG
+                    print("[WaterStore] 恢复记录时保存 HealthKit 失败: \(error)")
+                    #endif
+                }
+            }
+        }
+        
+        persist()
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        triggerSync()
+        updateAchievements()
     }
 
     /// 从 HealthKit 同步记录时使用（带 HK UUID 去重）
@@ -94,9 +127,8 @@ final class WaterStore: ObservableObject {
             hkSampleUUID: hkSampleUUID
         )
         records.insert(record, at: 0)
-        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
         persist()
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         triggerSync()
         updateAchievements()
         return record
@@ -105,9 +137,8 @@ final class WaterStore: ObservableObject {
     func delete(_ record: WaterRecord) {
         if let idx = records.firstIndex(where: { $0.id == record.id }) {
             records.remove(at: idx)
-            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-            WidgetCenter.shared.reloadAllTimelines()
             persist()
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
             triggerSync()
         }
     }
