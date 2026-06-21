@@ -56,6 +56,9 @@ struct Plant: Identifiable, Codable {
     /// 是否蔫了（当天没达标的表现，健康度偏低）
     var isWilting: Bool { health < 50 }
 
+    /// 是否已枯萎（健康度归零，需要持续喝水才能复活）
+    var isWilted: Bool { health <= 0 }
+
     /// 是否可以收获
     var canHarvest: Bool { stage == .harvestable && !isHarvested }
 
