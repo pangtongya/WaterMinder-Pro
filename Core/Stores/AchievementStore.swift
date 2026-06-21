@@ -141,13 +141,8 @@ final class AchievementStore: ObservableObject {
             achievement.unlockedAt = Date()
             newlyUnlocked = achievement
             
-            // 触发通知（延迟 3s 以提供更慢消失）
-            Task {
-                try? await Task.sleep(for: .seconds(3))
-                await MainActor.run {
-                    newlyUnlocked = nil
-                }
-            }
+            // 不再自动消失，等待用户手动关闭
+            // 用户可以在 AchievementCelebrationOverlay 中点击关闭
         }
         
         achievements[index] = achievement
