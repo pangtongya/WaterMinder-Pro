@@ -92,13 +92,13 @@ struct PlantStatusCard: View {
 
     /// 里程碑天数及其奖励描述
     private static let milestones: [(days: Int, titleKey: String, emoji: String)] = [
-        (3,   "初露锋芒",   "🌱"),
-        (7,   "坚持一周",   "🌿"),
-        (14,  "两周达人",   "🪴"),
-        (21,  "三周传奇",   "🌷"),
-        (30,  "满月之约",   "🌸"),
-        (60,  "双月坚守",   "🏆"),
-        (100, "百日不辍",   "👑"),
+        (3,   L.milestone3,   "🌱"),
+        (7,   L.milestone7,   "🌿"),
+        (14,  L.milestone14,  "🪴"),
+        (21,  L.milestone21,  "🌷"),
+        (30,  L.milestone30,  "🌸"),
+        (60,  L.milestone60,  "🏆"),
+        (100, L.milestone100, "👑"),
     ]
 
     private var streakRow: some View {
@@ -111,12 +111,12 @@ struct PlantStatusCard: View {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(.orange)
-                Text(String(format: NSLocalizedString("连续 %d 天达标", comment: ""), streak))
+                Text(String(format: L.streakDaysAchieved, streak))
                     .font(.system(size: 12, weight: .medium))
                 Spacer()
                 // 最近达成里程碑
                 if let last = passedMilestones.last {
-                    Text("\(last.emoji) \(NSLocalizedString(last.titleKey, comment: "Milestone title"))")
+                    Text("\(last.emoji) \(last.titleKey)")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Color.bloomGold)
                         .padding(.horizontal, 6)
@@ -128,8 +128,7 @@ struct PlantStatusCard: View {
             // 下一里程碑提示
             if let next = nextMilestone {
                 HStack(spacing: 4) {
-                    Text(String(format: NSLocalizedString("再坚持 %d 天 → %@ %@", comment: ""),
-                              next.days - streak, next.emoji, NSLocalizedString(next.titleKey, comment: "Milestone title")))
+                    Text(String(format: L.keepGoingForStreak, next.days - streak, next.emoji, next.titleKey))
                         .font(.system(size: 11))
                         .foregroundStyle(.tertiary)
                 }

@@ -88,6 +88,14 @@ extension L {
     static let streakDaysAchieved     = s("连续 %d 天达标")
     static let keepGoingForStreak     = s("再坚持 %d 天 → %@ %@")
     static let nextStage              = s("下一阶段：%@")
+    // Milestones
+    static let milestone3    = s("初露锋芒")
+    static let milestone7    = s("坚持一周")
+    static let milestone14   = s("两周达人")
+    static let milestone21   = s("三周传奇")
+    static let milestone30   = s("满月之约")
+    static let milestone60   = s("双月坚守")
+    static let milestone100  = s("百日不辍")
 }
 
 // MARK: - Settings
