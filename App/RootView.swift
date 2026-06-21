@@ -169,7 +169,7 @@ struct AchievementCelebrationOverlay: View {
 
                 // 标题
                 VStack(spacing: 8) {
-                    Text("🎉 成就解锁！")
+                    Text("🎉 \("成就解锁！".localized)")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(.white)
                     Text(achievement.title)
@@ -188,7 +188,7 @@ struct AchievementCelebrationOverlay: View {
 
                 // 关闭按钮
                 Button(action: onDismiss) {
-                    Text("太棒了！")
+                    Text("太棒了！".localized)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
