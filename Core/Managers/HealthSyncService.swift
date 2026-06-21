@@ -66,7 +66,7 @@ final class HealthSyncService: ObservableObject {
                 return
             }
 
-            // 逐条处理：去重 → 写入 WaterStore → 触发植物浇水
+            // 逐条处理：去重 → 写入 WaterStore → 触发植物喝水
             var newCount = 0
             for sample in hkRecords {
                 let amountML = Int(sample.quantity.doubleValue(for: .liter()) * 1000)
@@ -82,9 +82,9 @@ final class HealthSyncService: ObservableObject {
 
                 if added != nil {
                     newCount += 1
-                    // 每新增一条 → 触发植物喝水（避免一次喂太多，让植物慢慢长）
-                    // 批量同步时最多喂 10 次，避免一次性全部触发升级
-                    if let engine = plantEngine, newCount <= 10 {
+                    // 新增一条 → 触发植物喝水（PlantEngine.water 内部会截断上限，
+                    // 不必再做次数限制，避免"同步 200 条但植物只长 10 杯"的误导）
+                    if let engine = plantEngine, !engine.plant.isPaused {
                         engine.water(amount: amountML)
                     }
                 }
