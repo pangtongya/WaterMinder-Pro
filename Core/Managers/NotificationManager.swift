@@ -50,6 +50,20 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
         }
     }
 
+    /// 当用户设置中开启了提醒但系统状态为未决定时请求授权
+    /// 用户拒绝过则不打扰（避免反复弹窗）
+    func requestAuthorizationIfNeeded() async {
+        let settings = await withCheckedContinuation { (cont: CheckedContinuation<UNNotificationSettings, Never>) in
+            center.getNotificationSettings { cont.resume(returning: $0) }
+        }
+        if settings.authorizationStatus == .notDetermined {
+            let granted = await requestAuthorization()
+            #if DEBUG
+            print("[Notification] 授权结果: \(granted)")
+            #endif
+        }
+    }
+
     // MARK: - 喝水提醒（智能排程）
 
     /// 设置喝水提醒，文案随植物状态变化
@@ -64,16 +78,16 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
             cancelReminders()
             return
         }
-        
+
         cancelReminders()
 
         let interval = TimeInterval(max(15, intervalMinutes) * 60) // 最少 15 分钟，防止骚扰
-        
+
         // 计算当前时间到夜间免打扰开始还有多久
         let now = Date()
         let calendar = Calendar.current
         let currentHour = calendar.component(.hour, from: now)
-        
+
         // 如果在免打扰时段，不排程
         guard !isInQuietHours(currentHour) else {
             #if DEBUG
@@ -89,12 +103,12 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
             nc.title = content.title
             nc.body = content.body
             nc.sound = .default
-            
+
             // 智能跳过免打扰时段
             let fireInterval = interval * Double(i + 1)
             let fireDate = now.addingTimeInterval(fireInterval)
             let fireHour = calendar.component(.hour, from: fireDate)
-            
+
             // 如果触发时间在免打扰时段，跳过该条通知
             if isInQuietHours(fireHour) {
                 continue
@@ -113,6 +127,49 @@ final class NotificationManager: NSObject, ObservableObject, @unchecked Sendable
                     #endif
                 }
             }
+        }
+    }
+
+    /// 用日历时间排程（更可靠，跨天不受影响）
+    /// 进入前台时调用：在 8:00 - 22:00 范围内按间隔均匀分发
+    func scheduleSmartReminder(intervalMinutes: Int, health: Double, plantName: String, isPaused: Bool = false) {
+        guard !isPaused else {
+            cancelReminders()
+            return
+        }
+
+        cancelReminders()
+
+        let safeInterval = max(15, intervalMinutes) // 最少 15 分钟
+        let calendar = Calendar.current
+        var next = Date()
+
+        for i in 0..<maxScheduled {
+            next = calendar.date(byAdding: .minute, value: safeInterval * (i + 1), to: next) ?? Date()
+            let hour = calendar.component(.hour, from: next)
+            let mins = calendar.component(.minute, from: next)
+
+            // 跳过免打扰时段（22:00 - 次日 08:00）
+            if isInQuietHours(hour) { continue }
+
+            let content = NotificationContent.pick(for: health, plantName: plantName)
+            let nc = UNMutableNotificationContent()
+            nc.title = content.title
+            nc.body = content.body
+            nc.sound = .default
+
+            // 用日历时间触发（比 TimeInterval 更精确
+            var components = DateComponents()
+            components.hour = hour
+            components.minute = mins
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+
+            let request = UNNotificationRequest(
+                identifier: "\(idPrefix)\(i)",
+                content: nc,
+                trigger: trigger
+            )
+            center.add(request)
         }
     }
     
