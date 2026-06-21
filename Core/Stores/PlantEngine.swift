@@ -307,16 +307,12 @@ final class PlantEngine: ObservableObject {
 
     // MARK: - 云端数据合并
     
-    /// 合并云端植物数据（取较新的）
+    /// 合并云端植物数据（统一使用 CloudSyncManager 的合并策略：stage > health > lastWateredAt）
+    /// 确保与 CloudSyncManager.mergePlant 逻辑一致，避免同一植物在不同位置合并结果不同
     func mergeWithCloudPlant(_ cloudPlant: Plant) {
-        if let cloudLastWatered = cloudPlant.lastWateredAt,
-           let localLastWatered = plant.lastWateredAt {
-            if cloudLastWatered > localLastWatered {
-                plant = cloudPlant
-                persist()
-            }
-        } else if cloudPlant.lastWateredAt != nil {
-            plant = cloudPlant
+        let merged = cloudSync.mergePlant(local: plant, cloud: [cloudPlant])
+        if merged.id != plant.id {
+            plant = merged
             persist()
         }
     }
