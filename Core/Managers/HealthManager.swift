@@ -28,6 +28,22 @@ final class HealthManager: NSObject, ObservableObject, @unchecked Sendable {
         return store?.authorizationStatus(for: type) == .sharingAuthorized
     }
 
+    /// 获取权限状态（详细）
+    var authorizationStatus: HKAuthorizationStatus {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType,
+              let store else { return .notDetermined }
+        return store.authorizationStatus(for: type)
+    }
+
+    /// 是否已请求过权限（用户已做出选择）
+    var hasRequestedAuthorization: Bool {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let type = waterType else { return false }
+        let status = store?.authorizationStatus(for: type) ?? .notDetermined
+        return status == .sharingAuthorized || status == .sharingDenied
+    }
+
     func requestAuthorization() async -> Bool {
         guard HKHealthStore.isHealthDataAvailable(),
               let type = waterType,

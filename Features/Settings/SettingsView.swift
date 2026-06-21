@@ -3,6 +3,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var userStore: UserStore
@@ -18,6 +19,7 @@ struct SettingsView: View {
     @StateObject private var backupManager = DataBackupManager.shared
     
     @State private var healthAuthorized = false
+    @State private var healthDenied = false  // 添加：权限被拒绝状态
     @State private var showPaywall = false
     @State private var showAdvancedStats = false
     @State private var showHealthAlert = false
@@ -112,7 +114,13 @@ struct SettingsView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(L.settings)
         .navigationBarTitleDisplayMode(.large)
-        .onAppear { healthAuthorized = healthManager.isAuthorized }
+        .onAppear {
+            healthAuthorized = healthManager.isAuthorized
+            // 检查权限是否被拒绝
+            if healthManager.hasRequestedAuthorization && !healthManager.isAuthorized {
+                healthDenied = true
+            }
+        }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeManager)
         }
@@ -360,30 +368,70 @@ struct SettingsView: View {
 
     private var healthSection: some View {
         Section {
-            Button {
-                Task {
-                    let granted = await healthManager.requestAuthorization()
-                    await MainActor.run {
-                        healthAuthorized = granted
-                        if !granted { showHealthAlert = true }
+            if healthDenied {
+                // 权限被拒绝：显示引导提示
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "exclamationmark.shield.fill")
+                            .foregroundStyle(.orange)
+                        Text("健康 App 权限未开启")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Spacer()
+                    }
+
+                    Text("要在健康 App 中同步喝水记录，请在系统设置中开启权限")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+
+                    Button {
+                        // 跳转到系统设置
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Label("去设置中开启", systemImage: "gear")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.bloomPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
                 }
-            } label: {
-                HStack {
-                    Image(systemName: "heart.fill").foregroundStyle(.red)
-                    Text("连接健康 App".localized).foregroundStyle(.primary)
-                    Spacer()
-                    if healthAuthorized {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                    } else {
-                        Image(systemName: "chevron.right").font(.system(size: 14)).foregroundStyle(.secondary)
+                .padding(.vertical, 8)
+            } else {
+                // 正常状态：请求权限
+                Button {
+                    Task {
+                        let granted = await healthManager.requestAuthorization()
+                        await MainActor.run {
+                            healthAuthorized = granted
+                            healthDenied = !granted && healthManager.hasRequestedAuthorization
+                            if !granted { showHealthAlert = true }
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "heart.fill").foregroundStyle(.red)
+                        Text("连接健康 App".localized).foregroundStyle(.primary)
+                        Spacer()
+                        if healthAuthorized {
+                            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        } else {
+                            Image(systemName: "chevron.right").font(.system(size: 14)).foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
         } header: {
             Text("健康 App".localized)
         } footer: {
-            Text(healthAuthorized ? "已连接，喝水记录自动同步" : "同步喝水记录到健康 App")
+            if healthDenied {
+                Text("权限关闭后，喝水记录将无法同步到健康 App")
+            } else {
+                Text(healthAuthorized ? "已连接，喝水记录自动同步" : "同步喝水记录到健康 App")
+            }
         }
     }
 
