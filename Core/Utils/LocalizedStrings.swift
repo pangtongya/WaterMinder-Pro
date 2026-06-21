@@ -37,6 +37,7 @@ extension L {
     static let pauseExplanation       = s("暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。")
     static let proGardenLimit         = s("免费用户最多保存 5 株植物。升级 Pro 解锁无限花园！")
     static let harvestPlant           = s("收获 %@")
+    static let harvestPlantTitle      = s("收获植物")
     static let daysRemaining          = s("剩余 %@ 天")
     static let plantHasntWatered      = s("%@ 还没喝到水")
     static let reachedStage           = s("进入了「%@」阶段")
@@ -47,6 +48,8 @@ extension L {
     static let speciesCollection      = s("品种图鉴")
     static let notCollected           = s("未收集")
     static let daysToHarvest          = s("养护 %d 天")
+    static let wiltBannerTitle        = s("植物枯萎了")
+    static let wiltBannerBody        = s("坚持喝水就能复活，别放弃！")
 }
 
 // MARK: - Statistics
@@ -59,8 +62,21 @@ extension L {
     static let advancedStats          = s("高级统计")
     static let deepInsights           = s("深度洞察")
     static let plantGrowthJourney     = s("植物成长历程")
-    static let deepDataInsights       = s("深度数据洞察")
-    static let deepInsightsExplain    = s("解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。")
+    static let deepDataInsights      = s("深度数据洞察")
+    static let deepInsightsExplain   = s("解锁达标率分析、平均完成度、成长历程等深度数据，更科学地养成喝水习惯。")
+    // 时间周期（Statistics）
+    static let periodWeek            = s("周")
+    static let periodMonth          = s("月")
+    static let periodQuarter        = s("季")
+    static let periodYear           = s("年")
+    // 收获
+    static let plantMatured         = s("%@ 已成熟！")
+    static let congratulations       = s("恭喜！")
+    static let reachedStageMsg       = s("你的植物已经成长到 %@ 阶段")
+    static let stage               = s("阶段")
+    static let daysCared            = s("养护天数")
+    static let daysN               = s("%d 天")
+    static let harvestAndSave       = s("收获并保存到收藏")
 }
 
 // MARK: - Achievements
@@ -119,6 +135,7 @@ extension L {
     static let notificationPermission = s("通知权限")
     static let confirmResumeCare      = s("确定要恢复养护吗？植物将重新开始生长。")
     static let proThankYou            = s("感谢您的支持！Pro 权益已解锁。")
+    static let ok                    = s("好的")
 }
 
 // MARK: - Paywall

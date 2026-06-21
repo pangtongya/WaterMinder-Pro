@@ -40,10 +40,10 @@ struct HarvestView: View {
                     
                     // 标题
                     VStack(spacing: 6) {
-                        Text(String(format: NSLocalizedString("%@ 已成熟！", comment: ""), plant.name))
+                        Text(String(format: L.plantMatured, plant.name))
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text(String(format: NSLocalizedString("恭喜！你的植物已经成长到 %@ 阶段", comment: ""), plant.stage.name))
+                        Text(L.congratulations + " " + String(format: L.reachedStageMsg, plant.stage.name))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
@@ -52,13 +52,13 @@ struct HarvestView: View {
                     
                     // 植物信息卡片
                     VStack(spacing: 12) {
-                        infoRow(label: NSLocalizedString("品种", comment: "Species"), value: plant.species.localizedName)
+                        infoRow(label: L.species, value: plant.species.localizedName)
                         Divider()
-                        infoRow(label: NSLocalizedString("阶段", comment: "Stage"), value: plant.stage.name)
+                        infoRow(label: L.stage, value: plant.stage.name)
                         Divider()
                         infoRow(label: L.health, value: "\(Int(plant.health))%")
                         Divider()
-                        infoRow(label: NSLocalizedString("养护天数", comment: "Days cared"), value: String(format: NSLocalizedString("%d 天", comment: ""), plant.ageInDays))
+                        infoRow(label: L.daysCared, value: String(format: L.daysN, plant.ageInDays))
                     }
                     .padding(16)
                     .background(
@@ -77,7 +77,7 @@ struct HarvestView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 16, weight: .semibold))
-                            Text(NSLocalizedString("收获并保存到收藏", comment: "Harvest and save"))
+                            Text(L.harvestAndSave)
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         .frame(maxWidth: .infinity)
@@ -96,7 +96,7 @@ struct HarvestView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 30)
                 }
-                .navigationTitle(NSLocalizedString("收获植物", comment: "Harvest plant"))
+                .navigationTitle(L.harvestPlantTitle)
                 .navigationBarTitleDisplayMode(.inline)
             }
         }
