@@ -247,7 +247,7 @@ struct OnboardingView: View {
             Task {
                 let granted = await notificationManager.requestAuthorization()
                 if granted {
-                    notificationManager.scheduleReminder(
+                    notificationManager.scheduleSmartReminder(
                         intervalMinutes: 60,
                         health: 70,
                         plantName: plantName
