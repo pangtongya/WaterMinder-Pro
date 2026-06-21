@@ -81,7 +81,7 @@ struct AchievementCelebrationOverlay: View {
 
                 // 关闭按钮
                 Button(action: onDismiss) {
-                    Text(L.awesome)
+                    Text(L.amazing)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
