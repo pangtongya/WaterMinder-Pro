@@ -144,6 +144,8 @@ final class PlantEngine: ObservableObject {
     // MARK: - 每日结算（app 启动 / 跨天时调用）
 
     /// 检查自上次结算以来断水的天数，应用衰减
+    /// 注意：打开 App 本身不会更新 lastActiveDay（只有浇水或达标才算活跃）。
+    /// 如果用户只是每天看一眼但不喝水，植物应按连续断水持续衰减。
     func processOverdueDays() {
         // 自动恢复：暂停超过14天 → 自动解除暂停
         if plant.isPauseExpired {
@@ -159,11 +161,10 @@ final class PlantEngine: ObservableObject {
             return
         }
 
-        // 计算中间断水的天数
+        // 计算中间断水的天数（gap 天未达标，每一天都算断水）
+        // 暂停养护期间 PlantLifecycle.applyDailyDecay 已跳过，这里不再检查
         let gap = cal.dateComponents([.day], from: lastActive, to: today).day ?? 0
         if gap > 0 {
-            // gap 天未达标（每一天都算断水）
-            // 暂停养护期间 PlantLifecycle.applyDailyDecay 已跳过，这里不再检查
             plant = PlantLifecycle.applyDailyDecay(plant, consecutiveMissedDays: gap)
 
             // 健康度归零 → 枯萎重置
@@ -172,7 +173,9 @@ final class PlantEngine: ObservableObject {
                 justWilted = true  // UI 层据此显示枯萎动画
             }
         }
-        lastActiveDay = today
+        // 关键：不在这里更新 lastActiveDay = today
+        // 只有用户真正浇水（water()）或达标（processGoalMet()）时才会调用 markActiveToday()
+        // 这样：每天打开 App 但不喝水 → lastActiveDay 不变 → 每次都会按正确的 gap 衰减
         persist()
         triggerSync()
 
@@ -180,7 +183,7 @@ final class PlantEngine: ObservableObject {
         NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
     }
 
-    /// 喝水/打开 app 时标记今天活跃
+    /// 喝水/达标时标记今天活跃（只有真正的行为才算活跃）
     func markActiveToday() {
         lastActiveDay = Calendar.current.startOfDay(for: Date())
     }

@@ -77,7 +77,9 @@ struct BloomApp: App {
                     BackgroundTaskManager.shared.scheduleHealthDecayTask()
                     BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
                 } else if newPhase == .active {
-                    // 回到前台：1. 刷新 HealthKit 同步
+                    // 回到前台：0. 检测跨天，应用健康衰减
+                    plantEngine.processOverdueDays()
+                    // 1. 刷新 HealthKit 同步
                     Task { @MainActor in
                         if healthManager.isAuthorized {
                             await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
