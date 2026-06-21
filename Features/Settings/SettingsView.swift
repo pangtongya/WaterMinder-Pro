@@ -323,11 +323,13 @@ struct SettingsView: View {
             get: { userStore.reminderInterval },
             set: { interval in
                 userStore.setReminderInterval(interval)
-                notificationManager.scheduleSmartReminder(
-                    intervalMinutes: interval,
-                    health: plantEngine.plant.health,
-                    plantName: plantEngine.plant.name
-                )
+                Task {
+                    await notificationManager.scheduleSmartReminder(
+                        intervalMinutes: interval,
+                        health: plantEngine.plant.health,
+                        plantName: plantEngine.plant.name
+                    )
+                }
             }
         )
     }
@@ -338,7 +340,7 @@ struct SettingsView: View {
                 let granted = await notificationManager.requestAuthorization()
                 if granted {
                     userStore.setReminder(enabled: true)
-                    notificationManager.scheduleSmartReminder(
+                    await notificationManager.scheduleSmartReminder(
                         intervalMinutes: userStore.reminderInterval,
                         health: plantEngine.plant.health,
                         plantName: plantEngine.plant.name
