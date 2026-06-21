@@ -126,8 +126,9 @@ final class WaterStore: ObservableObject {
             totalAmount: totalAmount
         )
         
-        // 更新连续天数成就
-        achievementStore.updateStreakProgress(currentStreak: currentStreak)
+        // 更新连续天数成就（用 longestStreak 而非 currentStreak：
+        // 连续天数成就衡量的是"曾经达到过多少天连续达标"，而非"当前连续多少天"）
+        achievementStore.updateStreakProgress(currentStreak: longestStreak)
     }
 
     // MARK: - 今日查询

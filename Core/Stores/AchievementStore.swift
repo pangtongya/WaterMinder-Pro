@@ -86,7 +86,7 @@ final class AchievementStore: ObservableObject {
     }
     
     // MARK: - 进度更新核心逻辑
-    
+    /// 关键策略：进度只增不减（取更大值），避免删除记录导致成就被撤销
     private func updateProgress(id: String, newProgress: Int) {
         guard let index = achievements.firstIndex(where: { $0.id == id }) else {
             return
@@ -94,20 +94,25 @@ final class AchievementStore: ObservableObject {
         
         var achievement = achievements[index]
         
-        // 如果已解锁，不更新
+        // 如果已解锁，绝对不再更新（用户的成就永远保留，哪怕记录被删除也不撤销）
         guard !achievement.isUnlocked else { return }
         
-        // 更新进度
-        achievement.progress = newProgress
+        // 取现有进度与新进度的较大值——保证成就进度"只增不减"
+        // 例：用户累计喝了100次水 → 获得 hydration_100 → 删除50条记录 → 仍保留100
+        let actualProgress = max(achievement.progress, newProgress)
+        guard actualProgress != achievement.progress else {
+            return  // 进度没变，无需保存
+        }
+        achievement.progress = actualProgress
         
         // 检查是否达成
-        if newProgress >= achievement.requirement {
+        if actualProgress >= achievement.requirement {
             achievement.unlockedAt = Date()
             newlyUnlocked = achievement
             
-            // 触发通知
+            // 触发通知（延迟 3s 以提供更慢消失）
             Task {
-                try? await Task.sleep(for: .seconds(2))
+                try? await Task.sleep(for: .seconds(3))
                 await MainActor.run {
                     newlyUnlocked = nil
                 }
