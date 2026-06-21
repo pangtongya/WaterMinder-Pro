@@ -227,6 +227,11 @@ struct SettingsView: View {
                 TextField("小绿", text: nameBinding)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 120)
+                    .onChange(of: nameBinding.wrappedValue) { oldValue, newValue in
+                        if newValue.count > 20 {
+                            nameBinding.wrappedValue = String(newValue.prefix(20))
+                        }
+                    }
             }
 
             HStack {
