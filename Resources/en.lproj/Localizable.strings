@@ -387,6 +387,36 @@
 "Unlimited care all year" = "Unlimited care all year";
 "Save %d%% vs subscription" = "Save %d%% vs subscription";
 "Unsupported backup version: %@" = "Unsupported backup version: %@";
+
+// MARK: - SettingsView (补充)
+"喝水提醒" = "Hydration Reminders";
+"提醒间隔" = "Reminder Interval";
+"模式" = "Mode";
+"已连接，喝水记录自动同步" = "Connected, auto-syncing water logs";
+"同步喝水记录到健康 App" = "Sync water logs to Health App";
+
+// MARK: - GardenView (补充)
+"删除" = "Delete";
+"删除这条记录？" = "Delete this record?";
+"删除后将同步更新植物状态" = "Plant state will update after deletion";
+"植物正在健康成长中" = "Your plant is growing healthily";
+"再浇点水就能到「%@」" = "A bit more water to reach %@";
+"距离下一阶段还差约 %d 点成长值" = "About %d more growth points to next stage";
+"植物枯萎了" = "Your plant has wilted";
+"没关系，从种子重新开始吧" = "It's okay, start fresh from a seed";
+"坚持每天喝水，植物就不会再枯萎啦" = "Keep drinking daily, and your plant won't wilt again";
+"我知道了" = "I got it";
+"小绿" = "Greeny";
+
+// MARK: - Misc (补充)
+"养成天数" = "Days Cared";
+"收藏品种" = "Collected Species";
+"BEST VALUE" = "BEST VALUE";
+"POPULAR" = "POPULAR";
+"Advanced Statistics" = "Advanced Statistics";
+"Custom Themes" = "Custom Themes";
+"Unlimited Plants" = "Unlimited Plants";
+"Multi-device Sync" = "Multi-device Sync";
 "Backup file not found" = "Backup file not found";
 "Invalid backup data format" = "Invalid backup data format";
 "Backup file is corrupted (checksum verification failed)" = "Backup file is corrupted (checksum verification failed)";

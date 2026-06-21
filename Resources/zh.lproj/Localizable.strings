@@ -312,6 +312,45 @@
 "基于中国卫健委建议：每日 2000ml，可根据个人情况调整" = "基于中国卫健委建议：每日 2000ml，可根据个人情况调整";
 "同步失败：%@" = "同步失败：%@";
 
+// MARK: - SettingsView (补充)
+"喝水提醒" = "喝水提醒";
+"提醒间隔" = "提醒间隔";
+"模式" = "模式";
+"已连接，喝水记录自动同步" = "已连接，喝水记录自动同步";
+"同步喝水记录到健康 App" = "同步喝水记录到健康 App";
+"删除" = "删除";
+
+// MARK: - GardenView (补充)
+"删除这条记录？" = "删除这条记录？";
+"删除后将同步更新植物状态" = "删除后将同步更新植物状态";
+"植物正在健康成长中" = "植物正在健康成长中";
+"再浇点水就能到「%@」" = "再浇点水就能到「%@」";
+"距离下一阶段还差约 %d 点成长值" = "距离下一阶段还差约 %d 点成长值";
+"植物枯萎了" = "植物枯萎了";
+"没关系，从种子重新开始吧" = "没关系，从种子重新开始吧";
+"坚持每天喝水，植物就不会再枯萎啦" = "坚持每天喝水，植物就不会再枯萎啦";
+"我知道了" = "我知道了";
+"小绿" = "小绿";
+
+// MARK: - Misc (补充)
+"养成天数" = "养成天数";
+"收藏品种" = "收藏品种";
+"Lifetime Purchase" = "Lifetime Purchase";
+"Pro Yearly" = "Pro Yearly";
+"BEST VALUE" = "BEST VALUE";
+"POPULAR" = "POPULAR";
+"Save %d%% vs subscription" = "Save %d%% vs subscription";
+"Terms of Service" = "Terms of Service";
+"Privacy Policy" = "Privacy Policy";
+"Advanced Statistics" = "Advanced Statistics";
+"Complete data analysis and visualization reports" = "Complete data analysis and visualization reports";
+"Custom Themes" = "Custom Themes";
+"Unlock all Pro themes and appearances" = "Unlock all Pro themes and appearances";
+"Unlimited Plants" = "Unlimited Plants";
+"Unlock all 7 plant species for your dream garden" = "Unlock all 7 plant species for your dream garden";
+"Multi-device Sync" = "Multi-device Sync";
+"CloudKit data sync and backup" = "CloudKit data sync and backup";
+
 // MARK: - Paywall (新增)
 "一次购买，永久解锁" = "一次购买，永久解锁";
 "全年无限养护" = "全年无限养护";
