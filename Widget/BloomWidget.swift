@@ -37,6 +37,266 @@ enum WidgetL {
     static let noData = NSLocalizedString("No Data", comment: "No data available")
 }
 
+// MARK: - Widget 植物视觉组件（内联，避免修改 pbxproj）
+
+/// 极简版植物绘制 — 专为 Widget 设计
+/// 通过阶段和健康度决定植物外观，不依赖主 App 的复杂绘制逻辑
+struct WidgetPlantView: View {
+    let stage: String      // "Seed" / "Sprout" / "Growing" / "Blooming" / "Mature"
+    let health: Double     // 0 - 100
+    let size: CGFloat
+    
+    var body: some View {
+        ZStack {
+            // 背景光晕（根据健康度）
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [Color.healthColor(health).opacity(0.25), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: size * 0.6
+                    )
+                )
+                .frame(width: size, height: size)
+            
+            // 植物主体
+            plantBody
+                .frame(width: size, height: size)
+        }
+        .frame(width: size, height: size)
+    }
+    
+    @ViewBuilder
+    private var plantBody: some View {
+        switch stage.lowercased() {
+        case "seed":
+            SeedPlant(size: size, color: Color.healthColor(health))
+        case "sprout":
+            SproutPlant(size: size, color: Color.healthColor(health))
+        case "growing":
+            GrowingPlant(size: size, color: Color.healthColor(health))
+        case "blooming":
+            BloomingPlant(size: size, color: Color.healthColor(health), hasFlower: false)
+        case "mature":
+            BloomingPlant(size: size, color: Color.healthColor(health), hasFlower: true)
+        default:
+            SeedPlant(size: size, color: Color.healthColor(health))
+        }
+    }
+}
+
+/// 🌰 种子阶段：土堆 + 小嫩芽
+struct SeedPlant: View {
+    let size: CGFloat
+    let color: Color
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                Path { path in
+                    let w = geo.size.width
+                    let h = geo.size.height
+                    path.move(to: CGPoint(x: w * 0.15, y: h * 0.75))
+                    path.addQuadCurve(to: CGPoint(x: w * 0.85, y: h * 0.75),
+                                    control: CGPoint(x: w * 0.5, y: h * 0.85))
+                    path.addLine(to: CGPoint(x: w * 0.85, y: h * 0.9))
+                    path.addLine(to: CGPoint(x: w * 0.15, y: h * 0.9))
+                    path.closeSubpath()
+                }
+                .fill(Color.brown.opacity(0.3))
+                
+                Circle()
+                    .fill(color)
+                    .frame(width: size * 0.28, height: size * 0.28)
+                    .offset(y: size * 0.02)
+            }
+        }
+    }
+}
+
+/// 🌱 发芽阶段：小茎 + 两片叶子
+struct SproutPlant: View {
+    let size: CGFloat
+    let color: Color
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                Path { path in
+                    let centerX = geo.size.width * 0.5
+                    path.move(to: CGPoint(x: centerX, y: geo.size.height * 0.8))
+                    path.addLine(to: CGPoint(x: centerX, y: geo.size.height * 0.45))
+                }
+                .stroke(color, style: StrokeStyle(lineWidth: size * 0.04, lineCap: .round))
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.28, height: size * 0.18)
+                    .rotationEffect(.degrees(-35))
+                    .offset(x: -size * 0.15, y: -size * 0.05)
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.28, height: size * 0.18)
+                    .rotationEffect(.degrees(35))
+                    .offset(x: size * 0.15, y: -size * 0.05)
+                
+                Circle()
+                    .fill(color)
+                    .frame(width: size * 0.12, height: size * 0.12)
+                    .offset(y: -size * 0.1)
+            }
+        }
+    }
+}
+
+/// 🌿 成长阶段：较长的茎 + 更多叶子
+struct GrowingPlant: View {
+    let size: CGFloat
+    let color: Color
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                Path { path in
+                    let centerX = geo.size.width * 0.5
+                    path.move(to: CGPoint(x: centerX, y: geo.size.height * 0.85))
+                    path.addQuadCurve(
+                        to: CGPoint(x: centerX, y: geo.size.height * 0.25),
+                        control: CGPoint(x: centerX + size * 0.03, y: geo.size.height * 0.55)
+                    )
+                }
+                .stroke(color, style: StrokeStyle(lineWidth: size * 0.045, lineCap: .round))
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.32, height: size * 0.22)
+                    .rotationEffect(.degrees(-40))
+                    .offset(x: -size * 0.18, y: size * 0.15)
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.32, height: size * 0.22)
+                    .rotationEffect(.degrees(40))
+                    .offset(x: size * 0.18, y: size * 0.15)
+                
+                Ellipse()
+                    .fill(color.opacity(0.9))
+                    .frame(width: size * 0.26, height: size * 0.18)
+                    .rotationEffect(.degrees(-30))
+                    .offset(x: -size * 0.15, y: -size * 0.02)
+                
+                Ellipse()
+                    .fill(color.opacity(0.9))
+                    .frame(width: size * 0.26, height: size * 0.18)
+                    .rotationEffect(.degrees(30))
+                    .offset(x: size * 0.15, y: -size * 0.02)
+                
+                Circle()
+                    .fill(color)
+                    .frame(width: size * 0.14, height: size * 0.14)
+                    .offset(y: -size * 0.18)
+            }
+        }
+    }
+}
+
+/// 🌸 开花/成熟阶段：完整的植物 + 花朵
+struct BloomingPlant: View {
+    let size: CGFloat
+    let color: Color
+    let hasFlower: Bool
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                Path { path in
+                    let centerX = geo.size.width * 0.5
+                    path.move(to: CGPoint(x: centerX, y: geo.size.height * 0.9))
+                    path.addQuadCurve(
+                        to: CGPoint(x: centerX, y: geo.size.height * 0.2),
+                        control: CGPoint(x: centerX + size * 0.04, y: geo.size.height * 0.55)
+                    )
+                }
+                .stroke(color, style: StrokeStyle(lineWidth: size * 0.05, lineCap: .round))
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.34, height: size * 0.24)
+                    .rotationEffect(.degrees(-45))
+                    .offset(x: -size * 0.2, y: size * 0.2)
+                
+                Ellipse()
+                    .fill(color)
+                    .frame(width: size * 0.34, height: size * 0.24)
+                    .rotationEffect(.degrees(45))
+                    .offset(x: size * 0.2, y: size * 0.2)
+                
+                Ellipse()
+                    .fill(color.opacity(0.9))
+                    .frame(width: size * 0.28, height: size * 0.2)
+                    .rotationEffect(.degrees(-30))
+                    .offset(x: -size * 0.17, y: size * 0.02)
+                
+                Ellipse()
+                    .fill(color.opacity(0.9))
+                    .frame(width: size * 0.28, height: size * 0.2)
+                    .rotationEffect(.degrees(30))
+                    .offset(x: size * 0.17, y: size * 0.02)
+                
+                if hasFlower {
+                    ZStack {
+                        ForEach(0..<5, id: \.self) { i in
+                            Ellipse()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color(red: 1.0, green: 0.7, blue: 0.85),
+                                            Color(red: 1.0, green: 0.55, blue: 0.75)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(width: size * 0.22, height: size * 0.32)
+                                .offset(y: -size * 0.12)
+                                .rotationEffect(.degrees(Double(i) * 72))
+                        }
+                        Circle()
+                            .fill(Color(red: 1.0, green: 0.85, blue: 0.2))
+                            .frame(width: size * 0.15, height: size * 0.15)
+                    }
+                    .offset(y: -size * 0.3)
+                } else {
+                    ZStack {
+                        ForEach(0..<3, id: \.self) { i in
+                            Ellipse()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color(red: 1.0, green: 0.75, blue: 0.88),
+                                            Color(red: 1.0, green: 0.6, blue: 0.8)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(width: size * 0.15, height: size * 0.22)
+                                .offset(y: -size * 0.08)
+                                .rotationEffect(.degrees(Double(i - 1) * 30))
+                        }
+                        Circle()
+                            .fill(color)
+                            .frame(width: size * 0.1, height: size * 0.1)
+                    }
+                    .offset(y: -size * 0.28)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Widget 数据模型
 
 struct WidgetData: Codable {
@@ -62,6 +322,11 @@ struct WidgetData: Codable {
         case 20..<40: return "😟"
         default: return "🥀"
         }
+    }
+    
+    /// 健康度对应的颜色（供进度条和图标着色）
+    var healthDisplayColor: Color {
+        Color.healthColor(plantHealth)
     }
 }
 
@@ -169,62 +434,52 @@ struct SmallWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        VStack(spacing: 8) {
-            // 植物状态
-            HStack {
-                Text(data.plantSymbol)
-                    .font(.system(size: 24))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(data.plantName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .lineLimit(1)
-                    Text(data.plantStage)
+        HStack(spacing: 10) {
+            // 真实植物视觉（左侧）
+            WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 70)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(data.plantName)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                Text(data.plantStage)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                // 进度条
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 6)
+                    
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                colors: [.bloomPrimary, .bloomGold],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 50 * data.progressPercentage, height: 6)
+                }
+                
+                HStack(spacing: 3) {
+                    Text("\(data.currentIntake)")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("/ \(data.dailyGoal)")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
-                Spacer()
+                
                 if data.isPaused {
-                    Image(systemName: "pause.circle.fill")
-                        .font(.system(size: 16))
+                    Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
+                        .font(.system(size: 9))
                         .foregroundColor(.orange)
                 }
             }
-            
-            // 进度环
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 6)
-                
-                Circle()
-                    .trim(from: 0, to: data.progressPercentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color(red: 0.2, green: 0.8, blue: 0.6), Color.bloom],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 2) {
-                    Text("\(data.currentIntake)")
-                        .font(.system(size: 20, weight: .bold))
-                    Text("/ \(data.dailyGoal)ml")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                }
-            }
-            .frame(width: 80, height: 80)
-            
-            // 植物健康
-            HStack(spacing: 4) {
-                Text(data.healthEmoji)
-                    .font(.system(size: 12))
-                Text("\(Int(data.plantHealth))%")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
+            Spacer()
         }
         .padding()
     }
@@ -237,19 +492,16 @@ struct MediumWidgetView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // 左侧：植物
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(data.plantSymbol)
-                        .font(.system(size: 32))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(data.plantName)
-                            .font(.system(size: 15, weight: .semibold))
-                        Text(data.plantStage)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                }
+            // 左侧：真实植物视觉
+            WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 100)
+            
+            // 中间：文字信息
+            VStack(alignment: .leading, spacing: 6) {
+                Text(data.plantName)
+                    .font(.system(size: 15, weight: .semibold))
+                Text(data.plantStage)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
                 
                 if data.isPaused {
                     Label(WidgetL.pauseCareFull, systemImage: "pause.circle.fill")
@@ -258,9 +510,9 @@ struct MediumWidgetView: View {
                 }
                 
                 HStack(spacing: 12) {
-                    Label("\(Int(data.plantHealth))%", systemImage: "heart.fill")
+                    Label("\(Int(data.plantHealth))%", systemImage: "leaf.fill")
                         .font(.system(size: 11))
-                        .foregroundColor(.red)
+                        .foregroundColor(Color.healthColor(data.plantHealth))
                     
                     Spacer()
                     
@@ -281,7 +533,7 @@ struct MediumWidgetView: View {
                     .trim(from: 0, to: data.progressPercentage)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.bloom, Color.bloomPrimary],
+                            colors: [.bloomPrimary, .bloomGold],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -309,19 +561,26 @@ struct LargeWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        VStack(spacing: 16) {
-            // 顶部：植物状态
+        VStack(spacing: 12) {
+            // 顶部：真实植物视觉 + 文字
             HStack {
-                Text(data.plantSymbol)
-                    .font(.system(size: 40))
+                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 130)
+                    .padding(.leading, -6)
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(data.plantName)
                         .font(.system(size: 18, weight: .semibold))
                     Text(data.plantStage)
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
+                    Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .padding(.top, 2)
                 }
+                
                 Spacer()
+                
                 if data.isPaused {
                     Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
                         .font(.system(size: 13))
@@ -338,7 +597,7 @@ struct LargeWidgetView: View {
                     .trim(from: 0, to: data.progressPercentage)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.bloom, Color.bloomPrimary, Color.bloomGold],
+                            colors: [.bloomPrimary, .bloomGold],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -359,31 +618,30 @@ struct LargeWidgetView: View {
             }
             .frame(width: 140, height: 140)
             
-            // 底部：统计信息
-            HStack(spacing: 20) {
-                VStack {
+            // 底部：健康度显示
+            HStack(spacing: 12) {
+                VStack(alignment: .leading) {
                     Text(WidgetL.plantHealth)
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
-                    Text("\(Int(data.plantHealth))%")
-                        .font(.system(size: 16, weight: .semibold))
+                    HStack(spacing: 6) {
+                        Text("\(Int(data.plantHealth))%")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color.healthColor(data.plantHealth))
+                        // 小型健康度条
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 50, height: 6)
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.healthColor(data.plantHealth))
+                                .frame(width: 50 * CGFloat(data.plantHealth / 100), height: 6)
+                        }
+                    }
                 }
-                
-                Divider()
-                
-                VStack {
-                    Text(WidgetL.status)
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                    Text(data.healthEmoji)
-                        .font(.system(size: 20))
-                }
+                .padding(.leading, 8)
                 
                 Spacer()
-                
-                Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -405,10 +663,22 @@ struct BloomWidget: Widget {
     }
 }
 
-// MARK: - 颜色扩展
+// MARK: - Widget 颜色扩展（与主 App 颜色保持一致）
 
 extension Color {
-    static let bloom = Color(red: 0.2, green: 0.8, blue: 0.6)
     static let bloomPrimary = Color(red: 0.25, green: 0.75, blue: 0.55)
     static let bloomGold = Color(red: 1.0, green: 0.85, blue: 0.2)
+    static let bloomDeep = Color(red: 0.15, green: 0.6, blue: 0.45)
+    static let bloomSuccess = Color(red: 0.3, green: 0.7, blue: 0.5)
+    
+    /// 根据健康度返回对应颜色（绿色 -> 黄褐 -> 枯褐）
+    static func healthColor(_ health: Double) -> Color {
+        switch health {
+        case 80...100: return Color(red: 0.25, green: 0.75, blue: 0.55)
+        case 60..<80: return Color(red: 0.4, green: 0.7, blue: 0.5)
+        case 40..<60: return Color(red: 0.5, green: 0.6, blue: 0.45)
+        case 20..<40: return Color(red: 0.6, green: 0.55, blue: 0.4)
+        default: return Color(red: 0.55, green: 0.45, blue: 0.35)
+        }
+    }
 }

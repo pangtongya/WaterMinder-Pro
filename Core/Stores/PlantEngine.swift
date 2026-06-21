@@ -15,6 +15,9 @@ final class PlantEngine: ObservableObject {
     /// 最近一次阶段升级到的目标阶段（用于驱动庆祝动画）
     @Published private(set) var lastStageUpCelebration: GrowthStage?
 
+    /// 植物是否刚刚枯萎了（UI 层据此显示枯萎提示动画，消费后设为 false）
+    @Published private(set) var justWilted: Bool = false
+
     private let storage = PersistenceManager.shared
     private let filename = "current_plant.json"
     private let cloudSync = CloudSyncManager.shared
@@ -157,6 +160,7 @@ final class PlantEngine: ObservableObject {
             // 健康度归零 → 枯萎重置
             if plant.health <= 0 {
                 plant = PlantLifecycle.wilt(plant)
+                justWilted = true  // UI 层据此显示枯萎动画
             }
         }
         lastActiveDay = today
@@ -179,6 +183,7 @@ final class PlantEngine: ObservableObject {
         plant.health -= totalDecay
         if plant.health <= 0 {
             plant = PlantLifecycle.wilt(plant)
+            justWilted = true  // UI 层据此显示枯萎动画
         }
         persist()
         triggerSync()
@@ -237,9 +242,14 @@ final class PlantEngine: ObservableObject {
 
     // MARK: - 庆祝动画消费
 
-    /// UI 取走庆祝事件后调用，避免重复弹出
+    /// UI 取走阶段升级庆祝后调用，避免重复弹出
     func consumeStageUpCelebration() {
         lastStageUpCelebration = nil
+    }
+
+    /// UI 显示完枯萎提示后调用，清除标志位
+    func consumeWilt() {
+        justWilted = false
     }
 
     // MARK: - 私有
