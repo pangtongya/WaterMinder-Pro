@@ -25,7 +25,8 @@ struct RootView: View {
             if userStore.hasCompletedOnboarding {
                 await downloadCloudData()
                 plantEngine.processOverdueDays()
-                plantEngine.markActiveToday()
+                // 注意：打开 App 本身不调用 markActiveToday()，
+                // 只有用户真正浇水/达标时才标记活跃，确保衰减逻辑正确。
             }
         }
     }
