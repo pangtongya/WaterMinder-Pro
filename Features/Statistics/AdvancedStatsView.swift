@@ -504,7 +504,7 @@ struct AdvancedStatsView: View {
     /// 根据时间范围筛选记录
     private func filteredRecords() -> [WaterRecord] {
         let calendar = Calendar.current
-        let startDate = calendar.date(byAdding: .day, value: -selectedTimeRange.days, to: Date())!
+        let startDate = calendar.date(byAdding: .day, value: -selectedTimeRange.days, to: Date()) ?? Date()
         return waterStore.records.filter { $0.createdAt >= startDate }
     }
 
@@ -556,7 +556,7 @@ struct AdvancedStatsView: View {
     /// 获取图表数据（基于真实数据）
     private func getChartData() -> [ChartDataPoint] {
         let calendar = Calendar.current
-        let startDate = calendar.date(byAdding: .day, value: -selectedTimeRange.days, to: Date())!
+        let startDate = calendar.date(byAdding: .day, value: -selectedTimeRange.days, to: Date()) ?? Date()
 
         // 按天分组
         var dailyTotals: [Date: Int] = [:]
@@ -567,7 +567,8 @@ struct AdvancedStatsView: View {
 
         // 生成完整日期序列（即使某天没数据也要显示）
         return (0..<selectedTimeRange.days).map { daysAgo in
-            let date = calendar.date(byAdding: .day, value: -daysAgo, to: calendar.startOfDay(for: Date()))!
+            let today = calendar.startOfDay(for: Date())
+            let date = calendar.date(byAdding: .day, value: -daysAgo, to: today) ?? today
             let amount = dailyTotals[date] ?? 0
             return ChartDataPoint(date: date, amount: amount)
         }.sorted { $0.date < $1.date }
@@ -618,8 +619,8 @@ struct AdvancedStatsView: View {
     private func calculatePreviousPeriodStats() -> DailyStats {
         let calendar = Calendar.current
         let days = selectedTimeRange.days
-        let startDate = calendar.date(byAdding: .day, value: -days * 2, to: Date())!
-        let endDate = calendar.date(byAdding: .day, value: -days, to: Date())!
+        let startDate = calendar.date(byAdding: .day, value: -days * 2, to: Date()) ?? Date()
+        let endDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
 
         let prevRecords = waterStore.records.filter {
             $0.createdAt >= startDate && $0.createdAt < endDate

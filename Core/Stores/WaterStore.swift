@@ -81,7 +81,7 @@ final class WaterStore: ObservableObject {
         let cal = Calendar.current
         let rounded = cal.date(bySettingHour: cal.component(.hour, from: date),
                                minute: cal.component(.minute, from: date),
-                               second: 0, of: date)!
+                               second: 0, of: date) ?? date
         if records.contains(where: {
             cal.isDate($0.createdAt, equalTo: rounded, toGranularity: .minute)
             && $0.amount == amount

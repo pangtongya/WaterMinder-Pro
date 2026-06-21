@@ -56,7 +56,7 @@ final class HealthSyncService: ObservableObject {
         defer { isSyncing = false }
 
         do {
-            let startDate = lastSyncTime ?? Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+            let startDate = lastSyncTime ?? Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
             let endDate = Date()
 
             let hkRecords = try await healthManager.fetchWaterRecords(from: startDate, to: endDate)
