@@ -22,13 +22,44 @@ final class AchievementStore: ObservableObject {
     // MARK: - 加载成就
     
     private func loadAchievements() {
+        let defaultList = AchievementLibrary.allAchievements()
         if let saved = storage.load([Achievement].self, filename: filename) {
-            achievements = saved
+            // 合并策略：以默认库为基准，保留已保存的进度和解锁状态
+            // —— 这样即使后续版本新增了成就，老用户也能看到
+            var merged: [Achievement] = []
+            var needSave = false
+            for def in defaultList {
+                if let savedOne = saved.first(where: { $0.id == def.id }) {
+                    // 已存在的：保留用户的进度/解锁时间，但用最新的定义
+                    // （requirement 可能在新版本中调整，保持定义一致）
+                    var mergedOne = def
+                    mergedOne.progress = max(savedOne.progress, mergedOne.progress)
+                    mergedOne.unlockedAt = savedOne.unlockedAt ?? mergedOne.unlockedAt
+                    // 如果已解锁但进度不足（罕见），以解锁状态为准
+                    if mergedOne.unlockedAt != nil && mergedOne.progress < mergedOne.requirement {
+                        mergedOne.progress = mergedOne.requirement
+                    }
+                    merged.append(mergedOne)
+                    if savedOne.requirement != def.requirement { needSave = true }
+                } else {
+                    // 新成就：直接用默认定义（进度 0，未解锁）
+                    merged.append(def)
+                    needSave = true  // 有新成就 → 立即保存
+                }
+            }
+            achievements = merged
+            if needSave { persist() }
         } else {
             // 首次初始化所有成就
-            achievements = AchievementLibrary.allAchievements()
+            achievements = defaultList
             persist()
         }
+    }
+    
+    /// 应用启动时根据当前记录总量重新计算一次（确保老用户升级后成就正确）
+    func refreshFromCurrentRecords(totalRecords: Int, totalAmount: Int, longestStreak: Int) {
+        updateHydrationProgress(totalRecords: totalRecords, totalAmount: totalAmount)
+        updateStreakProgress(currentStreak: longestStreak)
     }
     
     // MARK: - 更新进度
