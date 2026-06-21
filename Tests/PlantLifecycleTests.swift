@@ -35,9 +35,12 @@ final class PlantLifecycleTests: XCTestCase {
     // MARK: - 枯萎
 
     func test断水后健康度衰减() {
-        var plant = Plant(name: "小绿", health: 80, plantedAt: Date())
+        // plantedAt 必须超过 48 小时才能触发衰减
+        let plantedAt = Calendar.current.date(byAdding: .hour, value: -72, to: Date())!
+        var plant = Plant(name: "小绿", health: 80, plantedAt: plantedAt)
         plant = PlantLifecycle.applyDailyDecay(plant, consecutiveMissedDays: 2)
-        XCTAssertEqual(plant.health, 50, accuracy: 0.01) // 80 - 30
+        // Day 1 miss: -5, Day 2 miss: -10 → cumulative -15
+        XCTAssertEqual(plant.health, 65, accuracy: 0.01) // 80 - 15
     }
 
     func test枯萎后重置为新种子但保留名字() {
