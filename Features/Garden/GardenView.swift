@@ -38,6 +38,13 @@ struct GardenView: View {
                 // 1. 植物绘制区
                 plantHero
 
+                // 1b. 枯萎恢复横幅（celebration 消失后仍然可见，直到用户喝水恢复健康）
+                if plantEngine.plant.isWilted {
+                    wiltBanner
+                        .padding(.horizontal, 20)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
                 // 2. 状态卡
                 PlantStatusCard()
                     .padding(.horizontal, 20)
@@ -248,6 +255,43 @@ struct GardenView: View {
                 .fill(Color(.systemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
+    }
+
+    // MARK: - 枯萎恢复横幅
+
+    /// 植物枯萎后持续显示的横幅，直到用户喝水恢复健康度 > 0
+    /// 解决：WiltCelebration 消失后用户不知道自己该怎么让植物复活
+    private var wiltBanner: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "drop.triangle.fill")
+                .font(.system(size: 22))
+                .foregroundColor(.red)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(NSLocalizedString("植物枯萎了", comment: ""))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text(NSLocalizedString("坚持喝水就能复活，别放弃！", comment: ""))
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.red.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.red.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .animation(.easeInOut(duration: 0.3), value: plantEngine.plant.isWilted)
     }
     private var healthGlowColor: Color {
         Color.healthColor(plantEngine.plant.health)
