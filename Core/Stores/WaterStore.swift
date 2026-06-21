@@ -55,10 +55,13 @@ final class WaterStore: ObservableObject {
             }
         }
 
-        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group）
-        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
+        // 先持久化记录
         persist()
+        
+        // 通知 Widget 刷新数据（由 BloomApp 监听并写入 App Group 后刷新 Widget）
+        // 注意：必须在 persist() 后发送通知，确保数据已保存
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
+        
         triggerSync()
         updateAchievements()
         return record
@@ -94,9 +97,8 @@ final class WaterStore: ObservableObject {
             hkSampleUUID: hkSampleUUID
         )
         records.insert(record, at: 0)
-        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
         persist()
+        NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
         triggerSync()
         updateAchievements()
         return record
@@ -105,9 +107,8 @@ final class WaterStore: ObservableObject {
     func delete(_ record: WaterRecord) {
         if let idx = records.firstIndex(where: { $0.id == record.id }) {
             records.remove(at: idx)
-            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
-            WidgetCenter.shared.reloadAllTimelines()
             persist()
+            NotificationCenter.default.post(name: AppConstants.NotificationNames.refreshWidget, object: nil)
             triggerSync()
         }
     }
