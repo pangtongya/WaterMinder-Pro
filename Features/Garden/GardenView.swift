@@ -824,7 +824,7 @@ struct WiltCelebration: View {
 
 // MARK: - 水滴飞溅动画
 
-/// 点击浇水时，几颗水滴从顶部下落并淡出
+/// 点击浇水时，水滴飞溅动画（增强版）
 struct WaterSplashOverlay: View {
     let trigger: Int
 
@@ -832,13 +832,27 @@ struct WaterSplashOverlay: View {
     @State private var animating = false
 
     var body: some View {
-        ZStack {
-            ForEach(drops) { drop in
-                Circle()
-                    .fill(Color.bloomWater.opacity(drop.opacity))
-                    .frame(width: drop.size, height: drop.size)
-                    .offset(x: drop.xOffset, y: drop.yOffset)
+        GeometryReader { geo in
+            ZStack {
+                ForEach(drops) { drop in
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color.bloomWater.opacity(drop.opacity),
+                                    Color.bloomWater.opacity(drop.opacity * 0.5)
+                                ],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: drop.size / 2
+                            )
+                        )
+                        .frame(width: drop.size, height: drop.size)
+                        .offset(x: drop.xOffset, y: drop.yOffset)
+                        .blur(radius: drop.blur)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .allowsHitTesting(false)
         .onChange(of: trigger) { _, _ in
@@ -847,23 +861,32 @@ struct WaterSplashOverlay: View {
     }
 
     private func spawnDrops() {
-        // 生成 6 颗随机水滴
-        let newDrops = (0..<6).map { i -> WaterDrop in
-            WaterDrop(
+        // 生成 12 颗随机水滴（增加到 12 颗，更丰富）
+        let newDrops = (0..<12).map { i -> WaterDrop in
+            let angle = Double(i) / 12.0 * 360
+            let distance = Double.random(in: 30...70)
+            let radian = angle * .pi / 180
+            
+            return WaterDrop(
                 id: UUID(),
-                size: Double.random(in: 6...12),
-                xOffset: Double.random(in: -40...40),
-                yOffset: -80,
-                opacity: 0.9
+                size: Double.random(in: 6...14),
+                xOffset: 0,
+                yOffset: 0,
+                opacity: 0.9,
+                targetX: cos(radian) * distance,
+                targetY: sin(radian) * distance,
+                blur: Double.random(in: 0...2)
             )
         }
         drops = newDrops
 
-        // 下落动画
-        withAnimation(.easeIn(duration: 0.6)) {
+        // 飞溅动画（使用 spring 动画，更生动）
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
             for i in drops.indices {
-                drops[i].yOffset = 60
+                drops[i].xOffset = drops[i].targetX
+                drops[i].yOffset = drops[i].targetY
                 drops[i].opacity = 0
+                drops[i].size *= 0.5
             }
         }
 
@@ -881,4 +904,7 @@ private struct WaterDrop: Identifiable {
     var xOffset: Double
     var yOffset: Double
     var opacity: Double
+    var targetX: Double = 0
+    var targetY: Double = 0
+    var blur: Double = 0
 }
