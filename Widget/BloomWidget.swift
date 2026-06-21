@@ -36,6 +36,9 @@ enum WidgetL {
     static let bloomWidgetName = NSLocalizedString("Bloom Progress", comment: "Widget name")
     static let bloomWidgetDesc = NSLocalizedString("View your hydration progress and plant status", comment: "Widget description")
     static let noData = NSLocalizedString("No Data", comment: "No data available")
+    // Placeholder 用
+    static let plant = NSLocalizedString("Plant", comment: "Default plant name in widget placeholder")
+    static let growing = NSLocalizedString("Growing", comment: "Default plant stage in widget placeholder")
 }
 
 // MARK: - Widget 植物视觉组件（内联，避免修改 pbxproj）
@@ -357,9 +360,9 @@ struct Provider: TimelineProvider {
             data: WidgetData(
                 currentIntake: 1500,
                 dailyGoal: 2000,
-                plantName: "Plant",
+                plantName: WidgetL.plant,
                 plantHealth: 75.0,
-                plantStage: "Growing",
+                plantStage: WidgetL.growing,
                 plantSymbol: "🌱",
                 isPaused: false,
                 lastUpdated: Date(),
@@ -394,7 +397,7 @@ struct Provider: TimelineProvider {
             return WidgetData(
                 currentIntake: 0,
                 dailyGoal: 2000,
-                plantName: "Bloom",
+                plantName: WidgetL.plant,
                 plantHealth: 50.0,
                 plantStage: "Seed",
                 plantSymbol: "🌰",
@@ -406,7 +409,7 @@ struct Provider: TimelineProvider {
         
         let currentIntake = defaults.integer(forKey: WidgetConstants.WidgetKeys.todayIntake)
         let dailyGoal = defaults.integer(forKey: WidgetConstants.WidgetKeys.dailyGoal)
-        let plantName = defaults.string(forKey: WidgetConstants.WidgetKeys.plantName) ?? "Plant"
+        let plantName = defaults.string(forKey: WidgetConstants.WidgetKeys.plantName) ?? WidgetL.plant
         let plantHealth = defaults.double(forKey: WidgetConstants.WidgetKeys.plantHealth)
         let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage) ?? "Seed"
         let plantSymbol = defaults.string(forKey: WidgetConstants.WidgetKeys.plantSymbol) ?? "🌰"
@@ -627,7 +630,7 @@ struct LargeWidgetView: View {
                 VStack(spacing: 4) {
                     Text("\(data.currentIntake)")
                         .font(.system(size: 36, weight: .bold))
-                    Text("/ \(data.dailyGoal)ml")
+                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                     Text("\(Int(data.progressPercentage * 100))%")
