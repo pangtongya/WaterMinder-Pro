@@ -160,7 +160,7 @@ struct GardenView: View {
             // 背景光晕（健康时鲜亮）
             RadialGradient(
                 colors: [
-                    healthGlowColor.opacity(0.15),
+                    healthGlowColor.opacity(plantEngine.plant.isPaused ? 0.05 : 0.15),
                     Color.clear
                 ],
                 center: .center,
@@ -175,6 +175,28 @@ struct GardenView: View {
                 .frame(width: 240, height: 320)
                 .scaleEffect(plantPressing ? 0.94 : 1.0)  // 按压时微缩
                 .animation(.spring(response: 0.3, dampingFraction: 0.8), value: plantPressing)
+                .opacity(plantEngine.plant.isPaused ? 0.5 : 1.0)  // 暂停时植物半透明
+
+            // 暂停状态提示覆盖
+            if plantEngine.plant.isPaused {
+                VStack(spacing: 10) {
+                    Image(systemName: "pause.circle.fill")
+                        .font(.system(size: 44, weight: .bold))
+                        .foregroundStyle(Color(white: 0.45))
+                    Text("暂停养护中")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(white: 0.4))
+                    Text("出差或旅游时，植物不会枯萎")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(white: 0.35))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(.systemBackground).opacity(0.85))
+                )
+            }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 340)
@@ -326,10 +348,24 @@ struct GardenView: View {
     /// 点击植物直接浇水（用中杯默认量），并触发水滴动画
     private func waterPlant(_ cup: CupType) {
         Task {
-            await plantEngine.waterPlant(cup: cup, waterStore: waterStore, healthManager: healthManager)
+            // 暂停养护：不更新植物，但给用户清晰反馈
+            if plantEngine.plant.isPaused {
+                Haptics.error()
+                // 给用户短暂的"摇晃"视觉效果（由 splashTrigger + 错误触觉组合表示）
+                return
+            }
+            let succeeded = await plantEngine.waterPlant(
+                cup: cup,
+                waterStore: waterStore,
+                healthManager: healthManager
+            )
             // 水滴动画 + 触觉（UI 相关，仍在 View 层）
-            splashTrigger += 1
-            Haptics.waterDrop()
+            if succeeded {
+                splashTrigger += 1
+                Haptics.waterDrop()
+            } else {
+                Haptics.error()
+            }
         }
     }
 

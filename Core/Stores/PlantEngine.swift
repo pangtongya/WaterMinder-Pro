@@ -71,11 +71,21 @@ final class PlantEngine: ObservableObject {
 
     /// 统一浇水入口（由 GardenView 调用）
     /// 整合了：记录喝水、更新植物、检测目标达成、同步 HealthKit
-    func waterPlant(cup: CupType, waterStore: WaterStore, healthManager: HealthManager) async {
+    /// - Returns: 是否实际执行了浇水（暂停状态/健康度超上限会返回 false）
+    @discardableResult
+    func waterPlant(cup: CupType, waterStore: WaterStore, healthManager: HealthManager) async -> Bool {
+        // 暂停养护期间不允许浇水
+        guard !plant.isPaused else { return false }
+
         let amount = cup.defaultAmount
 
+        // 健康度已满时，仍然让用户记录喝水，但避免植物继续成长
+        // （如果用户健康度已满仍要记录，仅更新 waterStore，不改变植物）
+        let canGrow = plant.health < 100 || plant.stage != .harvestable
         waterStore.add(amount: amount, cupType: cup)
-        _ = water(amount: amount)
+        if canGrow {
+            _ = water(amount: amount)
+        }
 
         if waterStore.isGoalMetToday {
             processGoalMet()
@@ -84,6 +94,7 @@ final class PlantEngine: ObservableObject {
         if healthManager.isAuthorized {
             try? await healthManager.saveWater(amount)
         }
+        return true
     }
 
     /// 统一删除记录入口（由 TodayRecordsCard 的滑动删除调用）

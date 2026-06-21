@@ -13,7 +13,9 @@ enum PlantLifecycle {
 
     /// 用户喝了一口水后，植物的新状态
     /// - 每次喝水：健康度恢复 + 成长值 + 触发一次阶段检查（可能升级）
+    /// - 暂停养护状态下不应调用此方法（由上层拦截），但这里仍提供防御性检查
     static func applyWatering(_ plant: Plant, amount: Int) -> Plant {
+        guard !plant.isPaused else { return plant }
         var p = plant
         p.health = HealthCalculator.applyWater(currentHealth: p.health, amount: amount)
         p.growthPoints += GrowthRules.growthFromWater(amount: amount)
