@@ -34,8 +34,36 @@ struct BloomApp: App {
         WindowGroup {
             Group {
                 if !isReady {
-                    // 启动屏幕：显示品牌色，避免白屏
-                    Color(.systemBackground)
+                    // 启动画面：显示加载状态，避免白屏
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        // 应用图标
+                        Image(systemName: "leaf.circle.fill")
+                            .resizable()
+                            .frame(width: 80, height: 80)
+                            .foregroundStyle(Color.bloomPrimary)
+                        
+                        // 应用名称
+                        Text("Bloom")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(Color.bloomPrimary)
+                        
+                        // 加载提示
+                        Text("正在加载你的植物...")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.secondary)
+                        
+                        // 加载指示器
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .scaleEffect(1.2)
+                            .padding(.top, 10)
+                        
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemBackground))
                 } else {
                     RootView()
                 }
