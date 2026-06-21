@@ -148,12 +148,12 @@ struct PlantStatusCard: View {
 
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(isMax ? NSLocalizedString("已满级", comment: "Max level") : NSLocalizedString("成长进度", comment: "Growth progress"))
+                Text(isMax ? L.maxLevel : L.growthProgress)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Spacer()
                 if let next = nextName {
-                    Text(String(format: NSLocalizedString("下一阶段：%@", comment: ""), next))
+                    Text(String(format: L.nextStage, next))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 } else {

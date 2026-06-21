@@ -20,6 +20,7 @@ enum WidgetConstants {
         static let plantSymbol = "widget.plantSymbol"
         static let isPaused = "widget.isPaused"
         static let lastUpdated = "widget.lastUpdated"
+        static let dataDate = "widget.dataDate"
     }
 }
 
@@ -308,10 +309,18 @@ struct WidgetData: Codable {
     let plantSymbol: String
     let isPaused: Bool
     let lastUpdated: Date
+    let dataDate: String
     
     var progressPercentage: Double {
         guard dailyGoal > 0 else { return 0 }
         return min(1.0, Double(currentIntake) / Double(dailyGoal))
+    }
+    
+    /// 检查数据是否为今日的（防止设备时钟偏移导致显示错误日期）
+    var isDataForToday: Bool {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        return df.string(from: Date()) == dataDate
     }
     
     var healthEmoji: String {
@@ -341,7 +350,9 @@ struct SimpleEntry: TimelineEntry {
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        return SimpleEntry(
             date: Date(),
             data: WidgetData(
                 currentIntake: 1500,
@@ -351,7 +362,8 @@ struct Provider: TimelineProvider {
                 plantStage: "Growing",
                 plantSymbol: "🌱",
                 isPaused: false,
-                lastUpdated: Date()
+                lastUpdated: Date(),
+                dataDate: df.string(from: Date())
             )
         )
     }
@@ -374,6 +386,10 @@ struct Provider: TimelineProvider {
     
     private func loadWidgetData() -> WidgetData {
         // 从共享 App Group 读取数据
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let todayString = df.string(from: Date())
+        
         guard let defaults = UserDefaults(suiteName: WidgetConstants.appGroupIdentifier) else {
             return WidgetData(
                 currentIntake: 0,
@@ -383,7 +399,8 @@ struct Provider: TimelineProvider {
                 plantStage: "Seed",
                 plantSymbol: "🌰",
                 isPaused: false,
-                lastUpdated: Date()
+                lastUpdated: Date(),
+                dataDate: todayString
             )
         }
         
@@ -394,6 +411,7 @@ struct Provider: TimelineProvider {
         let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage) ?? "Seed"
         let plantSymbol = defaults.string(forKey: WidgetConstants.WidgetKeys.plantSymbol) ?? "🌰"
         let isPaused = defaults.bool(forKey: WidgetConstants.WidgetKeys.isPaused)
+        let dataDate = defaults.string(forKey: WidgetConstants.WidgetKeys.dataDate) ?? todayString
         
         return WidgetData(
             currentIntake: currentIntake,
@@ -403,7 +421,8 @@ struct Provider: TimelineProvider {
             plantStage: plantStage,
             plantSymbol: plantSymbol,
             isPaused: isPaused,
-            lastUpdated: Date()
+            lastUpdated: Date(),
+            dataDate: dataDate
         )
     }
 }

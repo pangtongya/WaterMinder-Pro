@@ -98,8 +98,8 @@ final class BackgroundTaskManager {
                 let engine = PlantEngine.shared
                 engine.applyOfflineDecay(hours: hoursSinceLastActive)
 
-                let waterStore = WaterStore()
-                let userStore = UserStore()
+                let waterStore = WaterStore.shared
+                let userStore = UserStore.shared
                 WidgetDataManager.shared.updateWidgetData(
                     currentIntake: waterStore.todayTotal,
                     dailyGoal: userStore.dailyGoal,
@@ -134,9 +134,9 @@ final class BackgroundTaskManager {
             defer { task.setTaskCompleted(success: true) }
 
             // 仅刷新 Widget 数据，不修改植物状态
-            let waterStore = WaterStore()
+            let waterStore = WaterStore.shared
             let plantEngine = PlantEngine.shared
-            let userStore = UserStore()
+            let userStore = UserStore.shared
 
             WidgetDataManager.shared.updateWidgetData(
                 currentIntake: waterStore.todayTotal,

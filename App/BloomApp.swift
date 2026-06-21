@@ -7,12 +7,9 @@ import Combine
 
 @main
 struct BloomApp: App {
-    // 关键 store：立即加载（决定显示引导还是主界面）
-    @StateObject private var userStore = UserStore()
-
-    // 其他 store：在 .task 中异步初始化
-    @StateObject private var waterStore = WaterStore()
     // 单例 store：用 @ObservedObject 共享同一个实例，避免 SwiftUI 错误地假设拥有生命周期
+    @ObservedObject private var userStore = UserStore.shared
+    @ObservedObject private var waterStore = WaterStore.shared
     @ObservedObject private var plantEngine = PlantEngine.shared
     @StateObject private var gardenStore = GardenStore()
     @StateObject private var achievementStore = AchievementStore()

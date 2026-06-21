@@ -77,6 +77,9 @@ extension L {
     static let daysCared            = s("养护天数")
     static let daysN               = s("%d 天")
     static let harvestAndSave       = s("收获并保存到收藏")
+    // 成长进度
+    static let maxLevel             = s("已满级")
+    static let growthProgress       = s("成长进度")
 }
 
 // MARK: - Achievements

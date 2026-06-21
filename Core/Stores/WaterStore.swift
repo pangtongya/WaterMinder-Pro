@@ -7,6 +7,9 @@ import SwiftUI
 
 @MainActor
 final class WaterStore: ObservableObject {
+    /// 单例：整个 app 共用同一个 WaterStore 实例，避免多实例数据不一致
+    static let shared = WaterStore()
+
     @Published private(set) var records: [WaterRecord] = []
 
     /// 当日目标（从 UserStore 同步，避免循环依赖，用闭包注入）

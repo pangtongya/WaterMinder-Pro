@@ -23,6 +23,7 @@ enum AppConstants {
         static let plantSymbol = "widget.plantSymbol"
         static let isPaused = "widget.isPaused"
         static let lastUpdated = "widget.lastUpdated"
+        static let dataDate = "widget.dataDate"
     }
     
     enum NotificationNames {

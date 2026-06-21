@@ -6,6 +6,9 @@ import SwiftUI
 
 @MainActor
 final class UserStore: ObservableObject {
+    /// 单例：整个 app 共用同一个 UserStore 实例，避免多实例数据不一致
+    static let shared = UserStore()
+
     @Published private(set) var profile: UserProfile {
         didSet { persist() }
     }

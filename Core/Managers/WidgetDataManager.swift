@@ -43,6 +43,10 @@ final class WidgetDataManager {
         defaults.set(plantSymbol, forKey: AppConstants.WidgetKeys.plantSymbol)
         defaults.set(isPaused, forKey: AppConstants.WidgetKeys.isPaused)
         defaults.set(Date(), forKey: AppConstants.WidgetKeys.lastUpdated)
+        // dataDate：防止设备时钟偏移导致 Widget 显示错误日期
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        defaults.set(df.string(from: Date()), forKey: AppConstants.WidgetKeys.dataDate)
         
         // 同时保存本地化的阶段名称（供 Widget 直接读取）
         let localizedStage = GrowthStage(rawValue: plantStageRawValue)?.name ?? "Seed"
