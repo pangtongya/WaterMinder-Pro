@@ -443,7 +443,7 @@ final class CloudSyncManager: ObservableObject {
     
     /// 多设备合并植物：优先 health 更高 / stage 更成熟者，只在两者相同时才用 lastWateredAt 破局
     /// 避免：B 设备 lastWateredAt 晚但 health 更低，却覆盖掉 A 设备更健康的植物
-    private func mergePlant(local: Plant, cloud: [Plant]) -> Plant {
+    func mergePlant(local: Plant, cloud: [Plant]) -> Plant {
         guard let cloudPlant = cloud.first else { return local }
 
         // 1) stage 优先（成熟度最高的植物赢）
@@ -528,19 +528,14 @@ final class CloudSyncManager: ObservableObject {
         return merged
     }
     
+    /// 保存成就列表到云端
+    /// 注意：保存为 JSON data 格式（与其他 saveX 方法一致），以便 fetchAllRecords 能正确解码
     private func saveAchievements(_ achievements: [Achievement]) async throws {
-        let records: [CKRecord] = achievements.map { achievement in
-            let record = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
-            record["title"] = achievement.title
-            record["description"] = achievement.description
-            record["icon"] = achievement.icon
-            record["category"] = achievement.category.rawValue
-            record["requirement"] = achievement.requirement
-            record["progress"] = achievement.progress
-            record["unlockedAt"] = achievement.unlockedAt as NSDate?
-            return record
+        for achievement in achievements {
+            let ckRecord = CKRecord(recordType: "Achievement", recordID: CKRecord.ID(recordName: achievement.id))
+            ckRecord["data"] = try JSONEncoder().encode(achievement)
+            ckRecord["lastModified"] = Date()
+            _ = try await database.save(ckRecord)
         }
-
-        _ = try await database.modifyRecords(saving: records, deleting: [])
     }
 }
