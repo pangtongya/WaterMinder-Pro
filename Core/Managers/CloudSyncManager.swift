@@ -414,58 +414,90 @@ final class CloudSyncManager: ObservableObject {
         return Array(dict.values).sorted { $0.createdAt > $1.createdAt }
     }
     
+    /// 多设备合并植物：优先 health 更高 / stage 更成熟者，只在两者相同时才用 lastWateredAt 破局
+    /// 避免：B 设备 lastWateredAt 晚但 health 更低，却覆盖掉 A 设备更健康的植物
     private func mergePlant(local: Plant, cloud: [Plant]) -> Plant {
         guard let cloudPlant = cloud.first else { return local }
-        
-        if let localLastWatered = local.lastWateredAt,
-           let cloudLastWatered = cloudPlant.lastWateredAt {
-            return localLastWatered > cloudLastWatered ? local : cloudPlant
+
+        // 1) stage 优先（成熟度最高的植物赢）
+        if local.stage.rawValue != cloudPlant.stage.rawValue {
+            return local.stage.rawValue > cloudPlant.stage.rawValue ? local : cloudPlant
         }
-        
+        // 2) health 次之（越健康的植物赢）
+        if local.health != cloudPlant.health {
+            return local.health > cloudPlant.health ? local : cloudPlant
+        }
+        // 3) lastWateredAt 破局（较晚的更有权威性）
+        if let localLast = local.lastWateredAt, let cloudLast = cloudPlant.lastWateredAt {
+            return localLast > cloudLast ? local : cloudPlant
+        }
+        // 4) 暂停养护的合并：只要有一边是暂停，就保持暂停（更保守，避免意外浇水）
+        if local.isPaused != cloudPlant.isPaused {
+            var winner = local.health >= cloudPlant.health ? local : cloudPlant
+            winner.isPaused = local.isPaused || cloudPlant.isPaused
+            return winner
+        }
         return local
     }
-    
+
+    /// 多设备合并花园记录：按 id 去重，同一条记录保留 harvestedAt 较新的
+    /// 避免：本地永远覆盖云端 → 云端的新收获被旧本地数据覆盖
     private func mergeGardenItems(local: [GardenItem], cloud: [GardenItem]) -> [GardenItem] {
         var dict: [UUID: GardenItem] = [:]
-        
+
         for item in cloud {
             dict[item.id] = item
         }
-        
+
         for item in local {
-            dict[item.id] = item
+            if let existing = dict[item.id] {
+                // 同一条记录：保留 harvestedAt 较新的
+                dict[item.id] = item.harvestedAt >= existing.harvestedAt ? item : existing
+            } else {
+                dict[item.id] = item
+            }
         }
-        
+
         return Array(dict.values).sorted { $0.harvestedAt > $1.harvestedAt }
     }
-    
+
+    /// 多设备合并用户资料：Pro 状态只要一边是 true 就保留；其他字段本地优先
     private func mergeUserProfile(local: UserProfile, cloud: [UserProfile]) -> UserProfile {
         guard let cloudProfile = cloud.first else { return local }
-        
-        if cloudProfile.isPro && !local.isPro {
-            return cloudProfile
-        }
-        
-        return local
+
+        // Pro 状态一经解锁不应被撤销；如果本地或云端任一是 Pro，保留为 Pro
+        var merged = local
+        merged.isPro = local.isPro || cloudProfile.isPro
+        return merged
     }
-    
+
+    /// 多设备合并成就：进度单调递增（永不回退），解锁时间取两者中较早的
+    /// 避免：云端进度/解锁状态比本地旧时把用户"已解锁"或"已积累 50%" 的进度回退
     private func mergeAchievements(local: [Achievement], cloud: [Achievement]) -> [Achievement] {
         var merged = local
-        
+
         for cloudAch in cloud {
             if let index = merged.firstIndex(where: { $0.id == cloudAch.id }) {
-                // Merge: keep the one with later unlock date or higher progress
-                if cloudAch.isUnlocked && !merged[index].isUnlocked {
-                    merged[index] = cloudAch
-                } else if cloudAch.progress > merged[index].progress {
-                    merged[index].progress = cloudAch.progress
+                var existing = merged[index]
+                // 进度单调递增：取 max(local, cloud)
+                existing.progress = max(existing.progress, cloudAch.progress)
+
+                // 解锁状态：只要一方已解锁，就保留为已解锁；unlockedAt 取较早的时间（首次解锁时间）
+                switch (existing.unlockedAt, cloudAch.unlockedAt) {
+                case (_, nil):
+                    break
+                case (nil, _):
+                    existing.unlockedAt = cloudAch.unlockedAt
+                case (.some(let localAt), .some(let cloudAt)):
+                    existing.unlockedAt = min(localAt, cloudAt)
                 }
+
+                merged[index] = existing
             } else {
-                // New achievement from cloud
                 merged.append(cloudAch)
             }
         }
-        
+
         return merged
     }
     
