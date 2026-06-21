@@ -95,7 +95,7 @@ final class BackgroundTaskManager {
 
             // 1. 应用离线衰减
             if hoursSinceLastActive >= 1 {
-                let engine = PlantEngine()
+                let engine = PlantEngine.shared
                 engine.applyOfflineDecay(hours: hoursSinceLastActive)
 
                 let waterStore = WaterStore()
@@ -135,7 +135,7 @@ final class BackgroundTaskManager {
 
             // 仅刷新 Widget 数据，不修改植物状态
             let waterStore = WaterStore()
-            let plantEngine = PlantEngine()
+            let plantEngine = PlantEngine.shared
             let userStore = UserStore()
 
             WidgetDataManager.shared.updateWidgetData(

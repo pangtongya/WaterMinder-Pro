@@ -10,6 +10,9 @@ import SwiftUI
 
 @MainActor
 final class PlantEngine: ObservableObject {
+    /// 单例：整个 app 共用同一个 PlantEngine 实例，避免多实例数据竞争
+    static let shared = PlantEngine()
+
     @Published private(set) var plant: Plant
 
     /// 最近一次阶段升级到的目标阶段（用于驱动庆祝动画）
