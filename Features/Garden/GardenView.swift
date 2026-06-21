@@ -190,10 +190,10 @@ struct GardenView: View {
                     Image(systemName: "pause.circle.fill")
                         .font(.system(size: 44, weight: .bold))
                         .foregroundStyle(Color(white: 0.45))
-                    Text("暂停养护中")
+                    Text(L.carePaused)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(white: 0.4))
-                    Text("出差或旅游时，植物不会枯萎")
+                        .foregroundStyle(Color(white: 0.45))
+                    Text(L.pauseExplanation)
                         .font(.system(size: 11))
                         .foregroundStyle(Color(white: 0.35))
                         .multilineTextAlignment(.center)
@@ -232,7 +232,7 @@ struct GardenView: View {
                 Text(L.carePaused)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.orange)
-                Text(String(format: NSLocalizedString("剩余 %d 天", comment: ""), plantEngine.plant.remainingPauseDays))
+                Text(String(format: L.daysRemaining, plantEngine.plant.remainingPauseDays))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
             }
@@ -268,10 +268,10 @@ struct GardenView: View {
                 .foregroundColor(.red)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(NSLocalizedString("植物枯萎了", comment: ""))
+                Text(L.wiltBannerTitle)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.primary)
-                Text(NSLocalizedString("坚持喝水就能复活，别放弃！", comment: ""))
+                Text(L.wiltBannerBody)
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
             }

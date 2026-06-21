@@ -146,24 +146,24 @@ struct SettingsView: View {
             }
         }
         .alert("恢复成功".localized, isPresented: $showBackupSuccess) {
-            Button("好的".localized, role: .cancel) {}
+            Button(L.ok, role: .cancel) {}
         } message: {
             Text("数据已成功恢复".localized)
         }
         .alert("恢复失败".localized, isPresented: $showBackupError) {
-            Button("好的".localized, role: .cancel) {}
+            Button(L.ok, role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
         .alert("健康权限".localized, isPresented: $showHealthAlert) {
             Button("取消".localized, role: .cancel) {}
-            Button("去设置".localized) { openSettings() }
+            Button(L.goToSettings) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 访问健康数据".localized)
         }
         .alert("通知权限".localized, isPresented: $showNotificationAlert) {
             Button("取消".localized, role: .cancel) {}
-            Button("去设置".localized) { openSettings() }
+            Button(L.goToSettings) { openSettings() }
         } message: {
             Text("请在系统设置中允许 Bloom 发送通知".localized)
         }
@@ -227,7 +227,7 @@ struct SettingsView: View {
                             .foregroundColor(.green)
                         Text("恢复养护".localized)
                         Spacer()
-                        Text(String(format: NSLocalizedString("剩余 %d 天", comment: ""), plantEngine.plant.remainingPauseDays))
+                        Text(String(format: L.daysRemaining, plantEngine.plant.remainingPauseDays))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
