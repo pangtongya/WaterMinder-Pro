@@ -62,6 +62,18 @@ struct SettingsView: View {
             // Pro
             proSection
 
+            // 帮助与反馈
+            NavigationLink(destination: HelpView()) {
+                HStack {
+                    Image(systemName: "questionmark.circle.fill")
+                        .foregroundStyle(Color.bloomPrimary)
+                    Text("帮助与反馈")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             // 成就
             NavigationLink(destination: AchievementView().environmentObject(achievementStore)) {
