@@ -18,11 +18,12 @@ struct GardenView: View {
     @EnvironmentObject var healthManager: HealthManager
     @EnvironmentObject var achievementStore: AchievementStore
 
-    @State private var showHarvestSheet = false
+        @State private var showHarvestSheet = false
     @State private var celebrateStage: GrowthStage?
     @State private var splashTrigger: Int = 0   // 水滴动画触发器
     @State private var plantPressing = false    // 植物按压视觉反馈
     @State private var showWilt = false         // 植物枯萎提示动画
+    @State private var showGoalCelebration = false  // 达标庆祝
 
 
     @State private var showPauseConfirm = false
@@ -88,6 +89,21 @@ struct GardenView: View {
                 Haptics.error()
             }
         }
+        // 达标庆祝：监听 waterStore.isGoalMetToday 的变化
+        .onChange(of: waterStore.isGoalMetToday) { oldValue, newValue in
+            if !oldValue && newValue {
+                // 从未达标到达标，显示庆祝
+                showGoalCelebration = true
+                Haptics.success()
+                
+                // 3秒后自动消失
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation {
+                        showGoalCelebration = false
+                    }
+                }
+            }
+        }
         .overlay {
             if let stage = celebrateStage {
                 StageUpCelebration(stage: stage) {
@@ -103,6 +119,15 @@ struct GardenView: View {
                     plantEngine.consumeWilt()
                 }
                 .transition(.opacity)
+            }
+            // 达标庆祝
+            if showGoalCelebration {
+                GoalCelebrationView {
+                    withAnimation {
+                        showGoalCelebration = false
+                    }
+                }
+                .transition(.scale.combined(with: .opacity))
             }
         }
         .animation(.easeInOut(duration: 0.25), value: celebrateStage)
@@ -907,4 +932,95 @@ private struct WaterDrop: Identifiable {
     var targetX: Double = 0
     var targetY: Double = 0
     var blur: Double = 0
+}
+
+// MARK: - 达标庆祝视图
+
+/// 每日目标达成时的庆祝弹窗
+struct GoalCelebrationView: View {
+    let onDismiss: () -> Void
+    
+    @State private var scale: CGFloat = 0.5
+    @State private var opacity: Double = 0
+    @State private var showStars: Bool = false
+    
+    var body: some View {
+        ZStack {
+            // 背景遮罩
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    onDismiss()
+                }
+            
+            // 庆祝卡片
+            VStack(spacing: 20) {
+                // 星星动画
+                if showStars {
+                    HStack(spacing: 8) {
+                        ForEach(0..<5) { i in
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Color.yellow)
+                                .scaleEffect(showStars ? 1 : 0)
+                                .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(i) * 0.1), value: showStars)
+                        }
+                    }
+                    .padding(.top, 10)
+                }
+                
+                // 图标
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(Color.bloomSuccess)
+                    .scaleEffect(scale)
+                
+                // 标题
+                Text("🎉 今日目标达成！")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.bloomPrimary)
+                
+                // 副标题
+                Text("你太棒了！\n继续加油，保持好习惯！")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                // 关闭按钮
+                Button {
+                    onDismiss()
+                } label: {
+                    Text(L.amazing)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.bloomPrimary, Color.bloomDeep],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .padding(.top, 10)
+            }
+            .padding(30)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .onAppear {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                    scale = 1.0
+                    opacity = 1.0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showStars = true
+                }
+            }
+        }
+    }
 }
