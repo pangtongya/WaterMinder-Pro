@@ -143,8 +143,8 @@ struct GardenView: View {
             }
         }
         .alert(L.pauseCare, isPresented: $showPauseConfirm) {
-            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
-            Button(NSLocalizedString("暂停", comment: "Pause"), role: .destructive) {
+            Button(L.cancel, role: .cancel) { }
+            Button(L.pause, role: .destructive) {
                 plantEngine.pauseCare()
                 Haptics.light()
             }
@@ -156,12 +156,12 @@ struct GardenView: View {
                 plantEngine.resumeCare()
                 Haptics.success()
             }
-            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
+            Button(L.cancel, role: .cancel) { }
         } message: {
             Text(L.confirmResumeCare)
         }
         .alert(L.gardenFull, isPresented: $showGardenLimitAlert) {
-            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
+            Button(L.cancel, role: .cancel) { }
             Button(L.upgradeToPro) {
                 NotificationCenter.default.post(name: AppConstants.NotificationNames.showPaywall, object: nil)
             }
@@ -232,7 +232,6 @@ struct GardenView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 340)
-        .contentShape(Rectangle())
         .contentShape(Rectangle())  // 让整个区域可点击
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
@@ -330,7 +329,7 @@ struct GardenView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
-                Text(String(format: NSLocalizedString("收获 %@", comment: "Harvest [plant name]"), plantEngine.plant.name))
+                Text(String(format: L.harvestFormat, plantEngine.plant.name))
                 Image(systemName: "chevron.right")
             }
             .font(.system(size: 15, weight: .semibold))
@@ -361,16 +360,16 @@ struct GardenView: View {
                 .foregroundStyle(Color.bloomPrimary.opacity(0.8))
             VStack(alignment: .leading, spacing: 2) {
                 if let nextStage = next {
-                    Text(String(format: NSLocalizedString("再浇点水就能到「%@」", comment: "Hint text for next stage"), nextStage.name))
+                    Text(String(format: L.waterMoreForStage, nextStage.name))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.primary.opacity(0.8))
                     if let pts = remaining, pts > 0 {
-                        Text(String(format: NSLocalizedString("距离下一阶段还差约 %d 点成长值", comment: "Remaining growth points"), Int(pts)))
+                        Text(String(format: L.pointsToNextStage, Int(pts)))
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    Text(NSLocalizedString("植物正在健康成长中", comment: "Plant growing healthily hint"))
+                    Text(L.plantGrowingHealthily)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.primary.opacity(0.8))
                 }
@@ -457,7 +456,7 @@ struct TodayRecordsCard: View {
     @State private var showUndoSnackbar = false
     @State private var deletedRecord: WaterRecord?
     @State private var plantStateBeforeDelete: Plant?
-    @State private var undoWorkItem: DispatchWorkItem?
+    @State private var undoTask: Task<Void, Never>? = nil  // 使用 Task 替代 DispatchWorkItem
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -477,7 +476,7 @@ struct TodayRecordsCard: View {
                     Image(systemName: "drop")
                         .font(.system(size: 28))
                         .foregroundStyle(Color.bloomWater.opacity(0.4))
-                    Text(String(format: NSLocalizedString("%@ 还没喝到水", comment: ""), plantEngine.plant.name))
+                    Text(String(format: L.plantHasntWatered, plantEngine.plant.name))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
@@ -508,15 +507,15 @@ struct TodayRecordsCard: View {
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .animation(.easeInOut(duration: 0.3), value: showUndoSnackbar)
-        .alert(NSLocalizedString("删除这条记录？", comment: "Delete this record?"), isPresented: $showDeleteConfirm) {
-            Button(NSLocalizedString("取消", comment: "Cancel"), role: .cancel) { }
-            Button(NSLocalizedString("删除", comment: "Delete"), role: .destructive) {
+        .alert(L.deleteRecordConfirm, isPresented: $showDeleteConfirm) {
+            Button(L.cancel, role: .cancel) { }
+            Button(L.delete, role: .destructive) {
                 if let record = recordToDelete {
                     performDelete(record)
                 }
             }
         } message: {
-            Text(NSLocalizedString("删除后将同步更新植物状态", comment: "Will update plant state after deletion"))
+            Text(L.deleteRecordWarning)
         }
     }
     
@@ -537,12 +536,16 @@ struct TodayRecordsCard: View {
             showUndoSnackbar = true
         }
         
-        // 5秒后自动消失
-        let workItem = DispatchWorkItem {
-            dismissUndoSnackbar()
+        // 5秒后自动消失（使用 Task 替代 DispatchWorkItem）
+        undoTask?.cancel()
+        undoTask = Task {
+            try? await Task.sleep(for: .seconds(5))
+            if !Task.isCancelled {
+                await MainActor.run {
+                    dismissUndoSnackbar()
+                }
+            }
         }
-        undoWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: workItem)
         
         Haptics.light()
     }
@@ -553,7 +556,7 @@ struct TodayRecordsCard: View {
         guard let record = deletedRecord, let previousPlant = plantStateBeforeDelete else { return }
         
         // 取消自动消失
-        undoWorkItem?.cancel()
+        undoTask?.cancel()
         
         // 恢复记录（直接插入，不创建新记录）
         waterStore.restore(record: record)
@@ -603,7 +606,7 @@ struct TodayRecordsCard: View {
                 recordToDelete = record
                 showDeleteConfirm = true
             } label: {
-                Label(NSLocalizedString("删除", comment: "Delete"), systemImage: "trash")
+                Label(L.delete, systemImage: "trash")
             }
         }
     }
@@ -621,7 +624,7 @@ struct UndoSnackbarView: View {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(Color.bloomSuccess)
             
-            Text(String(format: NSLocalizedString("已删除 %@", comment: "Deleted [amount]"), deletedRecord.formattedAmount))
+            Text(String(format: L.deletedFormat, deletedRecord.formattedAmount))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.primary)
             
@@ -630,7 +633,7 @@ struct UndoSnackbarView: View {
             Button {
                 onUndo()
             } label: {
-                Text(NSLocalizedString("撤销", comment: "Undo"))
+                Text(L.undo)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.bloomPrimary)
             }
@@ -783,13 +786,13 @@ struct WiltCelebration: View {
                 }
 
                 // 主标题：温和的"枯萎"提示
-                Text(NSLocalizedString("植物枯萎了", comment: "Plant wilted"))
+                Text(L.plantWilted)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .opacity(appear ? 1 : 0)
 
                 // 副标题：温和的提醒
-                Text(NSLocalizedString("没关系，从种子重新开始吧", comment: "It's okay, start over from a seed"))
+                Text(L.startFromSeed)
                     .font(.system(size: 14))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white.opacity(0.85))
@@ -801,7 +804,7 @@ struct WiltCelebration: View {
                     Image(systemName: "drop.fill")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.bloomWater)
-                    Text(NSLocalizedString("坚持每天喝水，植物就不会再枯萎啦", comment: "Daily hydration tip"))
+                    Text(L.dailyHydrationTip)
                         .font(.system(size: 13))
                         .foregroundStyle(.white.opacity(0.9))
                     Spacer()
@@ -816,7 +819,7 @@ struct WiltCelebration: View {
                 Button {
                     onDismiss()
                 } label: {
-                    Text(NSLocalizedString("我知道了", comment: "Got it"))
+                    Text(L.gotIt)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 48)
@@ -976,12 +979,12 @@ struct GoalCelebrationView: View {
                     .scaleEffect(scale)
                 
                 // 标题
-                Text("🎉 今日目标达成！")
+                Text(L.goalAchieved)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomPrimary)
                 
                 // 副标题
-                Text("你太棒了！\n继续加油，保持好习惯！")
+                Text(L.keepUpGoodHabits)
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

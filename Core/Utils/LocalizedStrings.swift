@@ -22,34 +22,38 @@ enum L {
     }
 }
 
-// MARK: - Garden
+// MARK: - Garden (Extended)
 extension L {
-    static let health                 = s("健康度")
-    static let plantHealth            = s("植物健康")
-    static let status                 = s("状态")
-    static let todayLog               = s("今日记录")
-    static let myPlant                = s("我的植物")
-    static let currentlyGrowing       = s("正在养护")
-    static let carePaused             = s("暂停养护中")
-    static let readyToHarvest         = s("可以收获了！")
-    static let itGrew                 = s("长大啦！")
-    static let keepNurturing          = s("继续守护")
-    static let pauseExplanation       = s("暂停期间植物不会枯萎，最长可暂停14天。出差/旅行时非常有用。")
-    static let proGardenLimit         = s("免费用户最多保存 5 株植物。升级 Pro 解锁无限花园！")
-    static let harvestPlant           = s("收获 %@")
-    static let harvestPlantTitle      = s("收获植物")
-    static let daysRemaining          = s("剩余 %@ 天")
-    static let plantHasntWatered      = s("%@ 还没喝到水")
-    static let reachedStage           = s("进入了「%@」阶段")
-    static let bloomTagline           = s("用 Bloom 养成喝水好习惯")
-    static let gardenFull             = s("花园已满")
-    static let myGarden               = s("我的花园")
-    static let harvestWall            = s("收获墙")
-    static let speciesCollection      = s("品种图鉴")
-    static let notCollected           = s("未收集")
-    static let daysToHarvest          = s("养护 %d 天")
-    static let wiltBannerTitle        = s("植物枯萎了")
-    static let wiltBannerBody        = s("坚持喝水就能复活，别放弃！")
+    // Alert buttons
+    static let cancel              = s("取消")
+    static let pause               = s("暂停")
+    static let restore             = s("恢复")
+    static let delete              = s("删除")
+    static let undo                = s("撤销")
+    static let gotIt               = s("我知道了")
+    
+    // Harvest
+    static let harvestFormat       = s("收获 %@")
+    static let waterMoreForStage   = s("再浇点水就能到「%@」")
+    static let pointsToNextStage   = s("距离下一阶段还差约 %d 点成长值")
+    static let plantGrowingHealthily = s("植物正在健康成长中")
+    
+    // Wilt celebration
+    static let plantWilted         = s("植物枯萎了")
+    static let startFromSeed       = s("没关系，从种子重新开始吧")
+    static let dailyHydrationTip   = s("坚持每天喝水，植物就不会再枯萎啦")
+    
+    // Goal celebration
+    static let goalAchieved        = s("🎉 今日目标达成！")
+    static let keepUpGoodHabits    = s("你太棒了！\n继续加油，保持好习惯！")
+    
+    // Delete record
+    static let deleteRecordConfirm = s("删除这条记录？")
+    static let deleteRecordWarning = s("删除后将同步更新植物状态")
+    static let deletedFormat       = s("已删除 %@")
+    
+    // Plant status
+    static let plantHasntWatered   = s("%@ 还没喝到水")
 }
 
 // MARK: - Statistics
@@ -186,4 +190,5 @@ extension L {
     static let canTellYou             = s("能告诉你")
     static let notificationExplain    = s("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。")
     static let notNow                 = s("暂不开启")
+    static let defaultPlantName       = s("小绿")  // 默认植物名
 }
