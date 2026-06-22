@@ -250,7 +250,9 @@ struct HistoryView: View {
         }
         let f = DateFormatter()
         f.locale = Locale.current
-        f.dateFormat = period == .week ? "EEEE" : (Locale.current.language.languageCode?.identifier == "zh" ? "M月d日" : "MMM d")
+        // 正确判断中文语言环境
+        let isChinese = Locale.current.language.languageCode?.identifier == "zh"
+        f.dateFormat = period == .week ? "EEEE" : (isChinese ? "M月d日" : "MMM d")
         return f.string(from: best.date)
     }
 

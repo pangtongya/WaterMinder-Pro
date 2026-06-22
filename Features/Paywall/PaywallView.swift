@@ -108,10 +108,10 @@ struct PaywallView: View {
 
     private var benefitsList: some View {
         VStack(alignment: .leading, spacing: 14) {
-            benefitRow(icon: "📊", title: "Advanced Statistics".localized, desc: "Complete data analysis and visualization reports")
-            benefitRow(icon: "🎨", title: "Custom Themes".localized, desc: "Unlock all Pro themes and appearances")
-            benefitRow(icon: "🌱", title: "Unlimited Plants".localized, desc: "Unlock all 7 plant species for your dream garden")
-            benefitRow(icon: "☁️", title: "Multi-device Sync".localized, desc: "CloudKit data sync and backup")
+            benefitRow(icon: "📊", title: L.advancedStatistics, desc: L.advancedStatisticsDesc)
+            benefitRow(icon: "🎨", title: L.customThemes, desc: L.customThemesDesc)
+            benefitRow(icon: "🌱", title: L.unlimitedPlants, desc: L.unlimitedPlantsDesc)
+            benefitRow(icon: "☁️", title: L.multiDeviceSync, desc: L.multiDeviceSyncDesc)
         }
         .padding(18)
         .background(Color(.secondarySystemBackground))
@@ -172,7 +172,7 @@ struct PaywallView: View {
 
             // 服务条款 & 隐私政策
             HStack(spacing: 4) {
-                Button("Terms of Service".localized) {
+                Button(L.termsOfService) {
                     openURL(AppConstants.URLs.termsOfService)
                 }
                 .font(.system(size: 10))
@@ -180,7 +180,7 @@ struct PaywallView: View {
                 Text("·")
                     .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
-                Button("Privacy Policy".localized) {
+                Button(L.privacyPolicy) {
                     openURL(AppConstants.URLs.privacyPolicy)
                 }
                 .font(.system(size: 10))
@@ -211,10 +211,10 @@ struct PaywallView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(isLifetime ? "Lifetime Purchase" : "Pro Yearly")
+                        Text(isLifetime ? L.lifetimePurchase : L.proYearly)
                             .font(.system(size: 16, weight: .bold))
                         if isLifetime {
-                            Text("BEST VALUE".localized)
+                            Text(L.bestValue)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -222,7 +222,7 @@ struct PaywallView: View {
                                 .background(Color.bloomGold)
                                 .clipShape(Capsule())
                         } else if isYearly {
-                            Text("POPULAR".localized)
+                            Text(L.popular)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -232,11 +232,11 @@ struct PaywallView: View {
                         }
                     }
                     if let savings = savingsPercent, savings > 0 {
-                        Text(String(format: "Save %d%% vs subscription".localized, savings))
+                        Text(String(format: L.savePercent, savings))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(Color.bloomSuccess)
                     } else {
-                        Text(isLifetime ? "One-time purchase, permanent unlock".localized : "Unlimited care all year")
+                        Text(isLifetime ? L.oneTimePurchase : L.unlimitedCareAllYear)
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                     }

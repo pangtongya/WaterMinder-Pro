@@ -624,7 +624,8 @@ struct SettingsView: View {
             HStack {
                 Text("版本".localized)
                 Spacer()
-                Text("1.0.0").foregroundStyle(.secondary)
+                Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
+                    .foregroundStyle(.secondary)
             }
             Button("恢复购买".localized) {
                 Task {

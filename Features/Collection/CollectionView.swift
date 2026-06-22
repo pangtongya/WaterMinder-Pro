@@ -48,11 +48,11 @@ struct CollectionView: View {
 
     private var overviewCard: some View {
         HStack(spacing: 0) {
-            overviewStat(value: "\(gardenStore.totalCount)", label: "Harvested".localized, icon: "🌸")
+            overviewStat(value: "\(gardenStore.totalCount)", label: L.harvested, icon: "🌸")
             Divider().frame(height: 40)
-            overviewStat(value: "\(gardenStore.uniqueSpeciesCount)", label: "Species".localized, icon: "🌿")
+            overviewStat(value: "\(gardenStore.uniqueSpeciesCount)", label: L.species, icon: "🌿")
             Divider().frame(height: 40)
-            overviewStat(value: "\(PlantLibrary.all.count)", label: "Total".localized, icon: "📖")
+            overviewStat(value: "\(PlantLibrary.all.count)", label: L.total, icon: "📖")
         }
         .padding(.vertical, 16)
         .background(Color(.secondarySystemBackground))

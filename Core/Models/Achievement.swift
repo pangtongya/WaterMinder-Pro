@@ -248,7 +248,7 @@ enum AchievementLibrary {
                 requirement: 5
             ),
             Achievement(
-                id: "garden_10_species",
+                id: "garden_7_species",
                 titleKey: "植物学家",
                 descriptionKey: "收集7种不同植物品种",
                 icon: "tree.fill",

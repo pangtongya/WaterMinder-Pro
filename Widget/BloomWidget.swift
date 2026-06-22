@@ -411,7 +411,12 @@ struct Provider: TimelineProvider {
         let dailyGoal = defaults.integer(forKey: WidgetConstants.WidgetKeys.dailyGoal)
         let plantName = defaults.string(forKey: WidgetConstants.WidgetKeys.plantName) ?? WidgetL.plant
         let plantHealth = defaults.double(forKey: WidgetConstants.WidgetKeys.plantHealth)
-        let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage) ?? "Seed"
+        // WidgetDataManager writes both plantStageRawValue (Int) and plantStage (String)
+        // For Widget display, prefer reading localized plantStage string; fallback to raw value
+        let plantStageRaw = defaults.integer(forKey: "widget.plantStageRawValue")
+        let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage)
+            ?? GrowthStage(rawValue: plantStageRaw)?.name
+            ?? "Seed"
         let plantSymbol = defaults.string(forKey: WidgetConstants.WidgetKeys.plantSymbol) ?? "🌰"
         let isPaused = defaults.bool(forKey: WidgetConstants.WidgetKeys.isPaused)
         let dataDate = defaults.string(forKey: WidgetConstants.WidgetKeys.dataDate) ?? todayString
@@ -692,7 +697,11 @@ extension Color {
     static let bloomGold = Color(red: 1.0, green: 0.85, blue: 0.2)
     static let bloomDeep = Color(red: 0.15, green: 0.6, blue: 0.45)
     static let bloomSuccess = Color(red: 0.3, green: 0.7, blue: 0.5)
-    
+    static let bloomWater = Color(red: 0.3, green: 0.6, blue: 0.9)
+    static let bloomWarning = Color(red: 1.0, green: 0.75, blue: 0.2)
+    static let bloomSoil = Color(red: 0.36, green: 0.25, blue: 0.15)
+    static let bloomLeaf = Color(red: 0.3, green: 0.65, blue: 0.35)
+
     /// 根据健康度返回对应颜色（绿色 -> 黄褐 -> 枯褐）
     static func healthColor(_ health: Double) -> Color {
         switch health {

@@ -215,8 +215,9 @@ final class PersistenceManager {
                     do {
                         try validatable.validate()
                     } catch {
-                        Logger.persistence.warning("Validation failed for \(filename): \(error)")
-                        // 验证失败仍然保存，但记录警告
+                        Logger.persistence.warning("Validation failed for \(filename), skipping save: \(error)")
+                        self.pendingSaves[filename] = nil
+                        return
                     }
                 }
                 

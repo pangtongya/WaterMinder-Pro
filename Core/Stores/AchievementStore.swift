@@ -101,7 +101,7 @@ final class AchievementStore: ObservableObject {
         }
 
         // 品种收集成就
-        let speciesIds = ["garden_5_species", "garden_10_species", "garden_all_species"]
+        let speciesIds = ["garden_5_species", "garden_7_species", "garden_all_species"]
         for id in speciesIds {
             updateProgress(id: id, newProgress: uniqueSpecies)
         }
