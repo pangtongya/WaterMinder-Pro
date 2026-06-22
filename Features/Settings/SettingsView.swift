@@ -624,8 +624,7 @@ struct SettingsView: View {
             HStack {
                 Text("版本".localized)
                 Spacer()
-                Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
-                    .foregroundStyle(.secondary)
+                Text(appVersion).foregroundStyle(.secondary)
             }
             Button("恢复购买".localized) {
                 Task {
@@ -664,6 +663,13 @@ struct SettingsView: View {
         } header: {
             Text("关于".localized)
         }
+    }
+    
+    /// 从 Bundle 获取 App 版本号
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
     }
 
     // MARK: - 工具

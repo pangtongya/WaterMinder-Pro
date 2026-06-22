@@ -15,7 +15,7 @@ struct QuickRecordBar: View {
     @State private var showSuccessPulse: Bool = false  // 成功喝水后的脉冲动画
     @State private var pressedCup: CupType? = nil  // 当前按下的杯型（用于按压反馈）
     @State private var showAmountBubble: CupType? = nil  // 显示水量气泡
-    @State private var bubbleTimer: Timer? = nil
+    @State private var bubbleTask: Task<Void, Never>? = nil  // 使用 Task 替代 Timer
 
     var body: some View {
         VStack(spacing: 16) {
@@ -132,12 +132,17 @@ struct QuickRecordBar: View {
         let amount = cup.defaultAmount
         lastAmount = amount
 
-        // 1. 显示水量气泡
+        // 1. 显示水量气泡（使用 Task 替代 Timer，自动取消旧任务）
+        bubbleTask?.cancel()
         showAmountBubble = cup
-        bubbleTimer?.invalidate()
-        bubbleTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
-            withAnimation {
-                showAmountBubble = nil
+        bubbleTask = Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            if !Task.isCancelled {
+                await MainActor.run {
+                    withAnimation {
+                        showAmountBubble = nil
+                    }
+                }
             }
         }
 
@@ -165,9 +170,14 @@ struct QuickRecordBar: View {
         withAnimation(.easeOut(duration: 0.3)) {
             showSuccessPulse = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            withAnimation(.easeIn(duration: 0.2)) {
-                showSuccessPulse = false
+        Task {
+            try? await Task.sleep(for: .seconds(0.4))
+            if !Task.isCancelled {
+                await MainActor.run {
+                    withAnimation(.easeIn(duration: 0.2)) {
+                        showSuccessPulse = false
+                    }
+                }
             }
         }
     }

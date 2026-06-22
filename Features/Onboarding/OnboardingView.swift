@@ -13,7 +13,7 @@ struct OnboardingView: View {
     @EnvironmentObject var notificationManager: NotificationManager
 
     @State private var step = 1
-    @State private var plantName = "小绿"
+    @State private var plantName = L.defaultPlantName  // 使用本地化默认植物名
     /// 每日目标默认值：根据用户语言/地区自动推荐（US→8oz标准≈2400ml，其他→2000ml）
     @State private var selectedGoal = {
         let locale = Locale.current.identifier
@@ -95,7 +95,7 @@ struct OnboardingView: View {
     private var demoPlant: some View {
         // 演示植物：浇水前蔫，浇水后绽放
         let demoPlant = Plant(
-            name: "小绿".localized,
+            name: L.defaultPlantName,  // 使用本地化默认植物名
             stage: demoWatered ? .seedling : .seed,
             health: demoWatered ? 90 : 40
         )
