@@ -4,6 +4,10 @@
 import Foundation
 import Network
 
+extension Notification.Name {
+    static let networkStatusChanged = Notification.Name("networkStatusChanged")
+}
+
 @MainActor
 final class NetworkMonitor: ObservableObject {
     static let shared = NetworkMonitor()
@@ -21,8 +25,18 @@ final class NetworkMonitor: ObservableObject {
     private func startMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
-                self?.isConnected = path.status == .satisfied
+                let wasConnected = self?.isConnected ?? true
+                let isNowConnected = path.status == .satisfied
+                self?.isConnected = isNowConnected
                 self?.isCellular = path.usesInterfaceType(.cellular)
+                
+                if wasConnected != isNowConnected {
+                    NotificationCenter.default.post(
+                        name: .networkStatusChanged,
+                        object: self,
+                        userInfo: ["isConnected": isNowConnected]
+                    )
+                }
             }
         }
         monitor.start(queue: queue)

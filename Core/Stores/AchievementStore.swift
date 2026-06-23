@@ -6,6 +6,8 @@ import SwiftUI
 
 @MainActor
 final class AchievementStore: ObservableObject {
+    static let shared = AchievementStore()
+    
     @Published private(set) var achievements: [Achievement] = []
     @Published var newlyUnlocked: Achievement? // 用于显示解锁动画
     

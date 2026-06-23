@@ -1,6 +1,3 @@
-// RootView.swift
-// 根视图 —— 根据 onboarding 状态决定显示引导还是主界面
-
 import SwiftUI
 
 struct RootView: View {
@@ -12,38 +9,53 @@ struct RootView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var achievementStore: AchievementStore
     @StateObject private var networkMonitor = NetworkMonitor.shared
-
+    
+    let loadingPhase: AppLoadingPhase
+    
+    @State private var contentVisible = false
+    @State private var plantFadeIn = false
+    
     var body: some View {
         Group {
             if userStore.hasCompletedOnboarding {
                 mainTabs
+                    .opacity(contentVisible ? 1 : 0)
+                    .offset(y: contentVisible ? 0 : 20)
             } else {
                 OnboardingView()
+                    .opacity(contentVisible ? 1 : 0)
+                    .offset(y: contentVisible ? 0 : 20)
             }
         }
         .task {
             if userStore.hasCompletedOnboarding {
                 await downloadCloudData()
                 plantEngine.processOverdueDays()
-                // 注意：打开 App 本身不调用 markActiveToday()，
-                // 只有用户真正浇水/达标时才标记活跃，确保衰减逻辑正确。
+            }
+            
+            withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+                contentVisible = true
+            }
+            
+            withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
+                plantFadeIn = true
             }
         }
     }
 
     private var mainTabs: some View {
         TabView {
-            NavigationStack { GardenView() }
-                .tabItem { Label("花园".localized, systemImage: "leaf.fill") }
+            NavigationStack { GardenView(plantFadeIn: plantFadeIn) }
+                .tabItem { Label(L.myGarden, systemImage: "leaf.fill") }
 
             NavigationStack { HistoryView() }
-                .tabItem { Label("记录".localized, systemImage: "chart.bar.fill") }
+                .tabItem { Label(L.waterLog, systemImage: "chart.bar.fill") }
 
             NavigationStack { CollectionView() }
-                .tabItem { Label("收藏".localized, systemImage: "square.grid.2x2.fill") }
+                .tabItem { Label(L.myGarden, systemImage: "square.grid.2x2.fill") }
 
             NavigationStack { SettingsView() }
-                .tabItem { Label("设置".localized, systemImage: "gearshape.fill") }
+                .tabItem { Label(L.settings, systemImage: "gearshape.fill") }
         }
         .tint(themeManager.currentTheme.accent)
         .overlay {
@@ -52,12 +64,23 @@ struct RootView: View {
             }
         }
         .overlay(alignment: .top) {
-            SyncToastView(state: cloudSyncManager.syncToastState) {
-                // 用户手动关闭 Toast（失败状态）→ 重置状态
+            SyncToastView(
+                state: cloudSyncManager.syncToastState,
+                progress: mapProgress(cloudSyncManager.syncProgress),
+                canRetry: canRetrySync,
+                showsSettings: showsSettingsButton,
+                onRetry: {
+                    Task {
+                        await cloudSyncManager.retryLastSync()
+                    }
+                },
+                onOpenSettings: {
+                    cloudSyncManager.openSystemSettings()
+                }
+            ) {
                 cloudSyncManager.resetToastState()
             }
         }
-        // 成就解锁庆祝动画（全屏覆盖在最顶层）
         .overlay {
             if let achievement = achievementStore.newlyUnlocked {
                 AchievementCelebrationOverlay(achievement: achievement) {
@@ -91,19 +114,38 @@ struct RootView: View {
     private func downloadCloudData() async {
         guard cloudSyncManager.isSyncAvailable else { return }
 
-        // 下载并合并植物数据
         if let cloudPlant = await cloudSyncManager.downloadPlant() {
             plantEngine.mergeWithCloudPlant(cloudPlant)
         }
 
-        // 下载并合并喝水记录
         if let cloudRecords = await cloudSyncManager.downloadWaterRecords() {
             waterStore.mergeWithCloudRecords(cloudRecords)
         }
 
-        // 下载并合并花园数据
         if let cloudItems = await cloudSyncManager.downloadGardenItems() {
             gardenStore.mergeWithCloudItems(cloudItems)
+        }
+    }
+    
+    private var canRetrySync: Bool {
+        if case .failed(let error) = cloudSyncManager.syncStatus {
+            return error.canRetry
+        }
+        return false
+    }
+    
+    private var showsSettingsButton: Bool {
+        if case .failed(let error) = cloudSyncManager.syncStatus {
+            return error.showsSettingsButton
+        }
+        return false
+    }
+    
+    private func mapProgress(_ progress: CloudSyncManager.SyncProgress) -> SyncProgressStep {
+        switch progress {
+        case .downloading: return .downloading
+        case .merging: return .merging
+        case .uploading: return .uploading
         }
     }
 }

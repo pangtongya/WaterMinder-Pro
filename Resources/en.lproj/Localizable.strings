@@ -301,6 +301,27 @@
 "iCloud 同步失败" = "iCloud Sync Failed";
 "正在保存数据到 iCloud" = "Saving data to iCloud...";
 "你的数据已同步到所有设备" = "Your data is synced to all devices";
+"同步完成" = "Sync Complete";
+"同步失败" = "Sync Failed";
+"正在同步数据到 iCloud" = "Syncing data to iCloud";
+"下载中" = "Downloading";
+"合并中" = "Merging";
+"上传中" = "Uploading";
+"重试" = "Retry";
+"上次同步" = "Last Sync";
+"未登录 iCloud 账号" = "Not signed in to iCloud";
+"等待网络连接" = "Waiting for network connection";
+"iCloud 存储空间不足" = "iCloud storage is full";
+"无 iCloud 同步权限" = "No iCloud sync permission";
+"网络连接异常" = "Network connection error";
+"请在系统设置中登录 iCloud" = "Please sign in to iCloud in Settings";
+"连接网络后将自动同步" = "Will auto-sync when network is available";
+"请清理 iCloud 存储空间后重试" = "Free up iCloud storage and try again";
+"请在系统设置中允许 Bloom 访问 iCloud" = "Please allow Bloom to access iCloud in Settings";
+"请检查网络连接后重试" = "Check your network connection and try again";
+"请稍后重试" = "Please try again later";
+"请在系统设置中登录 iCloud 以启用同步" = "Sign in to iCloud in Settings to enable sync";
+"正在同步数据，请稍候..." = "Syncing data, please wait...";
 "本周" = "This Week";
 "本月" = "This Month";
 "相比订阅节省 %d%%" = "Save %d%% compared to subscription";
@@ -336,6 +357,28 @@
 "免费主题" = "Free Themes";
 "已拥有" = "Owned";
 "解锁" = "Unlock";
+
+// MARK: - Theme Names
+"theme.name.classic" = "Classic Green";
+"theme.name.sunflower" = "Sunflower";
+"theme.name.sakura" = "Sakura";
+"theme.name.ocean" = "Ocean Blue";
+"theme.name.midnightGold" = "Midnight Gold";
+"theme.name.forest" = "Forest";
+"theme.name.sunset" = "Sunset";
+"theme.name.lavender" = "Lavender";
+"theme.name.midnight" = "Midnight";
+
+// MARK: - Theme Descriptions
+"theme.desc.classic" = "Bloom's default color scheme, fresh and natural";
+"theme.desc.sunflower" = "Warm and bright sunflower tones";
+"theme.desc.sakura" = "Gentle and romantic pink theme";
+"theme.desc.ocean" = "Deep ocean blue tones";
+"theme.desc.midnightGold" = "Dark gray with gold, luxurious and elegant";
+"theme.desc.forest" = "Rich forest green tones";
+"theme.desc.sunset" = "Warm sunset orange and red";
+"theme.desc.lavender" = "Romantic purple dreams";
+"theme.desc.midnight" = "Mysterious midnight blue-black";
 
 // MARK: - CupType (新增)
 "小杯" = "Small Cup";

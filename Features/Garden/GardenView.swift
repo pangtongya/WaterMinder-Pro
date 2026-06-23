@@ -33,6 +33,8 @@ struct GardenView: View {
     @State private var showGardenLimitAlert = false
     @State private var showPaywall = false
     @EnvironmentObject var storeManager: StoreManager
+    
+    var plantFadeIn: Bool = true
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -199,6 +201,8 @@ struct GardenView: View {
                 startRadius: 40,
                 endRadius: 160
             )
+            .opacity(plantFadeIn ? 1 : 0)
+            .animation(.easeOut(duration: 0.6).delay(0.1), value: plantFadeIn)
 
             // 水滴飞溅动画层
             WaterSplashOverlay(trigger: splashTrigger)
@@ -207,7 +211,9 @@ struct GardenView: View {
                 .frame(width: 240, height: 320)
                 .scaleEffect(plantPressing ? 0.94 : 1.0)  // 按压时微缩
                 .animation(.spring(response: 0.3, dampingFraction: 0.8), value: plantPressing)
-                .opacity(plantEngine.plant.isPaused ? 0.5 : 1.0)  // 暂停时植物半透明
+                .opacity((plantEngine.plant.isPaused ? 0.5 : 1.0) * (plantFadeIn ? 1 : 0))  // 暂停时植物半透明
+                .scaleEffect(plantFadeIn ? 1.0 : 0.8)
+                .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15), value: plantFadeIn)
 
             // 暂停状态提示覆盖
             if plantEngine.plant.isPaused {
@@ -325,26 +331,68 @@ struct GardenView: View {
 
     private var harvestButton: some View {
         Button {
+            Haptics.success()
             showHarvestSheet = true
         } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "sparkles")
-                Text(String(format: L.harvestFormat, plantEngine.plant.name))
+            HStack(spacing: 0) {
+                ZStack {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 16, weight: .semibold))
+                    
+                    PulseRingView()
+                        .frame(width: 40, height: 40)
+                        .offset(x: -2)
+                }
+                .frame(width: 24, height: 24)
+                
+                Spacer().frame(width: 10)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(format: L.harvestFormat, plantEngine.plant.name))
+                        .font(.system(size: 16, weight: .bold))
+                    Text(L.readyToHarvest)
+                        .font(.system(size: 11))
+                        .opacity(0.9)
+                }
+                
+                Spacer()
+                
+                ZStack {
+                    Text(L.harvestNowBadge)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(Color.bloomGold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(.white)
+                        )
+                }
+                
+                Spacer().frame(width: 8)
+                
                 Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
             }
-            .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
             .background(
-                LinearGradient(
-                    colors: [Color.bloomGold, Color.bloomPrimary],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                ZStack {
+                    LinearGradient(
+                        colors: [Color.bloomGold, Color.bloomPrimary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    
+                    PulseGlowView()
+                }
             )
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: Color.bloomPrimary.opacity(0.35), radius: 12, y: 6)
         }
+        .buttonStyle(HarvestButtonStyle())
     }
 
     /// 植物尚未成熟时的提示
@@ -1025,5 +1073,41 @@ struct GoalCelebrationView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - 收获按钮脉冲动画
+
+struct PulseRingView: View {
+    @State private var animate = false
+    
+    var body: some View {
+        Circle()
+            .stroke(.white.opacity(0.6), lineWidth: 2)
+            .scaleEffect(animate ? 1.8 : 1.0)
+            .opacity(animate ? 0 : 0.8)
+            .animation(
+                Animation.easeOut(duration: 1.5)
+                    .repeatForever(autoreverses: false),
+                value: animate
+            )
+            .onAppear { animate = true }
+    }
+}
+
+struct PulseGlowView: View {
+    @State private var animate = false
+    
+    var body: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Color.white.opacity(0.15))
+            .scaleEffect(animate ? 1.02 : 0.98)
+            .opacity(animate ? 0.4 : 0.8)
+            .animation(
+                Animation.easeInOut(duration: 1.2)
+                    .repeatForever(autoreverses: true),
+                value: animate
+            )
+            .onAppear { animate = true }
     }
 }

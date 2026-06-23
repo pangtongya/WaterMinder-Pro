@@ -311,6 +311,28 @@
 "iCloud 同步失败" = "iCloud 同步失败";
 "正在保存数据到 iCloud" = "正在保存数据到 iCloud";
 "你的数据已同步到所有设备" = "你的数据已同步到所有设备";
+"同步完成" = "同步完成";
+"同步失败" = "同步失败";
+"正在同步数据到 iCloud" = "正在同步数据到 iCloud";
+"下载中" = "下载中";
+"合并中" = "合并中";
+"上传中" = "上传中";
+"重试" = "重试";
+"去设置" = "去设置";
+"上次同步" = "上次同步";
+"未登录 iCloud 账号" = "未登录 iCloud 账号";
+"等待网络连接" = "等待网络连接";
+"iCloud 存储空间不足" = "iCloud 存储空间不足";
+"无 iCloud 同步权限" = "无 iCloud 同步权限";
+"网络连接异常" = "网络连接异常";
+"请在系统设置中登录 iCloud" = "请在系统设置中登录 iCloud";
+"连接网络后将自动同步" = "连接网络后将自动同步";
+"请清理 iCloud 存储空间后重试" = "请清理 iCloud 存储空间后重试";
+"请在系统设置中允许 Bloom 访问 iCloud" = "请在系统设置中允许 Bloom 访问 iCloud";
+"请检查网络连接后重试" = "请检查网络连接后重试";
+"请稍后重试" = "请稍后重试";
+"请在系统设置中登录 iCloud 以启用同步" = "请在系统设置中登录 iCloud 以启用同步";
+"正在同步数据，请稍候..." = "正在同步数据，请稍候...";
 "本周" = "本周";
 "本月" = "本月";
 "相比订阅节省 %d%%" = "相比订阅节省 %d%%";
@@ -387,6 +409,28 @@
 "免费主题" = "免费主题";
 "已拥有" = "已拥有";
 "解锁" = "解锁";
+
+// MARK: - Theme Names
+"theme.name.classic" = "经典绿";
+"theme.name.sunflower" = "向日葵黄";
+"theme.name.sakura" = "樱花粉";
+"theme.name.ocean" = "海洋蓝";
+"theme.name.midnightGold" = "暗夜金";
+"theme.name.forest" = "森林";
+"theme.name.sunset" = "日落";
+"theme.name.lavender" = "薰衣草";
+"theme.name.midnight" = "午夜";
+
+// MARK: - Theme Descriptions
+"theme.desc.classic" = "Bloom 默认配色，清新自然";
+"theme.desc.sunflower" = "温暖明亮的阳光色调";
+"theme.desc.sakura" = "温柔浪漫的粉色系";
+"theme.desc.ocean" = "深邃的海洋蓝调";
+"theme.desc.midnightGold" = "深灰配金色，奢华典雅";
+"theme.desc.forest" = "浓郁的森林绿意";
+"theme.desc.sunset" = "温暖的夕阳橙红";
+"theme.desc.lavender" = "浪漫的紫色梦幻";
+"theme.desc.midnight" = "神秘的午夜蓝黑";
 
 // MARK: - CupType (新增)
 "小杯" = "小杯";

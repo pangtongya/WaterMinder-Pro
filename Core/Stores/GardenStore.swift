@@ -6,6 +6,8 @@ import SwiftUI
 
 @MainActor
 final class GardenStore: ObservableObject {
+    static let shared = GardenStore()
+    
     @Published private(set) var items: [GardenItem] = []
 
     private let storage = PersistenceManager.shared

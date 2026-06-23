@@ -10,6 +10,7 @@ import SwiftUI
 enum WidgetConstants {
     static let appGroupIdentifier = "group.com.pangtong.bloom"
     static let widgetKind = "BloomWidget"
+    static let widgetURLScheme = "bloom://garden"
 
     enum WidgetKeys {
         static let todayIntake = "widget.todayIntake"
@@ -36,23 +37,42 @@ enum WidgetL {
     static let bloomWidgetName = NSLocalizedString("Bloom Progress", comment: "Widget name")
     static let bloomWidgetDesc = NSLocalizedString("View your hydration progress and plant status", comment: "Widget description")
     static let noData = NSLocalizedString("No Data", comment: "No data available")
-    // Placeholder 用
     static let plant = NSLocalizedString("Plant", comment: "Default plant name in widget placeholder")
     static let growing = NSLocalizedString("Growing", comment: "Default plant stage in widget placeholder")
+    static let drinkWaterGrow = NSLocalizedString("Drink water to make it grow", comment: "Widget placeholder hint text")
+    static let todayProgress = NSLocalizedString("Today's Progress", comment: "Widget today progress label")
+    static let stage = NSLocalizedString("Stage", comment: "Widget stage label")
 }
 
-// MARK: - Widget 植物视觉组件（内联，避免修改 pbxproj）
+// MARK: - Widget 植物视觉组件
 
 /// 极简版植物绘制 — 专为 Widget 设计
 /// 通过阶段和健康度决定植物外观，不依赖主 App 的复杂绘制逻辑
 struct WidgetPlantView: View {
-    let stage: String      // "Seed" / "Sprout" / "Growing" / "Blooming" / "Mature"
-    let health: Double     // 0 - 100
+    let stage: String
+    let health: Double
     let size: CGFloat
+    
+    @State private var isBreathing = false
+    
+    private var breathScale: CGFloat {
+        isBreathing ? 1.03 : 0.98
+    }
+    
+    private var breathOpacity: Double {
+        isBreathing ? 1.0 : 0.92
+    }
+    
+    private var wiltRotation: Double {
+        health < 40 ? Double(40 - health) * 0.15 : 0
+    }
+    
+    private var saturationAmount: Double {
+        0.6 + (health / 100) * 0.4
+    }
     
     var body: some View {
         ZStack {
-            // 背景光晕（根据健康度）
             Circle()
                 .fill(
                     RadialGradient(
@@ -63,26 +83,45 @@ struct WidgetPlantView: View {
                     )
                 )
                 .frame(width: size, height: size)
+                .scaleEffect(isBreathing ? 1.08 : 1.0)
+                .opacity(isBreathing ? 0.8 : 0.5)
+                .animation(
+                    Animation.easeInOut(duration: 3.0)
+                        .repeatForever(autoreverses: true),
+                    value: isBreathing
+                )
             
-            // 植物主体
             plantBody
                 .frame(width: size, height: size)
+                .scaleEffect(breathScale)
+                .opacity(breathOpacity)
+                .rotationEffect(.degrees(wiltRotation), anchor: .bottom)
+                .saturation(saturationAmount)
+                .animation(
+                    Animation.easeInOut(duration: 2.8)
+                        .repeatForever(autoreverses: true)
+                        .delay(0.2),
+                    value: isBreathing
+                )
         }
         .frame(width: size, height: size)
+        .onAppear {
+            isBreathing = true
+        }
     }
     
     @ViewBuilder
     private var plantBody: some View {
         switch stage.lowercased() {
-        case "seed":
+        case "seed", "种子":
             SeedPlant(size: size, color: Color.healthColor(health))
-        case "sprout":
+        case "sprout", "发芽":
             SproutPlant(size: size, color: Color.healthColor(health))
-        case "growing":
+        case "growing", "seedling", "幼苗", "成长期":
             GrowingPlant(size: size, color: Color.healthColor(health))
-        case "blooming":
+        case "blooming", "含苞", "开花":
             BloomingPlant(size: size, color: Color.healthColor(health), hasFlower: false)
-        case "mature":
+        case "mature", "harvestable", "成株", "成熟", "盛开":
             BloomingPlant(size: size, color: Color.healthColor(health), hasFlower: true)
         default:
             SeedPlant(size: size, color: Color.healthColor(health))
@@ -301,6 +340,34 @@ struct BloomingPlant: View {
     }
 }
 
+// MARK: - 进度环组件
+
+struct ProgressRingView: View {
+    let progress: Double
+    let lineWidth: CGFloat
+    let size: CGFloat
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.gray.opacity(0.2), lineWidth: lineWidth)
+            
+            Circle()
+                .trim(from: 0, to: CGFloat(min(progress, 1.0)))
+                .stroke(
+                    LinearGradient(
+                        colors: [.bloomPrimary, .bloomGold],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: size, height: size)
+    }
+}
+
 // MARK: - Widget 数据模型
 
 struct WidgetData: Codable {
@@ -319,7 +386,10 @@ struct WidgetData: Codable {
         return min(1.0, Double(currentIntake) / Double(dailyGoal))
     }
     
-    /// 检查数据是否为今日的（防止设备时钟偏移导致显示错误日期）
+    var progressPercentString: String {
+        "\(Int(progressPercentage * 100))%"
+    }
+    
     var isDataForToday: Bool {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
@@ -336,7 +406,6 @@ struct WidgetData: Codable {
         }
     }
     
-    /// 健康度对应的颜色（供进度条和图标着色）
     var healthDisplayColor: Color {
         Color.healthColor(plantHealth)
     }
@@ -381,14 +450,12 @@ struct Provider: TimelineProvider {
         let data = loadWidgetData()
         let entry = SimpleEntry(date: Date(), data: data)
         
-        // 每小时更新一次
         let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
     
     private func loadWidgetData() -> WidgetData {
-        // 从共享 App Group 读取数据
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
         let todayString = df.string(from: Date())
@@ -411,8 +478,6 @@ struct Provider: TimelineProvider {
         let dailyGoal = defaults.integer(forKey: WidgetConstants.WidgetKeys.dailyGoal)
         let plantName = defaults.string(forKey: WidgetConstants.WidgetKeys.plantName) ?? WidgetL.plant
         let plantHealth = defaults.double(forKey: WidgetConstants.WidgetKeys.plantHealth)
-        // WidgetDataManager writes both plantStageRawValue (Int) and plantStage (String)
-        // For Widget display, prefer reading localized plantStage string; fallback to raw value
         let plantStageRaw = defaults.integer(forKey: "widget.plantStageRawValue")
         let plantStage = defaults.string(forKey: WidgetConstants.WidgetKeys.plantStage)
             ?? GrowthStage(rawValue: plantStageRaw)?.name
@@ -442,16 +507,34 @@ struct BloomWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     
     var body: some View {
-        switch family {
-        case .systemSmall:
-            SmallWidgetView(data: entry.data)
-        case .systemMedium:
-            MediumWidgetView(data: entry.data)
-        case .systemLarge:
-            LargeWidgetView(data: entry.data)
-        default:
-            SmallWidgetView(data: entry.data)
+        Group {
+            switch family {
+            case .systemSmall:
+                SmallWidgetView(data: entry.data)
+            case .systemMedium:
+                MediumWidgetView(data: entry.data)
+            case .systemLarge:
+                LargeWidgetView(data: entry.data)
+            default:
+                SmallWidgetView(data: entry.data)
+            }
         }
+        .widgetURL(URL(string: WidgetConstants.widgetURLScheme))
+    }
+}
+
+// MARK: - 占位符背景
+
+struct WidgetPlaceholderBackground: View {
+    var body: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 0.95, green: 0.98, blue: 0.96),
+                Color(red: 0.9, green: 0.96, blue: 0.92)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }
 
@@ -461,54 +544,57 @@ struct SmallWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        HStack(spacing: 10) {
-            // 真实植物视觉（左侧）
-            WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 70)
+        ZStack {
+            WidgetPlaceholderBackground()
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(data.plantName)
-                    .font(.system(size: 13, weight: .semibold))
-                    .lineLimit(1)
-                Text(data.plantStage)
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
+            VStack(spacing: 6) {
+                HStack(spacing: 8) {
+                    WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 55)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(data.plantName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .lineLimit(1)
+                        Text(data.plantStage)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer()
+                }
                 
                 Spacer()
                 
-                // 进度条
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 6)
+                ZStack {
+                    ProgressRingView(progress: data.progressPercentage, lineWidth: 6, size: 50)
                     
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                colors: [.bloomPrimary, .bloomGold],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: 50 * data.progressPercentage, height: 6)
+                    VStack(spacing: 0) {
+                        Text(data.progressPercentString)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.bloomPrimary)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
                 
-                HStack(spacing: 3) {
+                Spacer()
+                
+                HStack(spacing: 2) {
                     Text("\(data.currentIntake)")
-                        .font(.system(size: 11, weight: .bold))
-                    Text("/ \(data.dailyGoal)")
-                        .font(.system(size: 10))
+                        .font(.system(size: 10, weight: .bold))
+                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                        .font(.system(size: 9))
                         .foregroundColor(.secondary)
                 }
                 
                 if data.isPaused {
                     Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
-                        .font(.system(size: 9))
+                        .font(.system(size: 8))
                         .foregroundColor(.orange)
                 }
             }
-            Spacer()
+            .padding(12)
         }
-        .padding()
     }
 }
 
@@ -518,67 +604,69 @@ struct MediumWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        HStack(spacing: 16) {
-            // 左侧：真实植物视觉
-            WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 100)
+        ZStack {
+            WidgetPlaceholderBackground()
             
-            // 中间：文字信息
-            VStack(alignment: .leading, spacing: 6) {
-                Text(data.plantName)
-                    .font(.system(size: 15, weight: .semibold))
-                Text(data.plantStage)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
+            HStack(spacing: 12) {
+                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 90)
                 
-                if data.isPaused {
-                    Label(WidgetL.pauseCareFull, systemImage: "pause.circle.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(.orange)
-                }
-                
-                HStack(spacing: 12) {
-                    Label("\(Int(data.plantHealth))%", systemImage: "leaf.fill")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color.healthColor(data.plantHealth))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(data.plantName)
+                        .font(.system(size: 15, weight: .semibold))
+                    
+                    HStack(spacing: 4) {
+                        Text(data.plantStage)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        
+                        if data.isPaused {
+                            Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.orange)
+                        }
+                    }
                     
                     Spacer()
                     
-                    Text(data.lastUpdated, style: .time)
+                    HStack(spacing: 4) {
+                        Label("\(Int(data.plantHealth))%", systemImage: "leaf.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color.healthColor(data.plantHealth))
+                        
+                        Spacer()
+                        
+                        Text(data.lastUpdated, style: .time)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 6) {
+                    ZStack {
+                        ProgressRingView(progress: data.progressPercentage, lineWidth: 8, size: 80)
+                        
+                        VStack(spacing: 1) {
+                            Text("\(data.currentIntake)")
+                                .font(.system(size: 18, weight: .bold))
+                            Text(WidgetL.ml)
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
+                    
+                    Text(data.progressPercentString)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.bloomPrimary)
                 }
             }
-            
-            Spacer()
-            
-            // 右侧：进度环
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 8)
-                
-                Circle()
-                    .trim(from: 0, to: data.progressPercentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.bloomPrimary, .bloomGold],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 2) {
-                    Text("\(data.currentIntake)")
-                        .font(.system(size: 24, weight: .bold))
-                    Text(WidgetL.ml)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                }
-            }
-            .frame(width: 90, height: 90)
+            .padding(14)
         }
-        .padding()
     }
 }
 
@@ -588,97 +676,90 @@ struct LargeWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        VStack(spacing: 12) {
-            // 顶部：真实植物视觉 + 文字
-            HStack {
-                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 130)
-                    .padding(.leading, -6)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(data.plantName)
-                        .font(.system(size: 18, weight: .semibold))
-                    Text(data.plantStage)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                    Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                        .padding(.top, 2)
-                }
-                
-                Spacer()
-                
-                if data.isPaused {
-                    Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
-                        .font(.system(size: 13))
-                        .foregroundColor(.orange)
-                }
-            }
+        ZStack {
+            WidgetPlaceholderBackground()
             
-            // 中间：大进度环
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 10)
-                
-                Circle()
-                    .trim(from: 0, to: data.progressPercentage)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.bloomPrimary, .bloomGold],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 4) {
-                    Text("\(data.currentIntake)")
-                        .font(.system(size: 36, weight: .bold))
-                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                    Text("\(Int(data.progressPercentage * 100))%")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.bloomPrimary)
-                }
-            }
-            .frame(width: 140, height: 140)
-            
-            // 底部：健康度显示
-            HStack(spacing: 12) {
-                VStack(alignment: .leading) {
-                    Text(WidgetL.plantHealth)
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                    HStack(spacing: 6) {
-                        Text("\(Int(data.plantHealth))%")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color.healthColor(data.plantHealth))
-                        // 小型健康度条
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: 50, height: 6)
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(Color.healthColor(data.plantHealth))
-                                .frame(width: 50 * CGFloat(data.plantHealth / 100), height: 6)
-                        }
+            VStack(spacing: 10) {
+                HStack {
+                    WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 110)
+                        .padding(.leading, -4)
+                    
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(data.plantName)
+                            .font(.system(size: 18, weight: .semibold))
+                        Text(data.plantStage)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                            .padding(.top, 1)
+                    }
+                    
+                    Spacer()
+                    
+                    if data.isPaused {
+                        Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.orange)
                     }
                 }
-                .padding(.leading, 8)
                 
-                Spacer()
+                ZStack {
+                    ProgressRingView(progress: data.progressPercentage, lineWidth: 10, size: 130)
+                    
+                    VStack(spacing: 3) {
+                        Text("\(data.currentIntake)")
+                            .font(.system(size: 32, weight: .bold))
+                        Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                        Text(data.progressPercentString)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.bloomPrimary)
+                    }
+                }
+                .frame(width: 140, height: 140)
+                
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading) {
+                        Text(WidgetL.plantHealth)
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 5) {
+                            Text("\(Int(data.plantHealth))%")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color.healthColor(data.plantHealth))
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 50, height: 5)
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color.healthColor(data.plantHealth))
+                                    .frame(width: 50 * CGFloat(data.plantHealth / 100), height: 5)
+                            }
+                        }
+                    }
+                    .padding(.leading, 6)
+                    
+                    Spacer()
+                    
+                    Text(WidgetL.drinkWaterGrow)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.trailing)
+                        .padding(.trailing, 6)
+                }
             }
+            .padding(14)
         }
-        .padding()
     }
 }
 
 // MARK: - Widget 定义
 
 struct BloomWidget: Widget {
-    let kind: String = "BloomWidget"
+    let kind: String = WidgetConstants.widgetKind
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
@@ -713,3 +794,61 @@ extension Color {
         }
     }
 }
+
+// MARK: - Growth Stage 本地定义（Widget 无法访问主 App 的枚举）
+
+enum GrowthStage: Int {
+    case seed      = 0
+    case sprout    = 1
+    case seedling  = 2
+    case mature    = 3
+    case blooming  = 4
+    case harvestable = 5
+
+    var name: String {
+        switch self {
+        case .seed:        return NSLocalizedString("种子", comment: "Seed stage")
+        case .sprout:      return NSLocalizedString("发芽", comment: "Sprout stage")
+        case .seedling:    return NSLocalizedString("幼苗", comment: "Seedling stage")
+        case .mature:      return NSLocalizedString("成株", comment: "Mature stage")
+        case .blooming:    return NSLocalizedString("含苞", comment: "Blooming stage")
+        case .harvestable: return NSLocalizedString("盛开", comment: "Harvestable stage")
+        }
+    }
+}
+
+// MARK: - Live Activity / Dynamic Island 预留结构
+//
+// 以下为未来实现 Live Activity（动态岛）的预留注释结构
+// 实现时需要：
+// 1. 创建 Widget Extension 的新 Target（或在现有 Target 中添加）
+// 2. 导入 ActivityKit
+// 3. 定义 BloomWaterActivityAttributes
+// 4. 实现 Live Activity View（含动态岛紧凑/最小/扩展视图）
+// 5. 在主 App 中请求启动 Live Activity 权限
+// 6. 通过 WidgetDataManager 更新数据
+//
+// 示例结构（未来实现时取消注释并完善）：
+//
+// import ActivityKit
+//
+// struct BloomWaterActivityAttributes: ActivityAttributes {
+//     public struct ContentState: Codable, Hashable {
+//         var currentIntake: Int
+//         var dailyGoal: Int
+//         var plantHealth: Double
+//         var plantStage: String
+//         var lastUpdated: Date
+//     }
+//
+//     var plantName: String
+//     var plantSymbol: String
+// }
+//
+// struct BloomLiveActivityView: View {
+//     let context: ActivityViewContext<BloomWaterActivityAttributes>
+//
+//     var body: some View {
+//         // 实现紧凑视图、最小视图、扩展视图
+//     }
+// }

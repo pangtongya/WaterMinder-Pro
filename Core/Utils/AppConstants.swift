@@ -11,6 +11,12 @@ enum AppConstants {
         static let lastActiveDate = "bloom.lastActiveDate"
         static let goalBonusAppliedDate = "bloom.goalBonusDate"
         static let lastStageUp = "bloom.lastStageUp"
+        static let appInstallDate = "bloom.appInstallDate"
+        static let appLaunchCount = "bloom.appLaunchCount"
+        static let lastReviewPromptDate = "bloom.lastReviewPromptDate"
+        static let hasReviewed = "bloom.hasReviewed"
+        static let remindLaterDate = "bloom.remindLaterDate"
+        static let neverRemindReview = "bloom.neverRemindReview"
     }
     
     enum WidgetKeys {
@@ -58,5 +64,25 @@ enum AppConstants {
     enum URLs {
         static let privacyPolicy = "https://pangtongya.github.io/Bloom-Website/privacy-policy.html"
         static let termsOfService = "https://pangtongya.github.io/Bloom-Website/terms.html"
+        static let support = "https://pangtongya.github.io/Bloom-Website/support.html"
+        static let website = "https://pangtongya.github.io/Bloom-Website/"
+        static let appStore = "https://apps.apple.com/app/id6742091900"
+        static let appStoreReview = "https://apps.apple.com/app/id6742091900?action=write-review"
+    }
+    
+    // MARK: - 联系信息
+    enum Contact {
+        static let supportEmail = "support@bloomapp.com"
+        static let twitterHandle = "@bloom_app"
+        static let instagramHandle = "@bloom.app"
+    }
+    
+    // MARK: - 评分配置
+    enum Review {
+        static let minDaysSinceInstall = 7
+        static let minLaunchCount = 10
+        static let minDaysBetweenPrompts = 30
+        static let remindLaterDays = 7
+        static let maxPromptsPerYear = 3
     }
 }

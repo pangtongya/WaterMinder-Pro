@@ -5,6 +5,13 @@ import SwiftUI
 import WidgetKit
 import Combine
 
+enum AppLoadingPhase {
+    case initial
+    case coreDataLoaded
+    case highPriorityLoaded
+    case fullyLoaded
+}
+
 @main
 struct BloomApp: App {
     // 单例 store：用 @ObservedObject 共享同一个实例，避免 SwiftUI 错误地假设拥有生命周期
@@ -22,86 +29,86 @@ struct BloomApp: App {
     @ObservedObject private var themeManager = ThemeManager.shared
     @ObservedObject private var healthSyncService = HealthSyncService.shared
     
-    @State private var isReady = false
+    @State private var loadingPhase: AppLoadingPhase = .initial
+    @State private var showLaunchScreen = true
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
-        // 注册后台任务（尽早注册）
         BackgroundTaskManager.shared.registerBackgroundTasks()
     }
     
     var body: some Scene {
         WindowGroup {
-            Group {
-                if !isReady {
-                    // 启动屏幕：显示品牌色，避免白屏
+            ZStack {
+                if showLaunchScreen {
                     Color(.systemBackground)
-                } else {
-                    RootView()
+                        .transition(.opacity)
+                        .zIndex(1)
                 }
-            }
-            .environmentObject(userStore)
-            .environmentObject(waterStore)
-            .environmentObject(plantEngine)
-            .environmentObject(gardenStore)
-            .environmentObject(achievementStore)
-            .environmentObject(storeManager)
-            .environmentObject(notificationManager)
-            .environmentObject(healthManager)
-            .environmentObject(cloudSyncManager)
-            .environmentObject(themeManager)
-            .environmentObject(healthSyncService)
-            .preferredColorScheme(userStore.colorScheme)
-            .environment(\.scenePhase, scenePhase)
-            .task {
-                // 异步完成所有初始化
-                await initializeApp()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.refreshWidget)) { _ in
-                // 接收 Widget 数据刷新通知：写数据到 App Group，然后 reload Widget
-                WidgetRefresher.shared.refresh(
-                    waterStore: waterStore,
-                    userStore: userStore,
-                    plantEngine: plantEngine
-                )
-                WidgetCenter.shared.reloadAllTimelines()
-            }
-            .onChange(of: scenePhase) { oldPhase, newPhase in
-                if newPhase == .background {
-                    // 进入后台：1. 写入 lastActiveDate（为后台任务的健康衰减做准备）
-                    UserDefaults.standard.set(
-                        Date().timeIntervalSince1970,
-                        forKey: AppConstants.UserDefaultsKeys.lastActiveDate
-                    )
-                    // 2. 调度后台任务（植物健康衰减 + Widget 刷新）
-                    BackgroundTaskManager.shared.scheduleHealthDecayTask()
-                    BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
-                } else if newPhase == .active {
-                    // 回到前台：0. 检测跨天，应用健康衰减
-                    plantEngine.processOverdueDays()
-                    // 1. 刷新 HealthKit 同步
-                    Task { @MainActor in
-                        if healthManager.isAuthorized {
-                            await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
-                        }
+
+                Group {
+                    switch loadingPhase {
+                    case .initial, .coreDataLoaded:
+                        Color(.systemBackground)
+                    case .highPriorityLoaded, .fullyLoaded:
+                        RootView(loadingPhase: loadingPhase)
                     }
-                    // 2. 刷新 Widget 数据
+                }
+                .environmentObject(userStore)
+                .environmentObject(waterStore)
+                .environmentObject(plantEngine)
+                .environmentObject(gardenStore)
+                .environmentObject(achievementStore)
+                .environmentObject(storeManager)
+                .environmentObject(notificationManager)
+                .environmentObject(healthManager)
+                .environmentObject(cloudSyncManager)
+                .environmentObject(themeManager)
+                .environmentObject(healthSyncService)
+                .preferredColorScheme(userStore.colorScheme)
+                .environment(\.scenePhase, scenePhase)
+                .task {
+                    await initializeApp()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.refreshWidget)) { _ in
                     WidgetRefresher.shared.refresh(
                         waterStore: waterStore,
                         userStore: userStore,
                         plantEngine: plantEngine
                     )
                     WidgetCenter.shared.reloadAllTimelines()
-                    // 3. 重新排程通知（每天都能收到提醒的关键）
-                    if userStore.reminderEnabled {
-                        Task {
-                            await notificationManager.requestAuthorizationIfNeeded()
-                            await notificationManager.scheduleSmartReminder(
-                                intervalMinutes: userStore.reminderInterval,
-                                health: plantEngine.plant.health,
-                                plantName: plantEngine.plant.name,
-                                isPaused: plantEngine.plant.isPaused
-                            )
+                }
+                .onChange(of: scenePhase) { oldPhase, newPhase in
+                    if newPhase == .background {
+                        UserDefaults.standard.set(
+                            Date().timeIntervalSince1970,
+                            forKey: AppConstants.UserDefaultsKeys.lastActiveDate
+                        )
+                        BackgroundTaskManager.shared.scheduleHealthDecayTask()
+                        BackgroundTaskManager.shared.scheduleWidgetRefreshTask()
+                    } else if newPhase == .active {
+                        plantEngine.processOverdueDays()
+                        Task { @MainActor in
+                            if healthSyncService.shouldAutoSync() {
+                                await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
+                            }
+                        }
+                        WidgetRefresher.shared.refresh(
+                            waterStore: waterStore,
+                            userStore: userStore,
+                            plantEngine: plantEngine
+                        )
+                        WidgetCenter.shared.reloadAllTimelines()
+                        if userStore.reminderEnabled {
+                            Task {
+                                await notificationManager.requestAuthorizationIfNeeded()
+                                await notificationManager.scheduleSmartReminder(
+                                    intervalMinutes: userStore.reminderInterval,
+                                    health: plantEngine.plant.health,
+                                    plantName: plantEngine.plant.name,
+                                    isPaused: plantEngine.plant.isPaused
+                                )
+                            }
                         }
                     }
                 }
@@ -109,34 +116,22 @@ struct BloomApp: App {
         }
     }
 
-    /// 异步初始化所有依赖
     @MainActor
     private func initializeApp() async {
-        // 1. 注入 store 间的依赖
         wireStores()
-
-        // 2. 加载保存的主题
-        themeManager.loadSavedTheme(isPro: userStore.isPro)
-
-        // 3. 数据归档（启动时检查，超过 90 天的旧记录移至归档文件）
         waterStore.autoArchiveIfNeeded()
-
-        // 4. 请求 HealthKit 授权（仅在未决定时弹窗）
-        _ = await healthManager.requestAuthorizationIfNeeded()
-
-        // 5. 同步 HealthKit 数据（如果有权限）
-        if healthManager.isAuthorized {
+        themeManager.loadSavedTheme(isPro: userStore.isPro)
+        
+        if healthSyncService.shouldAutoSync() {
             await healthSyncService.sync(waterStore: waterStore, plantEngine: plantEngine)
         }
-
-        // 6. 首次 Widget 数据同步（让 Widget 立即有数据）
+        
         WidgetRefresher.shared.refresh(
             waterStore: waterStore,
             userStore: userStore,
             plantEngine: plantEngine
         )
-
-        // 7. 关键：如果用户开启了提醒，启动时重新排程（否则第二天可能就没有提醒了）
+        
         if userStore.reminderEnabled {
             await notificationManager.requestAuthorizationIfNeeded()
             await notificationManager.scheduleSmartReminder(
@@ -146,20 +141,18 @@ struct BloomApp: App {
                 isPaused: plantEngine.plant.isPaused
             )
         }
-
-        // 8. 关键：启动时刷新成就（根据已有记录重新计算一次，
-        //    确保老用户升级后成就能正确显示）
+        
         achievementStore.refreshFromCurrentRecords(
             totalRecords: waterStore.records.count,
             totalAmount: waterStore.records.reduce(0) { $0 + $1.amount },
             longestStreak: waterStore.longestStreak
         )
-
-        // 9. 标记就绪（显示 RootView）
-        isReady = true
+        
+        loadingPhase = .fullyLoaded
+        try? await Task.sleep(nanoseconds: 400_000_000)
+        showLaunchScreen = false
     }
     
-    /// 注入 store 间的依赖（目标、Pro 状态）
     @MainActor
     private func wireStores() {
         waterStore.dailyGoalProvider = { [weak userStore] in
@@ -183,6 +176,7 @@ struct BloomApp: App {
         // 注入成就系统依赖
         waterStore.achievementStore = achievementStore
         waterStore.healthManager = healthManager
+        waterStore.healthSyncService = healthSyncService
         gardenStore.achievementStore = achievementStore
         SharingManager.shared.achievementStore = achievementStore
     }

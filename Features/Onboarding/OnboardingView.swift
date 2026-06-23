@@ -20,16 +20,24 @@ struct OnboardingView: View {
         return locale.contains("US") ? 2400 : 2000
     }()
     @State private var demoWatered = false  // 第1步浇水演示
+    @State private var contentAppeared = false
 
     var body: some View {
         VStack(spacing: 0) {
             // 进度指示器
             progressDots
                 .padding(.top, 8)
+                .opacity(contentAppeared ? 1 : 0)
+                .offset(y: contentAppeared ? 0 : -10)
+                .animation(.easeOut(duration: 0.5).delay(0.1), value: contentAppeared)
 
             // 步骤内容
             TabView(selection: $step) {
-                stepOneConcept.tag(1)
+                stepOneConcept
+                    .tag(1)
+                    .opacity(contentAppeared ? 1 : 0)
+                    .offset(y: contentAppeared ? 0 : 20)
+                    .animation(.easeOut(duration: 0.6).delay(0.2), value: contentAppeared)
                 stepTwoPersonalize.tag(2)
                 stepThreePermission.tag(3)
             }
@@ -38,6 +46,9 @@ struct OnboardingView: View {
         }
         .background(Color(.systemBackground))
         .ignoresSafeArea(edges: .bottom)
+        .onAppear {
+            contentAppeared = true
+        }
     }
 
     // MARK: - 进度点

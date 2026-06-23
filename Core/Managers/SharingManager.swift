@@ -50,6 +50,38 @@ final class SharingManager: ObservableObject {
         return await renderToImage(view: view, size: CGSize(width: 1080, height: 1080))
     }
     
+    /// 生成连续达标天数分享卡片
+    func generateStreakCard(streakDays: Int, plantSymbol: String) async -> UIImage {
+        let view = ShareStreakCardView(streakDays: streakDays, plantSymbol: plantSymbol)
+        return await renderToImage(view: view, size: CGSize(width: 1080, height: 1080))
+    }
+    
+    /// 生成花园收藏进度分享卡片
+    func generateGardenProgressCard(collected: Int, total: Int, plantSymbols: [String]) async -> UIImage {
+        let view = ShareGardenProgressCardView(collected: collected, total: total, plantSymbols: plantSymbols)
+        return await renderToImage(view: view, size: CGSize(width: 1080, height: 1350))
+    }
+    
+    // MARK: - 分享文案
+    
+    /// 生成分享文字（带 App Store 链接）
+    func shareText(for type: ShareType, streakDays: Int = 0, plantName: String = "") -> String {
+        let appStoreLink = AppConstants.URLs.appStore
+        
+        switch type {
+        case .plant:
+            return String(format: L.sharePlantText, plantName, appStoreLink)
+        case .achievement:
+            return String(format: L.shareAchievementText, appStoreLink)
+        case .streak:
+            return String(format: L.shareStreakText, streakDays, appStoreLink)
+        case .garden:
+            return String(format: L.shareGardenText, appStoreLink)
+        case .app:
+            return String(format: L.shareAppText, appStoreLink)
+        }
+    }
+    
     // MARK: - 渲染为图片
     
     private func renderToImage<V: View>(view: V, size: CGSize) async -> UIImage {
@@ -101,8 +133,66 @@ final class SharingManager: ObservableObject {
     func shareAchievement(_ achievement: Achievement, from viewController: UIViewController? = nil) {
         Task {
             let image = await generateAchievementCard(achievement: achievement)
-            shareImage(image, from: viewController)
+            let text = shareText(for: .achievement)
+            shareItems([text, image], from: viewController)
         }
+    }
+    
+    /// 分享植物状态
+    func sharePlant(plant: Plant, waterStore: WaterStore, achievementStore: AchievementStore, from viewController: UIViewController? = nil) {
+        Task {
+            let image = await generatePlantShareCard(plant: plant, waterStore: waterStore, achievementStore: achievementStore)
+            let text = shareText(for: .plant, plantName: plant.name)
+            shareItems([text, image], from: viewController)
+        }
+    }
+    
+    /// 分享连续达标天数
+    func shareStreak(days: Int, plantSymbol: String, from viewController: UIViewController? = nil) {
+        Task {
+            let image = await generateStreakCard(streakDays: days, plantSymbol: plantSymbol)
+            let text = shareText(for: .streak, streakDays: days)
+            shareItems([text, image], from: viewController)
+        }
+    }
+    
+    /// 分享花园收藏进度
+    func shareGardenProgress(collected: Int, total: Int, plantSymbols: [String], from viewController: UIViewController? = nil) {
+        Task {
+            let image = await generateGardenProgressCard(collected: collected, total: total, plantSymbols: plantSymbols)
+            let text = shareText(for: .garden)
+            shareItems([text, image], from: viewController)
+        }
+    }
+    
+    /// 分享 App 给朋友
+    func shareApp(from viewController: UIViewController? = nil) {
+        let text = shareText(for: .app)
+        shareItems([text], from: viewController)
+    }
+    
+    /// 分享多个条目
+    func shareItems(_ items: [Any], from viewController: UIViewController?) {
+        guard let vc = viewController ?? topViewController() else { return }
+        
+        let activityVC = UIActivityViewController(
+            activityItems: items,
+            applicationActivities: nil
+        )
+        
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = vc.view
+            popover.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+        
+        activityVC.completionWithItemsHandler = { [weak self] _, completed, _, _ in
+            if completed {
+                self?.recordShare()
+            }
+        }
+        
+        vc.present(activityVC, animated: true)
     }
     
     // MARK: - Helper
@@ -280,6 +370,162 @@ struct StatItem: View {
             Text(label)
                 .font(.system(size: 24))
                 .foregroundColor(.white.opacity(0.8))
+        }
+    }
+}
+
+// MARK: - 分享类型
+
+enum ShareType {
+    case plant
+    case achievement
+    case streak
+    case garden
+    case app
+}
+
+// MARK: - 连续达标分享卡片
+
+struct ShareStreakCardView: View {
+    let streakDays: Int
+    let plantSymbol: String
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.bloomPrimary, Color.bloomGold.opacity(0.8)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                Text("Bloom")
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text(plantSymbol)
+                    .font(.system(size: 140))
+                
+                VStack(spacing: 16) {
+                    Text(L.streakAchieved)
+                        .font(.system(size: 32))
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    Text("\(streakDays)")
+                        .font(.system(size: 120, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text(L.daysConsecutive)
+                        .font(.system(size: 36, weight: .medium))
+                        .foregroundColor(.white)
+                }
+                
+                Text(L.keepItUp)
+                    .font(.system(size: 28))
+                    .foregroundColor(.white.opacity(0.8))
+                
+                Spacer()
+                
+                HStack(spacing: 8) {
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.white)
+                    Text(L.bloomTagline)
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(60)
+        }
+    }
+}
+
+// MARK: - 花园收藏进度分享卡片
+
+struct ShareGardenProgressCardView: View {
+    let collected: Int
+    let total: Int
+    let plantSymbols: [String]
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.green.opacity(0.7), Color.bloomPrimary.opacity(0.8)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 36) {
+                Text("Bloom")
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("🌱🌿🌺🌻🌷🌹🪴")
+                    .font(.system(size: 48))
+                
+                VStack(spacing: 16) {
+                    Text(L.myGardenCollection)
+                        .font(.system(size: 32))
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    HStack(alignment: .bottom, spacing: 4) {
+                        Text("\(collected)")
+                            .font(.system(size: 80, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("/ \(total)")
+                            .font(.system(size: 36))
+                            .foregroundColor(.white.opacity(0.7))
+                            .padding(.bottom, 8)
+                    }
+                    
+                    Text(L.speciesCollected)
+                        .font(.system(size: 28))
+                        .foregroundColor(.white)
+                }
+                
+                // 进度条
+                VStack(spacing: 12) {
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.white.opacity(0.3))
+                                .frame(height: 24)
+                            
+                            Capsule()
+                                .fill(Color.white)
+                                .frame(width: geometry.size.width * CGFloat(collected) / CGFloat(total), height: 24)
+                        }
+                    }
+                    .frame(height: 24)
+                    
+                    Text(String(format: L.collectionProgressPercent, Int(Double(collected) / Double(total) * 100)))
+                        .font(.system(size: 24))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.horizontal, 20)
+                
+                // 已收集的植物图标
+                if !plantSymbols.isEmpty {
+                    HStack(spacing: 16) {
+                        ForEach(Array(plantSymbols.prefix(7).enumerated()), id: \.offset) { _, symbol in
+                            Text(symbol)
+                                .font(.system(size: 44))
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                HStack(spacing: 8) {
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.white)
+                    Text(L.bloomTagline)
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(60)
         }
     }
 }

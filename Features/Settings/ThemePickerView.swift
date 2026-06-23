@@ -161,11 +161,11 @@ struct ThemeCard: View {
                 
                 // 主题名称
                 VStack(spacing: 2) {
-                    Text(theme.name)
+                    Text(theme.localizedName)
                         .font(.system(size: 14, weight: .semibold))
                         .lineLimit(1)
                     
-                    Text(theme.description)
+                    Text(theme.localizedDescription)
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                         .lineLimit(1)

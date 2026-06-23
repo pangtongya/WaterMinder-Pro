@@ -15,8 +15,90 @@ import SwiftUI
 final class CloudSyncManager: ObservableObject {
     static let shared = CloudSyncManager()
     
+    // MARK: - 同步状态
+    
+    enum SyncStatus: Equatable {
+        case idle
+        case syncing
+        case success
+        case failed(SyncError)
+    }
+    
+    enum SyncProgress: Equatable {
+        case downloading
+        case merging
+        case uploading
+    }
+    
+    enum SyncError: LocalizedError, Equatable {
+        case notSignedIn
+        case noNetwork
+        case insufficientSpace
+        case permissionDenied
+        case networkError
+        case unknown(String)
+        
+        var errorDescription: String? {
+            switch self {
+            case .notSignedIn:
+                return NSLocalizedString("未登录 iCloud 账号", comment: "iCloud not signed in")
+            case .noNetwork:
+                return NSLocalizedString("等待网络连接", comment: "Waiting for network")
+            case .insufficientSpace:
+                return NSLocalizedString("iCloud 存储空间不足", comment: "iCloud storage insufficient")
+            case .permissionDenied:
+                return NSLocalizedString("无 iCloud 同步权限", comment: "iCloud permission denied")
+            case .networkError:
+                return NSLocalizedString("网络连接异常", comment: "Network error")
+            case .unknown(let message):
+                return message
+            }
+        }
+        
+        var recoverySuggestion: String? {
+            switch self {
+            case .notSignedIn:
+                return NSLocalizedString("请在系统设置中登录 iCloud", comment: "Sign in to iCloud in Settings")
+            case .noNetwork:
+                return NSLocalizedString("连接网络后将自动同步", comment: "Will auto-sync when network is available")
+            case .insufficientSpace:
+                return NSLocalizedString("请清理 iCloud 存储空间后重试", comment: "Free up iCloud storage and try again")
+            case .permissionDenied:
+                return NSLocalizedString("请在系统设置中允许 Bloom 访问 iCloud", comment: "Allow Bloom to access iCloud in Settings")
+            case .networkError:
+                return NSLocalizedString("请检查网络连接后重试", comment: "Check network connection and try again")
+            case .unknown:
+                return NSLocalizedString("请稍后重试", comment: "Please try again later")
+            }
+        }
+        
+        var canRetry: Bool {
+            switch self {
+            case .notSignedIn, .permissionDenied, .insufficientSpace:
+                return false
+            case .noNetwork, .networkError, .unknown:
+                return true
+            }
+        }
+        
+        var showsSettingsButton: Bool {
+            switch self {
+            case .notSignedIn, .permissionDenied:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+    
     /// 同步是否可用（用户已登录 iCloud）
     @Published private(set) var isSyncAvailable = false
+    
+    /// 同步状态
+    @Published private(set) var syncStatus: SyncStatus = .idle
+    
+    /// 同步进度步骤
+    @Published private(set) var syncProgress: SyncProgress = .downloading
     
     /// 是否正在同步
     @Published private(set) var isSyncing = false
@@ -25,11 +107,22 @@ final class CloudSyncManager: ObservableObject {
     @Published private(set) var lastSyncDate: Date?
     
     /// 同步错误信息
-    @Published private(set) var lastError: String?
+    @Published private(set) var lastError: SyncError?
 
     /// 基于现有状态自动计算的 Toast 显示状态
     /// RootView 监听此属性即可，无需订阅多个 @Published
     @Published private(set) var syncToastState: SyncToastState = .idle
+    
+    /// 网络监视器
+    private let networkMonitor = NetworkMonitor.shared
+    
+    /// 是否有网络连接
+    var isNetworkAvailable: Bool {
+        networkMonitor.isConnected
+    }
+    
+    private var syncRetryTask: Task<Void, Never>?
+    private var pendingSyncBlock: (() async -> Void)?
 
     /// Toast 自动消失计时器（防止 syncToastState 一直停留在 success/failed）
     private var toastResetTimer: Timer?
@@ -64,6 +157,7 @@ final class CloudSyncManager: ObservableObject {
     deinit {
         NotificationCenter.default.removeObserver(self)
         toastResetTimer?.invalidate()
+        syncRetryTask?.cancel()
     }
     
     private init() {
@@ -81,6 +175,110 @@ final class CloudSyncManager: ObservableObject {
         Task {
             checkAccountStatus()
         }
+        
+        // 监听网络状态变化
+        Task { [weak self] in
+            for await isConnected in NotificationCenter.default
+                .notifications(named: .networkStatusChanged)
+                .compactMap({ $0.userInfo?["isConnected"] as? Bool }) {
+                guard let self = self else { return }
+                if isConnected {
+                    await self.handleNetworkRestored()
+                }
+            }
+        }
+    }
+    
+    // MARK: - 公共方法
+    
+    /// 手动触发全量同步
+    func syncAll() async {
+        guard await isSyncAllowed() else { return }
+        guard !isSyncing else { return }
+        
+        await MainActor.run {
+            isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
+            showSyncToast(.syncing)
+        }
+        
+        do {
+            syncProgress = .downloading
+            let waterRecords = try await fetchAllRecords(recordType: "WaterRecord") as [WaterRecord]
+            let cloudPlants = try await fetchAllRecords(recordType: "Plant") as [Plant]
+            let cloudItems = try await fetchAllRecords(recordType: "GardenItem") as [GardenItem]
+            let cloudProfiles = try await fetchAllRecords(recordType: "UserProfile") as [UserProfile]
+            let cloudAchievements = try await fetchAllRecords(recordType: "Achievement") as [Achievement]
+            
+            syncProgress = .merging
+            try await Task.sleep(nanoseconds: 300_000_000)
+            
+            syncProgress = .uploading
+            
+            let waterStore = WaterStore.shared
+            let plantEngine = PlantEngine.shared
+            let gardenStore = GardenStore.shared
+            let userStore = UserStore.shared
+            let achievementStore = AchievementStore.shared
+            
+            let mergedWater = mergeWaterRecords(local: waterStore.records, cloud: waterRecords)
+            for record in mergedWater {
+                try await saveWaterRecord(record)
+            }
+            
+            let latestPlant = mergePlant(local: plantEngine.plant, cloud: cloudPlants)
+            try await savePlant(latestPlant)
+            
+            let mergedGarden = mergeGardenItems(local: gardenStore.items, cloud: cloudItems)
+            for item in mergedGarden {
+                try await saveGardenItem(item)
+            }
+            
+            let latestProfile = mergeUserProfile(local: userStore.profile, cloud: cloudProfiles)
+            try await saveUserProfile(latestProfile)
+            
+            let mergedAchievements = mergeAchievements(local: achievementStore.achievements, cloud: cloudAchievements)
+            try await saveAchievements(mergedAchievements)
+            
+            await MainActor.run {
+                lastSyncDate = Date()
+                lastError = nil
+                syncStatus = .success
+                showSyncToast(.success(Date()))
+            }
+        } catch {
+            let syncError = classifyError(error)
+            await MainActor.run {
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
+                #if DEBUG
+                print("[CloudSync] 全量同步失败: \(error)")
+                #endif
+            }
+        }
+        
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
+    }
+    
+    /// 重试上次失败的同步
+    func retryLastSync() async {
+        if case .failed(let error) = syncStatus, error.canRetry {
+            await syncAll()
+        }
+    }
+    
+    /// 打开系统设置（用于引导用户登录 iCloud 或设置权限）
+    func openSystemSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
     
     // MARK: - 账号状态检查
@@ -91,6 +289,11 @@ final class CloudSyncManager: ObservableObject {
                 let status = try await container.accountStatus()
                 await MainActor.run {
                     isSyncAvailable = (status == .available)
+                    if status != .available {
+                        let error: SyncError = (status == .noAccount || status == .couldNotDetermine) ? .notSignedIn : .permissionDenied
+                        lastError = error
+                        syncStatus = .failed(error)
+                    }
                 }
             } catch {
                 #if DEBUG
@@ -98,8 +301,60 @@ final class CloudSyncManager: ObservableObject {
                 #endif
                 await MainActor.run {
                     isSyncAvailable = false
+                    lastError = .unknown(error.localizedDescription)
                 }
             }
+        }
+    }
+    
+    // MARK: - 错误分类
+    
+    private func classifyError(_ error: Error) -> SyncError {
+        let ckError = error as NSError
+        
+        // 检查网络错误
+        if ckError.domain == NSURLErrorDomain {
+            switch ckError.code {
+            case NSURLErrorNotConnectedToInternet,
+                 NSURLErrorNetworkConnectionLost,
+                 NSURLErrorDataNotAllowed:
+                return .noNetwork
+            default:
+                return .networkError
+            }
+        }
+        
+        // 检查 CloudKit 错误
+        if ckError.domain == CKErrorDomain {
+            switch ckError.code {
+            case CKError.notAuthenticated.rawValue:
+                return .notSignedIn
+            case CKError.permissionFailure.rawValue:
+                return .permissionDenied
+            case CKError.zoneBusy.rawValue,
+                 CKError.serviceUnavailable.rawValue,
+                 CKError.requestRateLimited.rawValue:
+                return .networkError
+            case CKError.quotaExceeded.rawValue:
+                return .insufficientSpace
+            default:
+                break
+            }
+        }
+        
+        return .unknown(error.localizedDescription)
+    }
+    
+    // MARK: - 网络状态处理
+    
+    private func handleNetworkRestored() async {
+        if case .failed(let error) = syncStatus, error == .noNetwork {
+            pendingSyncBlock = { [weak self] in
+                Task { @MainActor in
+                    await self?.syncAll()
+                }
+            }
+            await syncAll()
         }
     }
     
@@ -110,13 +365,19 @@ final class CloudSyncManager: ObservableObject {
         guard await isSyncAllowed() else { return }
         await MainActor.run {
             isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
             showSyncToast(.syncing)
         }
 
         do {
+            syncProgress = .downloading
             let cloudRecords: [WaterRecord] = try await fetchAllRecords(recordType: "WaterRecord")
+            
+            syncProgress = .merging
             let merged = mergeWaterRecords(local: records, cloud: cloudRecords)
-
+            
+            syncProgress = .uploading
             for record in merged {
                 try await saveWaterRecord(record)
             }
@@ -124,19 +385,27 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                syncStatus = .success
                 showSyncToast(.success(Date()))
             }
         } catch {
+            let syncError = classifyError(error)
             await MainActor.run {
-                lastError = "同步失败: \(error.localizedDescription)"
-                showSyncToast(.failed(error.localizedDescription))
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
                 #if DEBUG
                 print("[CloudSync] 同步喝水记录失败: \(error)")
                 #endif
             }
         }
 
-        await MainActor.run { isSyncing = false }
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
     }
     
     /// 同步植物状态
@@ -144,30 +413,45 @@ final class CloudSyncManager: ObservableObject {
         guard await isSyncAllowed() else { return }
         await MainActor.run {
             isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
             showSyncToast(.syncing)
         }
 
         do {
+            syncProgress = .downloading
             let cloudPlants: [Plant] = try await fetchAllRecords(recordType: "Plant")
+            
+            syncProgress = .merging
             let latest = mergePlant(local: plant, cloud: cloudPlants)
+            
+            syncProgress = .uploading
             try await savePlant(latest)
 
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                syncStatus = .success
                 showSyncToast(.success(Date()))
             }
         } catch {
+            let syncError = classifyError(error)
             await MainActor.run {
-                lastError = "同步植物失败: \(error.localizedDescription)"
-                showSyncToast(.failed(error.localizedDescription))
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
                 #if DEBUG
                 print("[CloudSync] 同步植物失败: \(error)")
                 #endif
             }
         }
 
-        await MainActor.run { isSyncing = false }
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
     }
 
     /// 同步花园收藏
@@ -175,13 +459,19 @@ final class CloudSyncManager: ObservableObject {
         guard await isSyncAllowed() else { return }
         await MainActor.run {
             isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
             showSyncToast(.syncing)
         }
 
         do {
+            syncProgress = .downloading
             let cloudItems: [GardenItem] = try await fetchAllRecords(recordType: "GardenItem")
+            
+            syncProgress = .merging
             let merged = mergeGardenItems(local: items, cloud: cloudItems)
-
+            
+            syncProgress = .uploading
             for item in merged {
                 try await saveGardenItem(item)
             }
@@ -189,19 +479,27 @@ final class CloudSyncManager: ObservableObject {
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                syncStatus = .success
                 showSyncToast(.success(Date()))
             }
         } catch {
+            let syncError = classifyError(error)
             await MainActor.run {
-                lastError = "同步花园失败: \(error.localizedDescription)"
-                showSyncToast(.failed(error.localizedDescription))
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
                 #if DEBUG
                 print("[CloudSync] 同步花园失败: \(error)")
                 #endif
             }
         }
 
-        await MainActor.run { isSyncing = false }
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
     }
 
     /// 同步用户配置
@@ -215,60 +513,90 @@ final class CloudSyncManager: ObservableObject {
         guard await isSyncAllowed() else { return }
         await MainActor.run {
             isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
             showSyncToast(.syncing)
         }
 
         do {
+            syncProgress = .downloading
             let cloudProfiles: [UserProfile] = try await fetchAllRecords(recordType: "UserProfile")
+            
+            syncProgress = .merging
             let latest = mergeUserProfile(local: profile, cloud: cloudProfiles)
+            
+            syncProgress = .uploading
             try await saveUserProfile(latest)
 
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                syncStatus = .success
                 showSyncToast(.success(Date()))
             }
         } catch {
+            let syncError = classifyError(error)
             await MainActor.run {
-                lastError = "同步配置失败: \(error.localizedDescription)"
-                showSyncToast(.failed(error.localizedDescription))
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
                 #if DEBUG
                 print("[CloudSync] 同步配置失败: \(error)")
                 #endif
             }
         }
 
-        await MainActor.run { isSyncing = false }
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
     }
 
     func syncAchievements(_ achievements: [Achievement]) async {
         guard await isSyncAllowed() else { return }
         await MainActor.run {
             isSyncing = true
+            syncStatus = .syncing
+            syncProgress = .downloading
             showSyncToast(.syncing)
         }
 
         do {
+            syncProgress = .downloading
             let cloudAchievements: [Achievement] = try await fetchAllRecords(recordType: "Achievement")
+            
+            syncProgress = .merging
             let merged = mergeAchievements(local: achievements, cloud: cloudAchievements)
+            
+            syncProgress = .uploading
             try await saveAchievements(merged)
 
             await MainActor.run {
                 lastSyncDate = Date()
                 lastError = nil
+                syncStatus = .success
                 showSyncToast(.success(Date()))
             }
         } catch {
+            let syncError = classifyError(error)
             await MainActor.run {
-                lastError = "同步成就失败: \(error.localizedDescription)"
-                showSyncToast(.failed(error.localizedDescription))
+                lastError = syncError
+                syncStatus = .failed(syncError)
+                showSyncToast(.failed(syncError.errorDescription ?? error.localizedDescription))
                 #if DEBUG
                 print("[CloudSync] 同步成就失败: \(error)")
                 #endif
             }
         }
 
-        await MainActor.run { isSyncing = false }
+        await MainActor.run {
+            isSyncing = false
+            if case .success = syncStatus {
+                syncStatus = .idle
+            }
+        }
     }
     
     // MARK: - 从云端下载数据
@@ -332,7 +660,19 @@ final class CloudSyncManager: ObservableObject {
     private func isSyncAllowed() async -> Bool {
         guard isSyncAvailable else {
             await MainActor.run {
-                lastError = "iCloud 不可用，请检查设置"
+                let error: SyncError = .notSignedIn
+                lastError = error
+                syncStatus = .failed(error)
+                showSyncToast(.failed(error.errorDescription ?? ""))
+            }
+            return false
+        }
+        guard networkMonitor.isConnected else {
+            await MainActor.run {
+                let error: SyncError = .noNetwork
+                lastError = error
+                syncStatus = .failed(error)
+                showSyncToast(.failed(error.errorDescription ?? ""))
             }
             return false
         }

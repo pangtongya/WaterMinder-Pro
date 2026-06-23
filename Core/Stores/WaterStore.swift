@@ -18,6 +18,9 @@ final class WaterStore: ObservableObject {
     /// HealthKit 管理器（由 BloomApp 注入，用于自动同步写入并回写 UUID）
     weak var healthManager: HealthManager?
 
+    /// HealthKit 同步服务（由 BloomApp 注入，用于记录写入统计）
+    weak var healthSyncService: HealthSyncService?
+
     private let storage = PersistenceManager.shared
     private let filename = "water_records.json"
     private let cloudSync = CloudSyncManager.shared
@@ -46,6 +49,7 @@ final class WaterStore: ObservableObject {
                         records[idx].hkSampleUUID = uuid
                         persist()
                         triggerSync()
+                        healthSyncService?.incrementWriteCount()
                     }
                 } catch {
                     #if DEBUG
@@ -82,6 +86,7 @@ final class WaterStore: ObservableObject {
                     let uuid = try await healthManager.saveWater(record.amount)
                     if let idx = records.firstIndex(where: { $0.id == record.id }) {
                         records[idx].hkSampleUUID = uuid
+                        healthSyncService?.incrementWriteCount()
                     }
                 } catch {
                     #if DEBUG
