@@ -47,7 +47,7 @@ extension Color {
 
     // MARK: - Hex 初始化器
 
-    init(hex: String) {
+    init(hex: String, opacity: Double = 1.0) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
@@ -67,7 +67,7 @@ extension Color {
             red: Double(r) / 255,
             green: Double(g) / 255,
             blue: Double(b) / 255,
-            opacity: Double(a) / 255
+            opacity: opacity
         )
     }
     
@@ -250,6 +250,50 @@ extension Color {
         light: UIColor.opaqueSeparator,
         dark: UIColor.opaqueSeparator
     ))
+    
+    /// Apple 设计系统边框色
+    static let bloomBorder = Color(hex: "000000", opacity: 0.06)
+    
+    /// Apple 设计系统分隔线色
+    static let bloomDivider = Color(hex: "3C3C43", opacity: 0.08)
+    
+    /// Apple 设计系统填充色
+    static let bloomFill = Color(hex: "787880", opacity: 0.12)
+    
+    /// Apple 信息蓝
+    static let bloomInfo = Color(hex: "007AFF")
+}
+
+// MARK: - Apple 风格动态背景色
+
+extension Color {
+    /// Apple 浅色模式页面背景 #F2F2F7
+    static let bloomBackgroundLight = Color(hex: "F2F2F7")
+    
+    /// Apple 深色模式页面背景 #000000
+    static let bloomBackgroundDark = Color(hex: "000000")
+    
+    /// 页面背景（自动适配深色模式）
+    static let bloomBackground = Color(uiColor: .dynamicColor(
+        light: bloomBackgroundLight,
+        dark: bloomBackgroundDark
+    ))
+}
+
+// MARK: - Apple 风格语义颜色
+
+extension Color {
+    /// Muted 主色（12% 透明度）
+    static let bloomPrimaryMuted = Color.bloomPrimary.opacity(0.12)
+    
+    /// Subtle 主色（6% 透明度）
+    static let bloomPrimarySubtle = Color.bloomPrimary.opacity(0.06)
+    
+    /// Muted 水蓝色（12% 透明度）
+    static let bloomWaterMuted = Color.bloomWater.opacity(0.12)
+    
+    /// Muted 金色（15% 透明度）
+    static let bloomGoldMuted = Color.bloomGold.opacity(0.15)
 }
 
 // MARK: - 健康度 → 状态颜色

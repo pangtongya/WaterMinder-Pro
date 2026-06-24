@@ -1,12 +1,13 @@
 // GardenView.swift
-// ⭐ 主界面 —— 植物花园，用户的核心情感场域
+// Apple 风格重构 —— 主界面
 //
-// 结构：
-//   1. 顶部：植物绘制区（AnimatedPlantView）—— 视觉中心，承载全部情感
-//   2. 中部：植物状态卡（PlantStatusCard）—— 名字、健康度、状态文案
-//   3. 底部：快速记录条（QuickRecordBar）—— 喝水按钮
-//
-// 每次喝水 → 植物立即恢复生机，形成"浇水养花"的正反馈闭环。
+// 设计特点：
+// - Apple Human Interface Guidelines 风格
+// - 大标题导航
+// - 毛玻璃底部栏
+// - 圆角卡片
+// - 进度环
+// - 简洁的视觉层级
 
 import SwiftUI
 
@@ -17,88 +18,90 @@ struct GardenView: View {
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var healthManager: HealthManager
     @EnvironmentObject var achievementStore: AchievementStore
-
-        @State private var showHarvestSheet = false
+    @EnvironmentObject var storeManager: StoreManager
+    
+    @State private var showHarvestSheet = false
     @State private var celebrateStage: GrowthStage?
-    @State private var splashTrigger: Int = 0   // 水滴动画触发器
-    @State private var plantPressing = false    // 植物按压视觉反馈
-    @State private var showWilt = false         // 植物枯萎提示动画
-    @State private var showGoalCelebration = false  // 达标庆祝
-
-
+    @State private var splashTrigger: Int = 0
+    @State private var plantPressing = false
+    @State private var showWilt = false
+    @State private var showGoalCelebration = false
     @State private var showPauseConfirm = false
     @State private var showResumeAlert = false
     @State private var isSharing = false
     @State private var shareImage: UIImage?
     @State private var showGardenLimitAlert = false
     @State private var showPaywall = false
-    @EnvironmentObject var storeManager: StoreManager
     
-    var plantFadeIn: Bool = true
+    private var plantFadeIn: Bool = true
+    
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // 1. 植物绘制区
-                plantHero
-
-                // 1b. 枯萎恢复横幅（celebration 消失后仍然可见，直到用户喝水恢复健康）
+            VStack(spacing: 16) {
+                // 1. 植物主视觉区 - 带进度环
+                plantHeroSection
+                    .padding(.horizontal, 16)
+                
+                // 2. 枯萎恢复横幅
                 if plantEngine.plant.isWilted {
                     wiltBanner
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 16)
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-
-                // 2. 状态卡
-                PlantStatusCard()
-                    .padding(.horizontal, 20)
-
-                // 3. 收获按钮（成熟时显示）或即将成熟提示
-            if plantEngine.plant.canHarvest {
-                harvestButton
-                    .padding(.horizontal, 20)
-            } else {
-                harvestHint
-                    .padding(.horizontal, 20)
+                
+                // 3. 状态信息卡片
+                statusSection
+                    .padding(.horizontal, 16)
+                
+                // 4. 成就徽章
+                if plantEngine.plant.currentStreak >= 7 {
+                    streakBadge
+                        .padding(.horizontal, 16)
+                }
+                
+                // 5. 快速记录区
+                quickRecordSection
+                    .padding(.horizontal, 16)
+                
+                // 6. 今日记录列表
+                todayRecordsSection
+                    .padding(.horizontal, 16)
+                
+                Spacer(minLength: 100)
             }
-
-                // 4. 快速记录
-                QuickRecordBar()
-                    .padding(.horizontal, 20)
-
-                // 5. 今日记录
-                todayRecords
-                    .padding(.horizontal, 20)
-
-                Spacer(minLength: 80)
-            }
-            .padding(.top, 4)
+            .padding(.top, 8)
         }
         .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle(L.myGarden)
+        .background(Color.bloomBackground)
+        .navigationTitle("我的花园")
         .navigationBarTitleDisplayMode(.large)
-        // 阶段升级庆祝：监听 engine 发布的庆祝事件
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    sharePlantStatus()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .foregroundStyle(Color.bloomTextSecondary)
+                }
+                .disabled(isSharing)
+            }
+        }
         .onChange(of: plantEngine.lastStageUpCelebration) { _, newStage in
             if let stage = newStage {
                 celebrateStage = stage
                 Haptics.success()
             }
         }
-        // 枯萎提示：监听 engine 发布的枯萎事件
         .onChange(of: plantEngine.justWilted) { _, wilted in
             if wilted {
                 showWilt = true
                 Haptics.error()
             }
         }
-        // 达标庆祝：监听 waterStore.isGoalMetToday 的变化
         .onChange(of: waterStore.isGoalMetToday) { oldValue, newValue in
             if !oldValue && newValue {
-                // 从未达标到达标，显示庆祝
                 showGoalCelebration = true
                 Haptics.success()
-                
-                // 3秒后自动消失
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     withAnimation {
                         showGoalCelebration = false
@@ -114,7 +117,6 @@ struct GardenView: View {
                 }
                 .transition(.opacity)
             }
-            // 枯萎提示：显示在植物区上方
             if showWilt {
                 WiltCelebration {
                     withAnimation { showWilt = false }
@@ -122,7 +124,6 @@ struct GardenView: View {
                 }
                 .transition(.opacity)
             }
-            // 达标庆祝
             if showGoalCelebration {
                 GoalCelebrationView {
                     withAnimation {
@@ -134,16 +135,6 @@ struct GardenView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: celebrateStage)
         .animation(.easeInOut(duration: 0.25), value: showWilt)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    sharePlantStatus()
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                }
-                .disabled(isSharing)
-            }
-        }
         .alert(L.pauseCare, isPresented: $showPauseConfirm) {
             Button(L.cancel, role: .cancel) { }
             Button(L.pause, role: .destructive) {
@@ -185,929 +176,355 @@ struct GardenView: View {
             showPaywall = true
         }
     }
-
-
+    
     // MARK: - 植物主视觉区
-
-    private var plantHero: some View {
-        ZStack {
-            // 背景光晕（健康时鲜亮）
-            RadialGradient(
-                colors: [
-                    healthGlowColor.opacity(plantEngine.plant.isPaused ? 0.05 : 0.15),
-                    Color.clear
-                ],
-                center: .center,
-                startRadius: 40,
-                endRadius: 160
-            )
-            .opacity(plantFadeIn ? 1 : 0)
-            .animation(.easeOut(duration: 0.6).delay(0.1), value: plantFadeIn)
-
-            // 水滴飞溅动画层
-            WaterSplashOverlay(trigger: splashTrigger)
-
-            AnimatedPlantView(plant: plantEngine.plant)
-                .frame(width: 240, height: 320)
-                .scaleEffect(plantPressing ? 0.94 : 1.0)  // 按压时微缩
-                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: plantPressing)
-                .opacity((plantEngine.plant.isPaused ? 0.5 : 1.0) * (plantFadeIn ? 1 : 0))  // 暂停时植物半透明
-                .scaleEffect(plantFadeIn ? 1.0 : 0.8)
-                .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15), value: plantFadeIn)
-
-            // 暂停状态提示覆盖
-            if plantEngine.plant.isPaused {
-                VStack(spacing: 10) {
-                    Image(systemName: "pause.circle.fill")
-                        .font(.system(size: 44, weight: .bold))
-                        .foregroundStyle(Color(white: 0.45))
-                    Text(L.carePaused)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(white: 0.45))
-                    Text(L.pauseExplanation)
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(white: 0.35))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color(.systemBackground).opacity(0.85))
-                )
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 340)
-        .contentShape(Rectangle())  // 让整个区域可点击
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in plantPressing = true }
-                .onEnded { _ in plantPressing = false }
-        )
-        .onTapGesture {
-            waterPlant(.medium)
-        }
-    }
-
-
-    // MARK: - 暂停养护横幅
-
-    private var pauseBanner: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "pause.circle.fill")
-                .font(.system(size: 24))
-                .foregroundColor(.orange)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(L.carePaused)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.orange)
-                Text(String(format: L.daysRemaining, plantEngine.plant.remainingPauseDays))
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Button(L.resumeCare) {
-                showResumeAlert = true
-            }
-            .font(.system(size: 14, weight: .medium))
-            .foregroundColor(.bloomPrimary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color.bloomPrimary.opacity(0.15))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-        )
-    }
-
-    // MARK: - 枯萎恢复横幅
-
-    /// 植物枯萎后持续显示的横幅，直到用户喝水恢复健康度 > 0
-    /// 解决：WiltCelebration 消失后用户不知道自己该怎么让植物复活
-    private var wiltBanner: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "drop.triangle.fill")
-                .font(.system(size: 22))
-                .foregroundColor(.red)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(L.wiltBannerTitle)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.primary)
-                Text(L.wiltBannerBody)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.red.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.red.opacity(0.2), lineWidth: 1)
-                )
-        )
-        .animation(.easeInOut(duration: 0.3), value: plantEngine.plant.isWilted)
-    }
-    private var healthGlowColor: Color {
-        Color.healthColor(plantEngine.plant.health)
-    }
-
-    // MARK: - 收获按钮
-
-    private var harvestButton: some View {
-        Button {
-            Haptics.success()
-            showHarvestSheet = true
-        } label: {
-            HStack(spacing: 0) {
+    
+    private var plantHeroSection: some View {
+        SurfaceCard(padding: 20) {
+            VStack(spacing: 20) {
+                // 进度环 + 植物
                 ZStack {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 16, weight: .semibold))
-                    
-                    PulseRingView()
-                        .frame(width: 40, height: 40)
-                        .offset(x: -2)
-                }
-                .frame(width: 24, height: 24)
-                
-                Spacer().frame(width: 10)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(String(format: L.harvestFormat, plantEngine.plant.name))
-                        .font(.system(size: 16, weight: .bold))
-                    Text(L.readyToHarvest)
-                        .font(.system(size: 11))
-                        .opacity(0.9)
-                }
-                
-                Spacer()
-                
-                ZStack {
-                    Text(L.harvestNowBadge)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(Color.bloomGold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(.white)
-                        )
-                }
-                
-                Spacer().frame(width: 8)
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-            }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .padding(.horizontal, 16)
-            .background(
-                ZStack {
-                    LinearGradient(
-                        colors: [Color.bloomGold, Color.bloomPrimary],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    
-                    PulseGlowView()
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .shadow(color: Color.bloomPrimary.opacity(0.35), radius: 12, y: 6)
-        }
-        .buttonStyle(HarvestButtonStyle())
-    }
-
-    /// 植物尚未成熟时的提示
-    private var harvestHint: some View {
-        let stage = plantEngine.plant.stage
-        let growthPoints = plantEngine.plant.growthPoints
-        let next = GrowthRules.nextStage(after: stage)
-        let remaining = GrowthRules.pointsToNextStage(currentStage: stage, growthPoints: growthPoints)
-
-        return HStack(spacing: 10) {
-            Image(systemName: "leaf.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.bloomPrimary.opacity(0.8))
-            VStack(alignment: .leading, spacing: 2) {
-                if let nextStage = next {
-                    Text(String(format: L.waterMoreForStage, nextStage.name))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary.opacity(0.8))
-                    if let pts = remaining, pts > 0 {
-                        Text(String(format: L.pointsToNextStage, Int(pts)))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text(L.plantGrowingHealthily)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary.opacity(0.8))
-                }
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(Color.bloomPrimary.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
-    // MARK: - 分享
-
-    private func sharePlantStatus() {
-        isSharing = true
-        Task {
-            let image = await SharingManager.shared.generatePlantShareCard(
-                plant: plantEngine.plant,
-                waterStore: waterStore,
-                achievementStore: achievementStore
-            )
-            await MainActor.run {
-                shareImage = image
-                isSharing = false
-            }
-        }
-    }
-
-    /// 实际执行收获逻辑（由 HarvestView 的 onHarvest 调用）
-    private func performHarvest() {
-        if !gardenStore.harvestPlant(plantEngine: plantEngine, isPro: userStore.isPro) {
-            let check = gardenStore.canHarvest(isPro: userStore.isPro)
-            if !check.allowed {
-                showGardenLimitAlert = true
-            }
-            return
-        }
-        Haptics.success()
-    }
-
-    // MARK: - 点击植物浇水
-
-    /// 点击植物直接浇水（用中杯默认量），并触发水滴动画
-    private func waterPlant(_ cup: CupType) {
-        Task {
-            // 暂停养护：不更新植物，但给用户清晰反馈
-            if plantEngine.plant.isPaused {
-                Haptics.error()
-                // 给用户短暂的"摇晃"视觉效果（由 splashTrigger + 错误触觉组合表示）
-                return
-            }
-            let succeeded = await plantEngine.waterPlant(
-                cup: cup,
-                waterStore: waterStore,
-                healthManager: healthManager
-            )
-            // 水滴动画 + 触觉（UI 相关，仍在 View 层）
-            if succeeded {
-                splashTrigger += 1
-                Haptics.waterDrop()
-            } else {
-                Haptics.error()
-            }
-        }
-    }
-
-    // MARK: - 今日记录
-
-    private var todayRecords: some View {
-        TodayRecordsCard()
-    }
-
-}
-// MARK: - 今日记录卡片
-
-struct TodayRecordsCard: View {
-    @EnvironmentObject var waterStore: WaterStore
-    @EnvironmentObject var plantEngine: PlantEngine
-    @EnvironmentObject var healthManager: HealthManager
-    
-    @State private var recordToDelete: WaterRecord?
-    @State private var showDeleteConfirm = false
-    @State private var showUndoSnackbar = false
-    @State private var deletedRecord: WaterRecord?
-    @State private var plantStateBeforeDelete: Plant?
-    @State private var undoTask: Task<Void, Never>? = nil  // 使用 Task 替代 DispatchWorkItem
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L.todayLog)
-                    .font(.system(size: 16, weight: .semibold))
-                Spacer()
-                if !waterStore.todayRecords.isEmpty {
-                    Text("\(waterStore.todayTotal) ml")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.bloomWater)
-                }
-            }
-            
-            if waterStore.todayRecords.isEmpty {
-                VStack(spacing: 10) {
-                    Image(systemName: "drop")
-                        .font(.system(size: 28))
-                        .foregroundStyle(Color.bloomWater.opacity(0.4))
-                    Text(String(format: L.plantHasntWatered, plantEngine.plant.name))
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 28)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(waterStore.todayRecords.prefix(5).enumerated()), id: \.element.id) { idx, record in
-                        recordRow(record)
-                        if idx < min(waterStore.todayRecords.count, 5) - 1 {
-                            Divider().padding(.leading, 44)
-                        }
-                    }
-                }
-            }
-            
-            // 撤销 Snackbar
-            if showUndoSnackbar, let deleted = deletedRecord {
-                UndoSnackbarView(
-                    deletedRecord: deleted,
-                    onUndo: performUndo,
-                    onDismiss: dismissUndoSnackbar
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .padding(18)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .animation(.easeInOut(duration: 0.3), value: showUndoSnackbar)
-        .alert(L.deleteRecordConfirm, isPresented: $showDeleteConfirm) {
-            Button(L.cancel, role: .cancel) { }
-            Button(L.delete, role: .destructive) {
-                if let record = recordToDelete {
-                    performDelete(record)
-                }
-            }
-        } message: {
-            Text(L.deleteRecordWarning)
-        }
-    }
-    
-    // MARK: - 删除记录（带撤销功能）
-    
-    private func performDelete(_ record: WaterRecord) {
-        // 保存删除前的植物状态
-        plantStateBeforeDelete = plantEngine.plant
-        deletedRecord = record
-        
-        // 执行删除
-        Task {
-            await plantEngine.deleteRecord(record, waterStore: waterStore, healthManager: healthManager)
-        }
-        
-        // 显示撤销 Snackbar
-        withAnimation {
-            showUndoSnackbar = true
-        }
-        
-        // 5秒后自动消失（使用 Task 替代 DispatchWorkItem）
-        undoTask?.cancel()
-        undoTask = Task {
-            try? await Task.sleep(for: .seconds(5))
-            if !Task.isCancelled {
-                await MainActor.run {
-                    dismissUndoSnackbar()
-                }
-            }
-        }
-        
-        Haptics.light()
-    }
-    
-    // MARK: - 撤销删除
-    
-    private func performUndo() {
-        guard let record = deletedRecord, let previousPlant = plantStateBeforeDelete else { return }
-        
-        // 取消自动消失
-        undoTask?.cancel()
-        
-        // 恢复记录（直接插入，不创建新记录）
-        waterStore.restore(record: record)
-        
-        // 恢复植物状态
-        plantEngine.restorePlantState(previousPlant)
-        
-        // 移除 Snackbar
-        withAnimation {
-            showUndoSnackbar = false
-        }
-        
-        Haptics.success()
-    }
-    
-    // MARK: - 消失撤销 Snackbar
-    
-    private func dismissUndoSnackbar() {
-        withAnimation {
-            showUndoSnackbar = false
-        }
-        deletedRecord = nil
-        plantStateBeforeDelete = nil
-    }
-    
-    private func recordRow(_ record: WaterRecord) -> some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.bloomWater.opacity(0.12))
-                    .frame(width: 32, height: 32)
-                Image(systemName: record.cupType.icon)
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.bloomWater)
-            }
-            Text(record.timeString)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(record.formattedAmount)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.bloomWater)
-        }
-        .padding(.vertical, 8)
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                recordToDelete = record
-                showDeleteConfirm = true
-            } label: {
-                Label(L.delete, systemImage: "trash")
-            }
-        }
-    }
-}
-
-// MARK: - 撤销 Snackbar
-
-struct UndoSnackbarView: View {
-    let deletedRecord: WaterRecord
-    let onUndo: () -> Void
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Color.bloomSuccess)
-            
-            Text(String(format: L.deletedFormat, deletedRecord.formattedAmount))
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.primary)
-            
-            Spacer()
-            
-            Button {
-                onUndo()
-            } label: {
-                Text(L.undo)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.bloomPrimary)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-    }
-}
-
-// MARK: - 阶段升级庆祝
-
-struct StageUpCelebration: View {
-    let stage: GrowthStage
-    let onDismiss: () -> Void
-
-    @State private var appear = false
-
-    var body: some View {
-        ZStack {
-            // 半透明遮罩
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
-                .onTapGesture { onDismiss() }
-
-            VStack(spacing: 18) {
-                // emoji + 光环
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color.bloomGold.opacity(0.5), .clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 70
-                            )
-                        )
-                        .frame(width: 140, height: 140)
-                        .scaleEffect(appear ? 1.0 : 0.4)
-
-                    Text(stage.emoji)
-                        .font(.system(size: 76))
-                        .scaleEffect(appear ? 1.0 : 0.3)
-                }
-
-                Text(L.itGrew)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .opacity(appear ? 1 : 0)
-
-                Text(String(format: NSLocalizedString("进入了「%@」阶段", comment: "Reached the [stage] stage"), stage.name))
-                    .font(.system(size: 15))
-                    .foregroundStyle(.white.opacity(0.85))
-                    .opacity(appear ? 1 : 0)
-
-                Button {
-                    onDismiss()
-                } label: {
-                    Text(L.keepNurturing)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.bloomPrimary)
-                        .padding(.horizontal, 40)
-                        .padding(.vertical, 12)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                }
-                .opacity(appear ? 1 : 0)
-            }
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                appear = true
-            }
-        }
-    }
-}
-
-// MARK: - 植物枯萎提示（情感反馈的另一面，提醒用户要更勤喝水）
-
-struct WiltCelebration: View {
-    let onDismiss: () -> Void
-    @State private var appear = false
-    @State private var leavesFalling = false
-
-    var body: some View {
-        ZStack {
-            // 半透明遮罩
-            Color.black.opacity(0.55)
-                .ignoresSafeArea()
-                .onTapGesture { onDismiss() }
-
-            VStack(spacing: 16) {
-                // 枯萎的植物图标 + 落叶粒子
-                ZStack {
-                    // 灰暗的背景光环
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color.brown.opacity(0.45), .clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 80
-                            )
-                        )
-                        .frame(width: 140, height: 140)
-                        .scaleEffect(appear ? 1.0 : 0.4)
-
-                    // 枯萎植物（低垂的叶子）
-                    VStack(spacing: 0) {
-                        HStack(spacing: -10) {
-                            Circle()
-                                .fill(Color.brown)
-                                .frame(width: 32, height: 32)
-                                .rotationEffect(.degrees(leavesFalling ? -25 : -10))
-                                .offset(y: leavesFalling ? 20 : 0)
-                            Circle()
-                                .fill(Color.brown.opacity(0.8))
-                                .frame(width: 28, height: 28)
-                                .rotationEffect(.degrees(leavesFalling ? 20 : 10))
-                                .offset(y: leavesFalling ? 15 : 0)
-                        }
-                        // 主茎
-                        Rectangle()
-                            .fill(Color.brown.opacity(0.85))
-                            .frame(width: 10, height: 60)
-                            .rotationEffect(.degrees(leavesFalling ? 8 : 2))
-                            .offset(y: -8)
-                    }
-                    .scaleEffect(appear ? 1.0 : 0.3)
-                    .opacity(appear ? 1 : 0)
-
-                    // 散落的叶片
-                    ForEach(0..<5, id: \.self) { i in
-                        Circle()
-                            .fill(Color.brown.opacity(0.6))
-                            .frame(width: 6, height: 6)
-                            .offset(
-                                x: leavesFalling ? CGFloat(i * 8 - 16) : 0,
-                                y: leavesFalling ? 80 : 0
-                            )
-                            .opacity(leavesFalling ? 0 : 1)
-                            .animation(
-                                Animation.easeIn(duration: 1.2)
-                                    .delay(Double(i) * 0.15),
-                                value: leavesFalling
-                            )
-                    }
-                }
-
-                // 主标题：温和的"枯萎"提示
-                Text(L.plantWilted)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .opacity(appear ? 1 : 0)
-
-                // 副标题：温和的提醒
-                Text(L.startFromSeed)
-                    .font(.system(size: 14))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .padding(.horizontal, 32)
-                    .opacity(appear ? 1 : 0)
-
-                // 提示卡片：健康度说明
-                HStack(spacing: 10) {
-                    Image(systemName: "drop.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color.bloomWater)
-                    Text(L.dailyHydrationTip)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.white.opacity(0.9))
-                    Spacer()
-                }
-                .padding(12)
-                .background(Color.white.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .padding(.horizontal, 20)
-                .opacity(appear ? 1 : 0)
-
-                // 继续按钮
-                Button {
-                    onDismiss()
-                } label: {
-                    Text(L.gotIt)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.white)
-                        .padding(.horizontal, 48)
-                        .padding(.vertical, 12)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.bloomPrimary, Color.bloomDeep],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                }
-                .opacity(appear ? 1 : 0)
-            }
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.55)) {
-                appear = true
-            }
-            // 延迟一会儿让叶子落下
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                withAnimation(.easeInOut(duration: 1.2)) {
-                    leavesFalling = true
-                }
-            }
-        }
-    }
-}
-
-// MARK: - 水滴飞溅动画
-
-/// 点击浇水时，水滴飞溅动画（增强版）
-struct WaterSplashOverlay: View {
-    let trigger: Int
-
-    @State private var drops: [WaterDrop] = []
-    @State private var animating = false
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                ForEach(drops) { drop in
-                    Circle()
-                        .fill(
+                    // 进度环
+                    ProgressRing(
+                        progress: plantEngine.plant.health / 100,
+                        lineWidth: 12,
+                        size: 200,
+                        backgroundColor: Color.bloomFill,
+                        foregroundColor: healthColor
+                    ) {
+                        // 中心植物
+                        ZStack {
+                            // 背景光晕
                             RadialGradient(
                                 colors: [
-                                    Color.bloomWater.opacity(drop.opacity),
-                                    Color.bloomWater.opacity(drop.opacity * 0.5)
+                                    healthGlowColor.opacity(plantEngine.plant.isPaused ? 0.05 : 0.15),
+                                    Color.clear
                                 ],
                                 center: .center,
-                                startRadius: 0,
-                                endRadius: drop.size / 2
+                                startRadius: 40,
+                                endRadius: 100
                             )
-                        )
-                        .frame(width: drop.size, height: drop.size)
-                        .offset(x: drop.xOffset, y: drop.yOffset)
-                        .blur(radius: drop.blur)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .allowsHitTesting(false)
-        .onChange(of: trigger) { _, _ in
-            spawnDrops()
-        }
-    }
-
-    private func spawnDrops() {
-        // 生成 12 颗随机水滴（增加到 12 颗，更丰富）
-        let newDrops = (0..<12).map { i -> WaterDrop in
-            let angle = Double(i) / 12.0 * 360
-            let distance = Double.random(in: 30...70)
-            let radian = angle * .pi / 180
-            
-            return WaterDrop(
-                id: UUID(),
-                size: Double.random(in: 6...14),
-                xOffset: 0,
-                yOffset: 0,
-                opacity: 0.9,
-                targetX: cos(radian) * distance,
-                targetY: sin(radian) * distance,
-                blur: Double.random(in: 0...2)
-            )
-        }
-        drops = newDrops
-
-        // 飞溅动画（使用 spring 动画，更生动）
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-            for i in drops.indices {
-                drops[i].xOffset = drops[i].targetX
-                drops[i].yOffset = drops[i].targetY
-                drops[i].opacity = 0
-                drops[i].size *= 0.5
-            }
-        }
-
-        // 清理
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            drops = []
-        }
-    }
-}
-
-
-private struct WaterDrop: Identifiable {
-    let id: UUID
-    var size: Double
-    var xOffset: Double
-    var yOffset: Double
-    var opacity: Double
-    var targetX: Double = 0
-    var targetY: Double = 0
-    var blur: Double = 0
-}
-
-// MARK: - 达标庆祝视图
-
-/// 每日目标达成时的庆祝弹窗
-struct GoalCelebrationView: View {
-    let onDismiss: () -> Void
-    
-    @State private var scale: CGFloat = 0.5
-    @State private var opacity: Double = 0
-    @State private var showStars: Bool = false
-    
-    var body: some View {
-        ZStack {
-            // 背景遮罩
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    onDismiss()
-                }
-            
-            // 庆祝卡片
-            VStack(spacing: 20) {
-                // 星星动画
-                if showStars {
-                    HStack(spacing: 8) {
-                        ForEach(0..<5) { i in
-                            Image(systemName: "star.fill")
-                                .font(.system(size: 20))
-                                .foregroundStyle(Color.yellow)
-                                .scaleEffect(showStars ? 1 : 0)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.6).delay(Double(i) * 0.1), value: showStars)
+                            
+                            // 水滴动画
+                            WaterSplashOverlay(trigger: splashTrigger)
+                            
+                            // 植物
+                            AnimatedPlantView(plant: plantEngine.plant)
+                                .frame(width: 140, height: 180)
+                                .scaleEffect(plantPressing ? 0.94 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: plantPressing)
+                                .opacity(plantEngine.plant.isPaused ? 0.5 : 1.0)
                         }
                     }
-                    .padding(.top, 10)
-                }
-                
-                // 图标
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundStyle(Color.bloomSuccess)
-                    .scaleEffect(scale)
-                
-                // 标题
-                Text(L.goalAchieved)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.bloomPrimary)
-                
-                // 副标题
-                Text(L.keepUpGoodHabits)
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                
-                // 关闭按钮
-                Button {
-                    onDismiss()
-                } label: {
-                    Text(L.amazing)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                    
+                    // 暂停状态覆盖
+                    if plantEngine.plant.isPaused {
+                        VStack(spacing: 6) {
+                            Image(systemName: "pause.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundStyle(Color.bloomTextTertiary)
+                            Text(L.carePaused)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        .padding(16)
                         .background(
-                            LinearGradient(
-                                colors: [Color.bloomPrimary, Color.bloomDeep],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.bloomSurface.opacity(0.9))
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
                 }
-                .padding(.top, 10)
-            }
-            .padding(30)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
-            .scaleEffect(scale)
-            .opacity(opacity)
-            .onAppear {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                    scale = 1.0
-                    opacity = 1.0
+                .frame(width: 220, height: 220)
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { _ in plantPressing = true }
+                        .onEnded { _ in plantPressing = false }
+                )
+                .onTapGesture {
+                    waterPlant(.medium)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    showStars = true
+                
+                // 植物信息
+                VStack(spacing: 8) {
+                    HStack {
+                        Text(plantEngine.plant.name)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        Badge(stageName, style: .brand)
+                    }
+                    
+                    // 健康度
+                    HealthStatusBar(health: plantEngine.plant.health)
+                    
+                    // 成长进度
+                    GrowthProgressBar(progress: growthProgress)
                 }
             }
         }
     }
-}
-
-// MARK: - 收获按钮脉冲动画
-
-struct PulseRingView: View {
-    @State private var animate = false
     
-    var body: some View {
-        Circle()
-            .stroke(.white.opacity(0.6), lineWidth: 2)
-            .scaleEffect(animate ? 1.8 : 1.0)
-            .opacity(animate ? 0 : 0.8)
-            .animation(
-                Animation.easeOut(duration: 1.5)
-                    .repeatForever(autoreverses: false),
-                value: animate
-            )
-            .onAppear { animate = true }
+    // MARK: - 状态信息
+    
+    private var statusSection: some View {
+        SurfaceCard(padding: 16) {
+            VStack(spacing: 16) {
+                // 统计数据
+                HStack(spacing: 0) {
+                    statItem(
+                        icon: "droplet.fill",
+                        iconColor: .bloomWater,
+                        value: "\(waterStore.todayAmount)",
+                        unit: "ml",
+                        label: "今日饮水"
+                    )
+                    
+                    Divider()
+                        .frame(height: 40)
+                    
+                    statItem(
+                        icon: "flag.fill",
+                        iconColor: .bloomWarning,
+                        value: "\(Int(waterStore.todayProgress * 100))",
+                        unit: "%",
+                        label: "目标进度"
+                    )
+                    
+                    Divider()
+                        .frame(height: 40)
+                    
+                    statItem(
+                        icon: "flame.fill",
+                        iconColor: .orange,
+                        value: "\(plantEngine.plant.currentStreak)",
+                        unit: "天",
+                        label: "连续达标"
+                    )
+                }
+                
+                // 喝水进度
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("今日喝水")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.bloomTextSecondary)
+                        
+                        Spacer()
+                        
+                        if waterStore.remainingAmount > 0 {
+                            ProgressCapsule(remaining: waterStore.remainingAmount)
+                        } else {
+                            Badge("已达标", style: .success)
+                        }
+                    }
+                    
+                    // 进度条
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.bloomFill)
+                            
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.bloomWater, Color.bloomPrimary],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: geometry.size.width * min(waterStore.todayProgress, 1.0))
+                                .animation(.easeInOut(duration: 0.4), value: waterStore.todayProgress)
+                        }
+                    }
+                    .frame(height: 8)
+                }
+            }
+        }
     }
-}
-
-struct PulseGlowView: View {
-    @State private var animate = false
     
-    var body: some View {
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(Color.white.opacity(0.15))
-            .scaleEffect(animate ? 1.02 : 0.98)
-            .opacity(animate ? 0.4 : 0.8)
-            .animation(
-                Animation.easeInOut(duration: 1.2)
-                    .repeatForever(autoreverses: true),
-                value: animate
-            )
-            .onAppear { animate = true }
+    private func statItem(icon: String, iconColor: Color, value: String, unit: String, label: String) -> some View {
+        VStack(spacing: 6) {
+            IconCircle(icon: icon, backgroundColor: iconColor.opacity(0.15), iconColor: iconColor, size: .small)
+            
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.bloomTextPrimary)
+                Text(unit)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.bloomTextSecondary)
+            }
+            
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.bloomTextTertiary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - 成就徽章
+    
+    private var streakBadge: some View {
+        SurfaceCard(padding: 16) {
+            HStack(spacing: 12) {
+                StreakBadge(days: plantEngine.plant.currentStreak, showBadge: plantEngine.plant.currentStreak >= 30)
+                
+                Spacer()
+                
+                Button {
+                    // 跳转到成就页面
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.bloomTextTertiary)
+                }
+            }
+        }
+    }
+    
+    // MARK: - 快速记录
+    
+    private var quickRecordSection: some View {
+        QuickRecordBar()
+    }
+    
+    // MARK: - 今日记录
+    
+    private var todayRecordsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader("今日记录", action: nil, actionTitle: nil)
+            
+            if waterStore.todayRecords.isEmpty {
+                emptyRecordsView
+            } else {
+                SurfaceCard(padding: 0) {
+                    VStack(spacing: 0) {
+                        ForEach(waterStore.todayRecords.prefix(5)) { record in
+                            WaterRecordRow(
+                                amount: record.amount,
+                                cupType: record.cupType.localizedName,
+                                time: record.timeString,
+                                icon: record.cupType.iconName
+                            )
+                            
+                            if record.id != waterStore.todayRecords.prefix(5).last?.id {
+                                Divider()
+                                    .padding(.leading, 60)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+        }
+    }
+    
+    private var emptyRecordsView: some View {
+        SurfaceCard(padding: 24) {
+            VStack(spacing: 12) {
+                IconCircle(
+                    icon: "drop",
+                    backgroundColor: Color.bloomWaterMuted,
+                    iconColor: Color.bloomWater,
+                    size: .medium
+                )
+                
+                Text("还没有喝水记录")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.bloomTextSecondary)
+                
+                Text("点击上方按钮记录喝水")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.bloomTextTertiary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+    }
+    
+    // MARK: - 枯萎恢复横幅
+    
+    private var wiltBanner: some View {
+        SurfaceCard(padding: 16) {
+            HStack(spacing: 12) {
+                Image(systemName: "drop.triangle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.red)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("植物口渴了！")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.bloomTextPrimary)
+                    
+                    Text("点击植物喝水，让它恢复健康")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.bloomTextSecondary)
+                }
+                
+                Spacer()
+            }
+        }
+    }
+    
+    // MARK: - Helper Properties
+    
+    private var healthColor: Color {
+        if plantEngine.plant.health > 70 {
+            return .bloomSuccess
+        } else if plantEngine.plant.health > 40 {
+            return .bloomWarning
+        } else {
+            return .bloomError
+        }
+    }
+    
+    private var healthGlowColor: Color {
+        if plantEngine.plant.health > 70 {
+            return .bloomSuccess
+        } else if plantEngine.plant.health > 40 {
+            return .bloomWarning
+        } else {
+            return .bloomError
+        }
+    }
+    
+    private var stageName: String {
+        switch plantEngine.plant.stage {
+        case .seed: return "种子"
+        case .sprout: return "发芽"
+        case .seedling: return "幼苗"
+        case .growing: return "成株"
+        case .mature: return "成熟"
+        case .budding: return "含苞"
+        case .harvestable: return "可收获"
+        }
+    }
+    
+    private var growthProgress: Double {
+        let daysSincePlanting = plantEngine.plant.daysSincePlanting
+        let totalGrowthDays = plantEngine.plant.species?.totalGrowthDays ?? 30
+        return min(Double(daysSincePlanting) / Double(totalGrowthDays) * 100, 100)
+    }
+    
+    // MARK: - Actions
+    
+    private func waterPlant(_ cupType: CupType) {
+        splashTrigger += 1
+        Task {
+            await plantEngine.water(amount: cupType.amount, cupType: cupType, waterStore: waterStore, healthManager: healthManager)
+        }
+    }
+    
+    private func performHarvest() {
+        Task {
+            await plantEngine.harvest(waterStore: waterStore, healthManager: healthManager)
+        }
+    }
+    
+    private func sharePlantStatus() {
+        isSharing = true
     }
 }

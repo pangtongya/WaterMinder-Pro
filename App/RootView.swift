@@ -14,11 +14,12 @@ struct RootView: View {
     
     @State private var contentVisible = false
     @State private var plantFadeIn = false
+    @State private var selectedTab: TabItem = .garden
     
     var body: some View {
         Group {
             if userStore.hasCompletedOnboarding {
-                mainTabs
+                mainView
                     .opacity(contentVisible ? 1 : 0)
                     .offset(y: contentVisible ? 0 : 20)
             } else {
@@ -42,28 +43,26 @@ struct RootView: View {
             }
         }
     }
-
-    private var mainTabs: some View {
-        TabView {
-            NavigationStack { GardenView(plantFadeIn: plantFadeIn) }
-                .tabItem { Label(L.myGarden, systemImage: "leaf.fill") }
-
-            NavigationStack { HistoryView() }
-                .tabItem { Label(L.waterLog, systemImage: "chart.bar.fill") }
-
-            NavigationStack { CollectionView() }
-                .tabItem { Label(L.myGarden, systemImage: "square.grid.2x2.fill") }
-
-            NavigationStack { SettingsView() }
-                .tabItem { Label(L.settings, systemImage: "gearshape.fill") }
-        }
-        .tint(themeManager.currentTheme.accent)
-        .overlay {
+    
+    private var mainView: some View {
+        ZStack(alignment: .bottom) {
+            // 内容页面
+            TabContent(selectedTab: selectedTab, plantFadeIn: plantFadeIn)
+                .ignoresSafeArea()
+            
+            // Apple 风格底部 TabBar
+            AppleTabBar(selectedTab: $selectedTab)
+            
+            // 网络状态提示
             if !networkMonitor.isConnected {
-                offlineBanner
+                VStack {
+                    offlineBanner
+                    Spacer()
+                }
+                .padding(.bottom, 56)
             }
-        }
-        .overlay(alignment: .top) {
+            
+            // 同步状态提示
             SyncToastView(
                 state: cloudSyncManager.syncToastState,
                 progress: mapProgress(cloudSyncManager.syncProgress),
@@ -80,8 +79,8 @@ struct RootView: View {
             ) {
                 cloudSyncManager.resetToastState()
             }
-        }
-        .overlay {
+            
+            // 成就解锁提示
             if let achievement = achievementStore.newlyUnlocked {
                 AchievementCelebrationOverlay(achievement: achievement) {
                     achievementStore.newlyUnlocked = nil
@@ -91,61 +90,73 @@ struct RootView: View {
     }
     
     private var offlineBanner: some View {
-        VStack {
-            HStack {
-                Image(systemName: "wifi.slash")
-                    .foregroundColor(.white)
-                Text(NSLocalizedString("离线模式 - 数据已本地保存", comment: "Offline mode - data saved locally"))
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            .background(Color.orange)
-            
-            Spacer()
+        HStack {
+            Image(systemName: "wifi.slash")
+                .foregroundColor(.white)
+            Text(NSLocalizedString("离线模式 - 数据已本地保存", comment: "Offline mode - data saved locally"))
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white)
         }
-        .transition(.move(edge: .top))
-        .animation(.easeInOut, value: networkMonitor.isConnected)
-    }
-    
-    private func downloadCloudData() async {
-        guard cloudSyncManager.isSyncAvailable else { return }
-
-        if let cloudPlant = await cloudSyncManager.downloadPlant() {
-            plantEngine.mergeWithCloudPlant(cloudPlant)
-        }
-
-        if let cloudRecords = await cloudSyncManager.downloadWaterRecords() {
-            waterStore.mergeWithCloudRecords(cloudRecords)
-        }
-
-        if let cloudItems = await cloudSyncManager.downloadGardenItems() {
-            gardenStore.mergeWithCloudItems(cloudItems)
-        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.bloomWarning)
+        .clipShape(Capsule())
+        .padding(.top, 8)
     }
     
     private var canRetrySync: Bool {
         if case .failed(let error) = cloudSyncManager.syncStatus {
-            return error.canRetry
+            return error.isRetryable
         }
         return false
     }
     
     private var showsSettingsButton: Bool {
         if case .failed(let error) = cloudSyncManager.syncStatus {
-            return error.showsSettingsButton
+            return error.requiresSettings
         }
         return false
     }
     
-    private func mapProgress(_ progress: CloudSyncManager.SyncProgress) -> SyncProgressStep {
+    private func mapProgress(_ progress: CloudSyncManager.SyncProgress?) -> Double? {
+        guard let progress = progress else { return nil }
         switch progress {
-        case .downloading: return .downloading
-        case .merging: return .merging
-        case .uploading: return .uploading
+        case .downloading: return 0.33
+        case .merging: return 0.66
+        case .uploading: return 1.0
+        }
+    }
+    
+    private func downloadCloudData() async {
+        if cloudSyncManager.isSyncing { return }
+        await cloudSyncManager.sync()
+    }
+}
+
+// MARK: - Tab Content
+
+struct TabContent: View {
+    let selectedTab: TabItem
+    let plantFadeIn: Bool
+    
+    var body: some View {
+        switch selectedTab {
+        case .garden:
+            NavigationStack {
+                GardenView(plantFadeIn: plantFadeIn)
+            }
+        case .history:
+            NavigationStack {
+                HistoryView()
+            }
+        case .collection:
+            NavigationStack {
+                CollectionView()
+            }
+        case .settings:
+            NavigationStack {
+                SettingsView()
+            }
         }
     }
 }
