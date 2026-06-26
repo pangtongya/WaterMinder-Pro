@@ -1,13 +1,3 @@
-// GardenView.swift
-// Apple 风格重构 —— 主界面
-//
-// 严格按照设计稿：
-// - 顶部大标题（半透明毛玻璃）
-// - 植物英雄区（居中，无卡片）
-// - 健康度卡片（SurfaceCard）
-// - 快速记录卡片（SurfaceCard）
-// - 今日记录（标题 + 列表卡片）
-
 import SwiftUI
 
 struct GardenView: View {
@@ -32,8 +22,6 @@ struct GardenView: View {
     @State private var shareImage: UIImage?
     @State private var showGardenLimitAlert = false
     @State private var showPaywall = false
-    
-    private var plantFadeIn: Bool = true
     
     var body: some View {
         Group {
@@ -84,24 +72,21 @@ struct GardenView: View {
     private var mainContent: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // 1. 植物英雄区（无卡片背景，居中）
                 plantHeroSection
                     .padding(.top, 24)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 8)
                 
-                // 2. 健康度卡片
                 healthCardSection
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.top, 20)
                 
-                // 3. 快速记录卡片
                 quickRecordSection
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.top, 20)
                 
-                // 4. 今日记录
                 todayRecordsSection
                     .padding(.horizontal, 20)
+                    .padding(.top, 20)
                 
                 Spacer(minLength: 100)
             }
@@ -110,7 +95,6 @@ struct GardenView: View {
         .background(Color.bloomBackground)
         .navigationTitle("我的花园")
         .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 shareButton
@@ -225,20 +209,15 @@ struct GardenView: View {
     
     private var plantHeroSection: some View {
         VStack(spacing: 16) {
-            // 进度环 + 植物
             ZStack {
-                // 进度环
                 ProgressRing(
                     progress: plantEngine.plant.health / 100,
                     lineWidth: 8,
                     size: 180,
                     backgroundColor: Color.bloomFill,
                     foregroundColor: healthColor
-                ) {
-                    EmptyView()
-                }
+                )
                 
-                // 中心植物（圆形剪裁）
                 ZStack {
                     Circle()
                         .fill(Color.bloomSurfaceSecondary)
@@ -251,7 +230,6 @@ struct GardenView: View {
                         .opacity(plantEngine.plant.isPaused ? 0.5 : 1.0)
                         .clipShape(Circle())
                     
-                    // 水滴动画
                     if splashTrigger > 0 {
                         ForEach(0..<5, id: \.self) { i in
                             Image(systemName: "droplet.fill")
@@ -264,7 +242,6 @@ struct GardenView: View {
                         }
                     }
                     
-                    // 暂停覆盖
                     if plantEngine.plant.isPaused {
                         Circle()
                             .fill(Color.black.opacity(0.3))
@@ -291,7 +268,6 @@ struct GardenView: View {
                     waterPlant(.medium)
                 }
                 
-                // 百分比标签（右下角）
                 VStack {
                     Spacer()
                     HStack {
@@ -316,8 +292,7 @@ struct GardenView: View {
             }
             .frame(width: 180, height: 180)
             
-            // 植物信息
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(plantEngine.plant.name)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color.bloomTextPrimary)
@@ -334,53 +309,20 @@ struct GardenView: View {
     // MARK: - 2. 健康度卡片
     
     private var healthCardSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // 健康度行
-            HStack {
-                Text("健康度")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.bloomTextPrimary)
-                
-                Spacer()
-                
-                Text("\(Int(plantEngine.plant.health))%")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.bloomPrimary)
-            }
-            
-            // 健康度进度条
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 999)
-                        .fill(Color.bloomFill)
-                    
-                    RoundedRectangle(cornerRadius: 999)
-                        .fill(healthColor)
-                        .frame(width: geometry.size.width * (plantEngine.plant.health / 100))
-                        .animation(.easeInOut(duration: 0.4), value: plantEngine.plant.health)
-                }
-            }
-            .frame(height: 8)
-            
-            // 状态描述
-            Text(healthStatusText)
-                .font(.system(size: 13))
-                .foregroundStyle(Color.bloomTextSecondary)
-                .padding(.top, 2)
-            
-            // 成长进度
-            VStack(alignment: .leading, spacing: 6) {
+        SurfaceCard(padding: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Text("成长进度")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.bloomTextTertiary)
+                    Text("健康度")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.bloomTextPrimary)
                     
                     Spacer()
                     
-                    Text("\(Int(growthProgress))%")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.bloomTextTertiary)
+                    Text("\(Int(plantEngine.plant.health))%")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.bloomPrimary)
                 }
+                .padding(.bottom, 6)
                 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
@@ -388,117 +330,131 @@ struct GardenView: View {
                             .fill(Color.bloomFill)
                         
                         RoundedRectangle(cornerRadius: 999)
-                            .fill(Color.bloomWater)
-                            .frame(width: geometry.size.width * (growthProgress / 100))
-                            .animation(.easeInOut(duration: 0.4), value: growthProgress)
+                            .fill(healthColor)
+                            .frame(width: geometry.size.width * (plantEngine.plant.health / 100))
+                            .animation(.easeInOut(duration: 0.4), value: plantEngine.plant.health)
                     }
                 }
-                .frame(height: 6)
-            }
-            .padding(.top, 12)
-            
-            // 分隔线 + 连续天数
-            Divider()
-                .background(Color.bloomDivider)
-                .padding(.top, 12)
-            
-            HStack {
-                HStack(spacing: 6) {
-                    Text("🔥")
-                        .font(.system(size: 16))
+                .frame(height: 8)
+                
+                Text(healthStatusText)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.bloomTextSecondary)
+                    .padding(.top, 12)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("成长进度")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.bloomTextTertiary)
+                        
+                        Spacer()
+                        
+                        Text("\(Int(growthProgress))%")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.bloomTextTertiary)
+                    }
                     
-                    Text("连续 \(waterStore.currentStreak) 天")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.bloomTextPrimary)
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 999)
+                                .fill(Color.bloomFill)
+                            
+                            RoundedRectangle(cornerRadius: 999)
+                                .fill(Color.bloomWater)
+                                .frame(width: geometry.size.width * (growthProgress / 100))
+                                .animation(.easeInOut(duration: 0.4), value: growthProgress)
+                        }
+                    }
+                    .frame(height: 6)
                 }
+                .padding(.top, 12)
                 
-                Spacer()
+                Divider()
+                    .background(Color.bloomDivider)
+                    .padding(.top, 12)
                 
-                if waterStore.currentStreak >= 7 {
-                    Badge("里程碑", style: .brand)
+                HStack {
+                    HStack(spacing: 6) {
+                        Text("🔥")
+                            .font(.system(size: 16))
+                        
+                        Text("连续 \(waterStore.currentStreak) 天")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                    }
+                    
+                    Spacer()
+                    
+                    if waterStore.currentStreak >= 7 {
+                        Badge("里程碑", style: .brand)
+                    }
                 }
+                .padding(.top, 12)
             }
-            .padding(.top, 12)
         }
-        .padding(16)
-        .background(Color.bloomSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.bloomBorder, lineWidth: 0.5)
-        )
     }
     
     // MARK: - 3. 快速记录卡片
     
     private var quickRecordSection: some View {
-        VStack(spacing: 16) {
-            // 杯型按钮
-            HStack(spacing: 0) {
-                ForEach(CupType.allCases, id: \.self) { cup in
-                    Button {
-                        waterPlant(cup)
-                    } label: {
-                        VStack(spacing: 6) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.bloomWaterMuted)
-                                    .frame(width: 40, height: 40)
+        SurfaceCard(padding: 16) {
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    ForEach(CupType.allCases, id: \.self) { cup in
+                        Button {
+                            waterPlant(cup)
+                        } label: {
+                            VStack(spacing: 6) {
+                                IconCircle(
+                                    icon: cup.icon,
+                                    backgroundColor: Color.bloomWaterMuted,
+                                    iconColor: Color.bloomWater,
+                                    size: .medium
+                                )
                                 
-                                Image(systemName: cup.icon)
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.bloomWater)
+                                Text("\(cup.defaultAmount)ml")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Color.bloomTextSecondary)
                             }
-                            
-                            Text("\(cup.defaultAmount)ml")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.bloomTextSecondary)
+                            .frame(maxWidth: .infinity)
                         }
-                        .frame(maxWidth: .infinity)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-            }
-            
-            // 进度胶囊
-            HStack {
-                Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: "droplets")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color.bloomWater)
-                    
-                    if waterStore.remaining > 0 {
-                        Text("还差 \(waterStore.remaining) ml")
-                            .font(.system(size: 13, weight: .medium))
+                
+                HStack {
+                    Spacer()
+                    HStack(spacing: 6) {
+                        Image(systemName: "droplets")
+                            .font(.system(size: 14))
                             .foregroundStyle(Color.bloomWater)
-                    } else {
-                        Text("今日已达标 🎉")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(Color.bloomSuccess)
+                        
+                        if waterStore.remaining > 0 {
+                            Text("还差 \(waterStore.remaining) ml")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Color.bloomWater)
+                        } else {
+                            Text("今日已达标 🎉")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Color.bloomSuccess)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.bloomPrimarySubtle)
+                    .clipShape(Capsule())
+                    Spacer()
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.bloomPrimarySubtle)
-                .clipShape(Capsule())
-                Spacer()
+                .padding(.top, 16)
             }
         }
-        .padding(16)
-        .background(Color.bloomSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.bloomBorder, lineWidth: 0.5)
-        )
     }
     
     // MARK: - 4. 今日记录
     
     private var todayRecordsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // 标题行
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("今日记录")
                     .font(.system(size: 18, weight: .bold))
@@ -511,93 +467,79 @@ struct GardenView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color.bloomPrimary)
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, 12)
             
             if waterStore.todayRecords.isEmpty {
                 emptyRecordsView
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(waterStore.todayRecords.enumerated()), id: \.element.id) { index, record in
-                        HStack(spacing: 12) {
-                            // 图标
-                            ZStack {
-                                Circle()
-                                    .fill(Color.bloomWaterMuted)
-                                    .frame(width: 32, height: 32)
+                SurfaceCard(padding: 0) {
+                    VStack(spacing: 0) {
+                        ForEach(Array(waterStore.todayRecords.enumerated()), id: \.element.id) { index, record in
+                            HStack(spacing: 12) {
+                                IconCircle(
+                                    icon: record.cupType.icon,
+                                    backgroundColor: Color.bloomWaterMuted,
+                                    iconColor: Color.bloomWater,
+                                    size: .small
+                                )
                                 
-                                Image(systemName: record.cupType.icon)
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Color.bloomWater)
-                            }
-                            
-                            // 信息
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("\(record.amount)ml")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundStyle(Color.bloomTextPrimary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(record.amount)ml")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(Color.bloomTextPrimary)
+                                    
+                                    Text(record.cupType.localizedName)
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(Color.bloomTextTertiary)
+                                }
                                 
-                                Text(record.cupType.localizedName)
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color.bloomTextTertiary)
+                                Spacer()
+                                
+                                Text(record.timeString)
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Color.bloomTextSecondary)
                             }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
                             
-                            Spacer()
-                            
-                            // 时间
-                            Text(record.timeString)
-                                .font(.system(size: 13))
-                                .foregroundStyle(Color.bloomTextSecondary)
-                        }
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 16)
-                        
-                        if index < waterStore.todayRecords.count - 1 {
-                            Divider()
-                                .background(Color.bloomDivider)
-                                .padding(.leading, 60)
+                            if index < waterStore.todayRecords.count - 1 {
+                                Divider()
+                                    .background(Color.bloomDivider)
+                                    .padding(.leading, 60)
+                            }
                         }
                     }
                 }
-                .background(Color.bloomSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.bloomBorder, lineWidth: 0.5)
-                )
             }
         }
     }
     
     private var emptyRecordsView: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.bloomWaterMuted)
-                    .frame(width: 48, height: 48)
+        SurfaceCard(padding: 0) {
+            VStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.bloomWaterMuted)
+                        .frame(width: 48, height: 48)
+                    
+                    Image(systemName: "drop")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color.bloomWater)
+                }
                 
-                Image(systemName: "drop")
-                    .font(.system(size: 22))
-                    .foregroundStyle(Color.bloomWater)
+                VStack(spacing: 4) {
+                    Text("还没有喝水记录")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.bloomTextSecondary)
+                    
+                    Text("点击上方按钮记录喝水")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.bloomTextTertiary)
+                }
             }
-            
-            VStack(spacing: 4) {
-                Text("还没有喝水记录")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.bloomTextSecondary)
-                
-                Text("点击上方按钮记录喝水")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.bloomTextTertiary)
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 32)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .background(Color.bloomSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.bloomBorder, lineWidth: 0.5)
-        )
     }
     
     // MARK: - Helper Properties
@@ -610,10 +552,6 @@ struct GardenView: View {
         } else {
             return .bloomError
         }
-    }
-    
-    private var healthGlowColor: Color {
-        healthColor
     }
     
     private var healthStatusText: String {

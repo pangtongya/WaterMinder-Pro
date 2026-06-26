@@ -48,36 +48,33 @@ struct SettingsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // 植物设置
+            VStack(spacing: 24) {
+                // 我的植物
                 plantSection
                 
-                // 饮水目标
+                // 每日目标
                 goalSection
                 
-                // 提醒设置
+                // 提醒
                 reminderSection
                 
-                // 外观主题
+                // 外观
                 themeSection
                 
                 // 健康 App
                 healthSection
                 
-                // iCloud 同步
+                // iCloud
                 cloudSection
                 
-                // 数据备份与恢复
-                backupSection
-                
-                // Pro
+                // Bloom Pro
                 proSection
                 
-                // 成就和高级统计
-                achievementAndStatsSection
+                // 数据备份
+                backupSection
                 
                 // 关于
-                aboutSection
+                achievementAndStatsSection
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -243,7 +240,7 @@ struct SettingsView: View {
                     }
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 品种
                     HStack(spacing: 12) {
@@ -274,7 +271,7 @@ struct SettingsView: View {
                     .padding(.vertical, 12)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 暂停/恢复养护
                     if plantEngine.plant.isPaused {
@@ -424,7 +421,7 @@ struct SettingsView: View {
                     
                     if userStore.reminderEnabled {
                         Divider()
-                            .padding(.leading, 56)
+                            .padding(.leading, 68)
                         
                         // 提醒间隔
                         HStack(spacing: 12) {
@@ -550,7 +547,7 @@ struct SettingsView: View {
                     .padding(.vertical, 12)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 主题颜色
                     NavigationLink(destination: ThemePickerView().environmentObject(userStore)) {
@@ -608,22 +605,21 @@ struct SettingsView: View {
                             iconColor: Color.bloomError
                         )
                         
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(healthAuthorized ? NSLocalizedString("已连接健康 App", comment: "Health App connected") : L.connectHealth)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(Color.bloomTextPrimary)
-                            
-                            Text(healthManager.authorizationStatus.localizedDescription)
-                                .font(.system(size: 12))
-                                .foregroundStyle(Color.bloomTextSecondary)
-                        }
+                        Text(L.connectHealth)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
                         
                         Spacer()
                         
                         if healthAuthorized {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 22))
-                                .foregroundStyle(Color.bloomSuccess)
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Color.bloomPrimary)
+                                Text(NSLocalizedString("已连接", comment: "Connected"))
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundStyle(Color.bloomPrimary)
+                            }
                         } else {
                             Button {
                                 showHealthPermissionSheet = true
@@ -646,7 +642,7 @@ struct SettingsView: View {
                     // 已授权时的详细设置
                     if healthAuthorized && healthManager.authorizationStatus == .authorized {
                         Divider()
-                            .padding(.leading, 56)
+                            .padding(.leading, 68)
                         
                         healthDetailSettings
                     }
@@ -695,7 +691,7 @@ struct SettingsView: View {
             .padding(.vertical, 12)
             
             Divider()
-                .padding(.leading, 48)
+                .padding(.leading, 60)
             
             // 读取开关
             HStack(spacing: 12) {
@@ -727,7 +723,7 @@ struct SettingsView: View {
             
             if healthManager.readEnabled {
                 Divider()
-                    .padding(.leading, 48)
+                    .padding(.leading, 60)
                 
                 // 同步频率
                 HStack(spacing: 12) {
@@ -770,7 +766,7 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
                 
                 Divider()
-                    .padding(.leading, 48)
+                    .padding(.leading, 60)
                 
                 // 立即同步
                 Button {
@@ -805,7 +801,7 @@ struct SettingsView: View {
             }
             
             Divider()
-                .padding(.leading, 48)
+                .padding(.leading, 60)
             
             // 隐私说明
             Button {
@@ -836,7 +832,7 @@ struct SettingsView: View {
             .buttonStyle(.plain)
             
             Divider()
-                .padding(.leading, 48)
+                .padding(.leading, 60)
             
             // 清除健康数据
             Button {
@@ -906,7 +902,7 @@ struct SettingsView: View {
                     
                     if let lastSync = cloudSyncManager.lastSyncDate {
                         Divider()
-                            .padding(.leading, 56)
+                            .padding(.leading, 68)
                         
                         HStack(spacing: 12) {
                             IconCircle(
@@ -932,7 +928,7 @@ struct SettingsView: View {
                     
                     if case .failed(let error) = cloudSyncManager.syncStatus {
                         Divider()
-                            .padding(.leading, 56)
+                            .padding(.leading, 68)
                         
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 8) {
@@ -1176,7 +1172,7 @@ struct SettingsView: View {
                     .disabled(backupManager.isExporting)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 导入按钮
                     Button {
@@ -1213,7 +1209,7 @@ struct SettingsView: View {
                     
                     if let lastBackup = backupManager.lastBackupDate {
                         Divider()
-                            .padding(.leading, 56)
+                            .padding(.leading, 68)
                         
                         HStack(spacing: 12) {
                             IconCircle(
@@ -1368,7 +1364,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 高级统计 (Pro teaser)
                     Button {
@@ -1406,7 +1402,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 隐私政策
                     Button {
@@ -1436,7 +1432,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 版本号
                     HStack(spacing: 12) {
@@ -1460,7 +1456,7 @@ struct SettingsView: View {
                     .padding(.vertical, 12)
                     
                     Divider()
-                        .padding(.leading, 56)
+                        .padding(.leading, 68)
                     
                     // 恢复购买
                     Button {

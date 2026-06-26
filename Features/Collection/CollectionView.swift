@@ -1,20 +1,4 @@
-// CollectionView.swift
-// Apple 风格重构 —— 收藏页
-//
-// 设计特点：
-// - Apple Human Interface Guidelines 风格
-// - 统计数据卡片
-// - 品种网格展示
-// - Pro 锁定样式
-
 import SwiftUI
-
-struct ScrollOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
 
 struct CollectionView: View {
     @EnvironmentObject var gardenStore: GardenStore
@@ -24,53 +8,25 @@ struct CollectionView: View {
     @State private var showPaywall = false
     @State private var selectedSpecies: PlantSpecies?
     @State private var showSpeciesDetail = false
-    @State private var visibleHarvestCount: Int = 6
-    @State private var scrollOffset: CGFloat = 0
-    
-    private let initialLoadCount = 6
-    private let loadMoreThreshold: CGFloat = 200
-    
-    private var hasMoreHarvests: Bool {
-        visibleHarvestCount < gardenStore.items.count
-    }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                GeometryReader { geo in
-                    Color.clear.preference(
-                        key: ScrollOffsetKey.self,
-                        value: -geo.frame(in: .named("scroll")).origin.y
-                    )
-                }
-                .frame(height: 0)
-                
-                // 收集进度总览
-                collectionProgressCard
+            VStack(spacing: 12) {
+                statsCard
                     .padding(.horizontal, 16)
                 
-                // 当前养护植物
                 currentPlantCard
                     .padding(.horizontal, 16)
                 
-                // 已收获列表
-                if !gardenStore.items.isEmpty {
-                    harvestedSection
-                        .padding(.horizontal, 16)
-                }
+                harvestWallSection
+                    .padding(.horizontal, 16)
                 
-                // 品种图鉴
-                speciesCodex
+                speciesCodexSection
                     .padding(.horizontal, 16)
                 
                 Spacer(minLength: 100)
             }
             .padding(.top, 8)
-        }
-        .coordinateSpace(name: "scroll")
-        .onPreferenceChange(ScrollOffsetKey.self) { offset in
-            scrollOffset = offset
-            checkLoadMore()
         }
         .scrollIndicators(.hidden)
         .background(Color.bloomBackground)
@@ -120,251 +76,269 @@ struct CollectionView: View {
                 .environmentObject(gardenStore)
             }
         }
-        .onAppear {
-            visibleHarvestCount = min(initialLoadCount, gardenStore.items.count)
-        }
-    }
-    
-    private func checkLoadMore() {
-        guard hasMoreHarvests else { return }
-        
-        DispatchQueue.main.async {
-            if scrollOffset > loadMoreThreshold {
-                loadMoreHarvests()
-            }
-        }
-    }
-    
-    private func loadMoreHarvests() {
-        let nextCount = min(visibleHarvestCount + 6, gardenStore.items.count)
-        if nextCount > visibleHarvestCount {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                visibleHarvestCount = nextCount
-            }
-        }
     }
 
-    // MARK: - 收集进度总览
+    // MARK: - 1. 顶部统计卡片
 
-    private var collectionProgressCard: some View {
+    private var statsCard: some View {
         SurfaceCard(padding: 16) {
-            VStack(spacing: 16) {
-                // 标题行
-                HStack {
-                    IconCircle(
-                        icon: "book.closed.fill",
-                        backgroundColor: Color.bloomGoldMuted,
-                        iconColor: Color.bloomWarning,
-                        size: .small
-                    )
-                    
-                    Text("收藏进度")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.bloomTextPrimary)
-                    
-                    Spacer()
-                    
-                    Text("\(gardenStore.uniqueSpeciesCount)/\(PlantLibrary.all.count)")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.bloomPrimary)
-                }
+            HStack(spacing: 0) {
+                statItem(
+                    icon: "🌸",
+                    value: "\(gardenStore.items.count)",
+                    label: "已收获"
+                )
+                .frame(maxWidth: .infinity)
                 
-                // 进度条
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.bloomFill)
-                        
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.bloomPrimary)
-                            .frame(width: geometry.size.width * (Double(gardenStore.uniqueSpeciesCount) / Double(PlantLibrary.all.count)))
-                            .animation(.easeInOut(duration: 0.4), value: gardenStore.uniqueSpeciesCount)
-                    }
-                }
-                .frame(height: 8)
+                Divider()
+                    .frame(width: 0.5)
+                    .background(Color.bloomDivider)
                 
-                // 统计卡片
-                StatsCard(stats: [
-                    (icon: "🌸", value: "\(gardenStore.totalCount)", label: "总收获数"),
-                    (icon: "🌿", value: "\(gardenStore.uniqueSpeciesCount)", label: "已收集品种"),
-                    (icon: "📖", value: "\(PlantLibrary.all.count)", label: "全部品种")
-                ])
+                statItem(
+                    icon: "🌿",
+                    value: "\(gardenStore.uniqueSpeciesCount)",
+                    label: "品种"
+                )
+                .frame(maxWidth: .infinity)
                 
-                // 全部收集提示
-                if gardenStore.uniqueSpeciesCount == PlantLibrary.all.count {
-                    HStack(spacing: 6) {
-                        Image(systemName: "trophy.fill")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color.bloomWarning)
-                        
-                        Text("恭喜！已收集全部品种")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(Color.bloomWarning)
-                    }
-                    .padding(.top, 4)
-                }
+                Divider()
+                    .frame(width: 0.5)
+                    .background(Color.bloomDivider)
+                
+                statItem(
+                    icon: "📖",
+                    value: "\(PlantSpecies.allCases.count)",
+                    label: "全部"
+                )
+                .frame(maxWidth: .infinity)
             }
         }
     }
+    
+    private func statItem(icon: String, value: String, label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(icon)
+                .font(.system(size: 24))
+                .padding(.bottom, 2)
+            
+            Text(value)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(Color.bloomPrimary)
+            
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundStyle(Color.bloomTextSecondary)
+        }
+        .padding(.vertical, 4)
+    }
 
-    // MARK: - 当前植物
+    // MARK: - 2. 当前植物卡片
 
     private var currentPlantCard: some View {
         SurfaceCard(padding: 16) {
-            VStack(spacing: 12) {
-                // 标题行
+            VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Text("当前养护")
-                        .font(.system(size: 15, weight: .semibold))
+                    Text("正在养护")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.bloomPrimary)
+                    
+                    Spacer()
+                    
+                    Text("🌼")
+                        .font(.system(size: 20))
+                }
+                .padding(.bottom, 12)
+                
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.bloomPrimary.opacity(0.15),
+                                        Color.bloomPrimary.opacity(0.05)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 120, height: 160)
+                        
+                        AnimatedPlantView(plant: plantEngine.plant)
+                            .frame(width: 100, height: 140)
+                    }
+                    .frame(width: 120, height: 160)
+                    
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(plantEngine.plant.name)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                            .tracking(-0.3)
+                            .lineLimit(1)
+                        
+                        Text("\(plantEngine.plant.species.localizedName) · \(plantEngine.plant.stage.name)")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.bloomTextSecondary)
+                            .padding(.top, 4)
+                            .lineLimit(1)
+                        
+                        HStack(spacing: 6) {
+                            Badge("第 \(plantEngine.plant.ageInDays) 天", style: .brand)
+                            Badge("养护中", style: .fill)
+                        }
+                        .padding(.top, 12)
+                        
+                        Spacer()
+                    }
+                    .padding(.top, 4)
+                    
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+    }
+
+    // MARK: - 3. 收获墙
+
+    private var harvestWallSection: some View {
+        SurfaceCard(padding: 16) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("收获墙")
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(Color.bloomTextPrimary)
                     
                     Spacer()
                     
-                    Badge(stageName, style: .brand)
-                }
-                
-                // 植物视图
-                AnimatedPlantView(plant: plantEngine.plant)
-                    .frame(width: 100, height: 140)
-                
-                // 植物信息
-                VStack(spacing: 4) {
-                    Text(plantEngine.plant.name)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.bloomTextPrimary)
-                    
-                    Text("\(plantEngine.plant.species.localizedName) · \(plantEngine.plant.stage.name)")
-                        .font(.system(size: 13))
+                    Text("\(gardenStore.items.count) 棵")
+                        .font(.system(size: 11))
                         .foregroundStyle(Color.bloomTextSecondary)
                 }
+                .padding(.bottom, 12)
                 
-                // 成长信息
-                HStack(spacing: 16) {
-                    VStack(spacing: 2) {
-                        Text("\(plantEngine.plant.ageInDays)")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.bloomTextPrimary)
-                        Text("养护天数")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.bloomTextTertiary)
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: 12),
+                        GridItem(.flexible(), spacing: 12)
+                    ],
+                    spacing: 12
+                ) {
+                    ForEach(gardenStore.items) { item in
+                        harvestedPlantCard(item)
                     }
                     
-                    Divider()
-                        .frame(height: 30)
-                    
-                    VStack(spacing: 2) {
-                        Text("\(Int(plantEngine.plant.health))%")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.bloomPrimary)
-                        Text("健康度")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.bloomTextTertiary)
-                    }
-                    
-                    Divider()
-                        .frame(height: 30)
-                    
-                    VStack(spacing: 2) {
-                        Text("\(plantEngine.plant.ageInDays)")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.bloomWarning)
-                        Text("养护天数")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.bloomTextTertiary)
+                    if gardenStore.items.isEmpty {
+                        emptyHarvestSlot
                     }
                 }
             }
         }
     }
-
-    // MARK: - 已收获列表
-
-    private var harvestedSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("收获墙", action: nil, actionTitle: nil)
-            
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(Array(gardenStore.items.prefix(visibleHarvestCount))) { item in
-                    harvestedCard(item)
-                }
+    
+    private func harvestedPlantCard(_ item: GardenItem) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack {
+                Circle()
+                    .fill(harvestIconColor(for: item.species).opacity(0.15))
+                    .frame(width: 40, height: 40)
+                
+                Text(item.species.symbol)
+                    .font(.system(size: 20))
             }
+            .padding(.bottom, 8)
             
-            if hasMoreHarvests {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .padding(.vertical, 8)
-                    Spacer()
-                }
-            }
-        }
-    }
-
-    private func harvestedCard(_ item: GardenItem) -> some View {
-        VStack(spacing: 8) {
-            // 用 PlantView 替代 MiniPlantCanvas
-            PlantView(
-                plant: Plant(
-                    speciesID: item.speciesID,
-                    stage: item.peakStage,
-                    health: 100
-                )
-            )
-            .frame(width: 80, height: 80)
-
             Text(item.name)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.bloomTextPrimary)
                 .lineLimit(1)
             
-            Text(item.species.localizedName)
+            Text("\(item.species.localizedName) · 成熟")
                 .font(.system(size: 11))
                 .foregroundStyle(Color.bloomTextSecondary)
+                .padding(.top, 2)
                 .lineLimit(1)
             
-            Text("\(item.daysToHarvest) 天成熟")
-                .font(.system(size: 10))
+            Text("\(item.daysToHarvest) 天收获")
+                .font(.system(size: 11))
                 .foregroundStyle(Color.bloomTextTertiary)
+                .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
         .background(Color.bloomSurfaceSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
-
-    // MARK: - 品种图鉴
-
-    private var speciesCodex: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader("品种图鉴", action: {
-                // 查看全部
-            }, actionTitle: "查看全部")
+    
+    private var emptyHarvestSlot: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "plus")
+                .font(.system(size: 24, weight: .regular))
+                .foregroundStyle(Color.bloomTextTertiary)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
-                ForEach(PlantLibrary.all, id: \.id) { species in
-                    let isCollected = gardenStore.hasCollected(speciesID: species.id)
-                    let isProLocked = species.isProOnly && !storeManager.isPro
+            Text("继续养护")
+                .font(.system(size: 11))
+                .foregroundStyle(Color.bloomTextTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 120)
+        .background(Color.bloomSurfaceSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+    
+    private func harvestIconColor(for species: PlantSpecies) -> Color {
+        switch species.id {
+        case "sunflower": return .bloomPrimary
+        case "mint": return .bloomWater
+        case "succulent": return .bloomPrimary
+        default: return Color(hex: species.colorTheme.primary)
+        }
+    }
+
+    // MARK: - 4. 品种图鉴
+
+    private var speciesCodexSection: some View {
+        SurfaceCard(padding: 16) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("品种图鉴")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color.bloomTextPrimary)
                     
-                    Button {
-                        if isCollected {
-                            selectedSpecies = species
-                            showSpeciesDetail = true
-                        } else if !isProLocked {
-                            // 购买或解锁
-                        } else {
-                            showPaywall = true
+                    Spacer()
+                    
+                    Text("\(gardenStore.uniqueSpeciesCount)/\(PlantSpecies.allCases.count)")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.bloomTextSecondary)
+                }
+                .padding(.bottom, 12)
+                
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3),
+                    spacing: 12
+                ) {
+                    ForEach(PlantSpecies.allCases, id: \.id) { species in
+                        let isCollected = gardenStore.hasCollected(speciesID: species.id)
+                        let isProLocked = species.isProOnly && !storeManager.isPro
+                        
+                        Button {
+                            if isCollected {
+                                selectedSpecies = species
+                                showSpeciesDetail = true
+                            } else if isProLocked {
+                                showPaywall = true
+                            }
+                        } label: {
+                            speciesCard(species, isCollected: isCollected, isProLocked: isProLocked)
                         }
-                    } label: {
-                        speciesCard(species, isCollected: isCollected, isProLocked: isProLocked)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
     }
     
     private func speciesCard(_ species: PlantSpecies, isCollected: Bool, isProLocked: Bool) -> some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 0) {
             ZStack {
                 Circle()
                     .fill(isCollected ? Color.bloomPrimary.opacity(0.15) : Color.bloomFill)
@@ -372,44 +346,44 @@ struct CollectionView: View {
                 
                 if isCollected {
                     Text(species.symbol)
-                        .font(.system(size: 24))
+                        .font(.system(size: 22))
                 } else {
                     Image(systemName: isProLocked ? "lock.fill" : "questionmark")
                         .font(.system(size: 18))
                         .foregroundStyle(Color.bloomTextTertiary)
                 }
             }
+            .padding(.bottom, 6)
             
             Text(species.localizedName)
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(isCollected ? Color.bloomTextPrimary : Color.bloomTextSecondary)
                 .lineLimit(1)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
             
             if isCollected {
                 Badge("已收集", style: .brand)
+                    .padding(.top, 4)
             } else if isProLocked {
-                Badge("Pro", style: .gold)
+                Badge("Pro 解锁", style: .gold)
+                    .padding(.top, 4)
             } else {
                 Badge("未收集", style: .fill)
+                    .padding(.top, 4)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(Color.bloomSurfaceSecondary)
+        .padding(.horizontal, 4)
+        .background(isCollected ? Color.bloomPrimary.opacity(0.06) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .opacity(isCollected || !isProLocked ? 1.0 : 0.7)
+        .opacity(isCollected || !isProLocked ? 1.0 : 0.5)
     }
-    
-    // MARK: - Helper Properties
-    
-    private var stageName: String {
-        switch plantEngine.plant.stage {
-        case .seed: return "种子"
-        case .sprout: return "发芽"
-        case .seedling: return "幼苗"
-        case .mature: return "成株"
-        case .blooming: return "含苞"
-        case .harvestable: return "盛开"
-        }
+}
+
+extension PlantSpecies: CaseIterable {
+    public static var allCases: [PlantSpecies] {
+        PlantLibrary.all
     }
 }
