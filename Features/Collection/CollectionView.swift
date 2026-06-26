@@ -82,8 +82,42 @@ struct CollectionView: View {
         }
         .sheet(isPresented: $showSpeciesDetail) {
             if let species = selectedSpecies {
-                SpeciesDetailView(species: species)
-                    .environmentObject(gardenStore)
+                NavigationStack {
+                    List {
+                        Section("品种信息") {
+                            HStack {
+                                Text("名称")
+                                Spacer()
+                                Text(species.localizedName)
+                            }
+                            HStack {
+                                Text("难度")
+                                Spacer()
+                                Text(species.difficulty.displayName)
+                            }
+                            HStack {
+                                Text("需水量")
+                                Spacer()
+                                Text("\(species.waterNeed)")
+                            }
+                        }
+                        
+                        Section("收藏状态") {
+                            HStack {
+                                Text("是否已收藏")
+                                Spacer()
+                                if gardenStore.hasCollected(speciesID: species.id) {
+                                    Text("已收藏").foregroundStyle(Color.bloomSuccess)
+                                } else {
+                                    Text("未收藏").foregroundStyle(Color.bloomTextTertiary)
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle(species.localizedName)
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+                .environmentObject(gardenStore)
             }
         }
         .onAppear {
@@ -207,7 +241,7 @@ struct CollectionView: View {
                 // 成长信息
                 HStack(spacing: 16) {
                     VStack(spacing: 2) {
-                        Text("\(plantEngine.plant.daysSincePlanting)")
+                        Text("\(plantEngine.plant.ageInDays)")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.bloomTextPrimary)
                         Text("养护天数")
@@ -231,10 +265,10 @@ struct CollectionView: View {
                         .frame(height: 30)
                     
                     VStack(spacing: 2) {
-                        Text("\(plantEngine.plant.currentStreak)")
+                        Text("\(plantEngine.plant.ageInDays)")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.bloomWarning)
-                        Text("连续天数")
+                        Text("养护天数")
                             .font(.system(size: 11))
                             .foregroundStyle(Color.bloomTextTertiary)
                     }
@@ -268,8 +302,15 @@ struct CollectionView: View {
 
     private func harvestedCard(_ item: GardenItem) -> some View {
         VStack(spacing: 8) {
-            MiniPlantCanvas(speciesID: item.speciesID, stage: item.peakStage)
-                .frame(width: 80, height: 80)
+            // 用 PlantView 替代 MiniPlantCanvas
+            PlantView(
+                plant: Plant(
+                    speciesID: item.speciesID,
+                    stage: item.peakStage,
+                    health: 100
+                )
+            )
+            .frame(width: 80, height: 80)
 
             Text(item.name)
                 .font(.system(size: 13, weight: .semibold))
@@ -301,7 +342,7 @@ struct CollectionView: View {
             
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
                 ForEach(PlantLibrary.all, id: \.id) { species in
-                    let isCollected = gardenStore.collectedSpeciesIDs.contains(species.id)
+                    let isCollected = gardenStore.hasCollected(speciesID: species.id)
                     let isProLocked = species.isProOnly && !storeManager.isPro
                     
                     Button {
@@ -366,10 +407,9 @@ struct CollectionView: View {
         case .seed: return "种子"
         case .sprout: return "发芽"
         case .seedling: return "幼苗"
-        case .growing: return "成株"
-        case .mature: return "成熟"
-        case .budding: return "含苞"
-        case .harvestable: return "可收获"
+        case .mature: return "成株"
+        case .blooming: return "含苞"
+        case .harvestable: return "盛开"
         }
     }
 }

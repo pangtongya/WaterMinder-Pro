@@ -10,72 +10,90 @@ struct QuickRecordBar: View {
     @EnvironmentObject var waterStore: WaterStore
     @EnvironmentObject var plantEngine: PlantEngine
     @EnvironmentObject var healthManager: HealthManager
-
-    @State private var lastAmount: Int = 0  // 记录最近一次水量（用于水滴动画）
-    @State private var showSuccessPulse: Bool = false  // 成功喝水后的脉冲动画
-    @State private var pressedCup: CupType? = nil  // 当前按下的杯型（用于按压反馈）
-    @State private var showAmountBubble: CupType? = nil  // 显示水量气泡
-    @State private var bubbleTask: Task<Void, Never>? = nil  // 使用 Task 替代 Timer
-
+    
+    @State private var lastAmount: Int = 0
+    @State private var showSuccessPulse: Bool = false
+    @State private var showAmountBubble: Int? = nil
+    @State private var bubbleTask: Task<Void, Never>? = nil
+    @State private var isWaterButtonPressed: Bool = false
+    
+    // 常用杯型选项（固定显示）
+    private let quickAmounts = [200, 300, 500]
+    
     var body: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 12) {
-                ForEach(CupType.allCases, id: \.self) { cup in
-                    cupButton(cup)
-                }
+        SurfaceCard(padding: 20) {
+            VStack(spacing: 16) {
+                // 主要喝水按钮
+                mainWaterButton
+                
+                // 杯型快捷选择
+                cupSizeSelector
+                
+                // 今日进度提示
+                progressHint
             }
-
-            // 今日进度提示
-            progressHint
         }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color.bloomWaterMuted.opacity(0.3))
         .overlay {
             // 成功喝水后的脉冲光环
             if showSuccessPulse {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(Color.bloomWater.opacity(0.6), lineWidth: 3)
                     .padding(-4)
                     .transition(.opacity)
             }
         }
     }
-
-    // MARK: - 杯型按钮
-
-    private func cupButton(_ cup: CupType) -> some View {
+    
+    // MARK: - 主要喝水按钮
+    
+    private var mainWaterButton: some View {
         Button {
-            recordWater(cup)
+            recordWater(lastAmount > 0 ? lastAmount : 250)
         } label: {
-            VStack(spacing: 6) {
+            HStack(spacing: 12) {
                 ZStack {
-                    // 背景圆（按压时放大）
+                    // 水滴图标背景
                     Circle()
-                        .fill(Color.bloomWater.opacity(pressedCup == cup ? 0.25 : 0.12))
-                        .frame(width: pressedCup == cup ? 56 : 52, height: pressedCup == cup ? 56 : 52)
-                        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: pressedCup)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.bloomWater, Color.bloomWater.opacity(0.7)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 48, height: 48)
 
-                    Image(systemName: cup.icon)
-                        .font(.system(size: 22))
-                        .foregroundStyle(Color.bloomWater)
-                        .scaleEffect(pressedCup == cup ? 1.1 : 1.0)
-                        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: pressedCup)
+                    // 水滴图标
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .scaleEffect(isWaterButtonPressed ? 0.9 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isWaterButtonPressed)
                 }
 
-                Text("\(cup.defaultAmount)")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.secondary)
-                Text("ml")
-                    .font(.system(size: 9))
-                    .foregroundStyle(.tertiary)
+                Text("喝水")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+
+                Spacer()
             }
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(
+                LinearGradient(
+                    colors: [Color.bloomWater, Color.bloomWater.opacity(0.85)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .scaleEffect(isWaterButtonPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isWaterButtonPressed)
             .overlay(alignment: .top) {
-                // 水量气泡（点击后显示）
-                if showAmountBubble == cup {
-                    Text("+\(cup.defaultAmount)ml")
+                // 水量气泡提示
+                if let amount = showAmountBubble {
+                    Text("+\(amount)ml")
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10)
@@ -91,14 +109,53 @@ struct QuickRecordBar: View {
         .buttonStyle(.plain)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
-                .onChanged { _ in pressedCup = cup }
-                .onEnded { _ in pressedCup = nil }
+                .onChanged { _ in isWaterButtonPressed = true }
+                .onEnded { _ in isWaterButtonPressed = false }
         )
-        .accessibilityLabel("\(cup.localizedName) \(cup.defaultAmount) ml")
     }
-
+    
+    // MARK: - 杯型选择器
+    
+    private var cupSizeSelector: some View {
+        HStack(spacing: 12) {
+            ForEach(quickAmounts, id: \.self) { amount in
+                CupSizeButton(
+                    amount: amount,
+                    icon: cupIcon(for: amount),
+                    isSelected: lastAmount == amount
+                ) {
+                    recordWater(amount)
+                }
+            }
+            
+            // 自定义杯型入口
+            customCupButton
+        }
+    }
+    
+    private var customCupButton: some View {
+        Button {
+            // TODO: 打开自定义杯型界面
+            Haptics.light()
+        } label: {
+            VStack(spacing: 4) {
+                IconCircle(
+                    icon: "plus",
+                    backgroundColor: Color.bloomFill,
+                    iconColor: Color.bloomTextSecondary,
+                    size: .medium
+                )
+                
+                Text("自定义")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.bloomTextSecondary)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+    
     // MARK: - 进度提示
-
+    
     private var progressHint: some View {
         HStack(spacing: 6) {
             Image(systemName: waterStore.isGoalMetToday ? "checkmark.circle.fill" : "drop.fill")
@@ -112,29 +169,37 @@ struct QuickRecordBar: View {
         .background(progressColor.opacity(0.12))
         .clipShape(Capsule())
     }
-
+    
     private var progressText: String {
         waterStore.isGoalMetToday
             ? NSLocalizedString("今日目标达成！", comment: "Goal achieved")
             : String(format: NSLocalizedString("还差 %d ml", comment: "Remaining ml"), waterStore.remaining)
     }
-
+    
     private var progressColor: Color {
         let p = waterStore.todayProgress
         if p >= 1.0 { return Color.bloomSuccess }
         if p < 0.3 { return Color.bloomDanger }
         return Color.bloomPrimary
     }
-
-    // MARK: - 记录喝水
-
-    private func recordWater(_ cup: CupType) {
-        let amount = cup.defaultAmount
+    
+    // MARK: - 辅助方法
+    
+    private func cupIcon(for amount: Int) -> String {
+        switch amount {
+        case 200: return "cup.and.saucer.fill"
+        case 300: return "mug.fill"
+        case 500: return "takeoutbag.and.cup.and.straw.fill"
+        default: return "cup.and.saucer.fill"
+        }
+    }
+    
+    private func recordWater(_ amount: Int) {
         lastAmount = amount
-
-        // 1. 显示水量气泡（使用 Task 替代 Timer，自动取消旧任务）
+        
+        // 1. 显示水量气泡
         bubbleTask?.cancel()
-        showAmountBubble = cup
+        showAmountBubble = amount
         bubbleTask = Task {
             try? await Task.sleep(for: .seconds(1.5))
             if !Task.isCancelled {
@@ -145,27 +210,36 @@ struct QuickRecordBar: View {
                 }
             }
         }
-
+        
         // 2. 记录喝水数据
-        waterStore.add(amount: amount, cupType: cup)
-
-        // 3. 喂给植物（核心：植物恢复生机）
+        let cupType: CupType = {
+            switch amount {
+            case 200: return .small
+            case 300: return .medium  // 使用 medium 作为 300ml
+            case 500: return .large
+            default: return .medium
+            }
+        }()
+        
+        waterStore.add(amount: amount, cupType: cupType)
+        
+        // 3. 喂给植物
         plantEngine.water(amount: amount)
-
+        
         // 4. 达标结算
         if waterStore.isGoalMetToday {
             plantEngine.processGoalMet()
         }
-
+        
         // 5. 同步到健康App
         if healthManager.isAuthorized {
             Task { try? await healthManager.saveWater(amount) }
         }
-
+        
         // 6. 触觉反馈
         Haptics.waterDrop()
-
-        // 7. 成功脉冲动画（视觉反馈）
+        
+        // 7. 成功脉冲动画
         showSuccessPulse = true
         withAnimation(.easeOut(duration: 0.3)) {
             showSuccessPulse = true

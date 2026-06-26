@@ -249,6 +249,8 @@ extension L {
     static let about                  = s("关于")
     static let plantName              = s("植物名字")
     static let pauseCare              = s("暂停养护")
+    static let carePaused             = s("养护已暂停")
+    static let pauseExplanation       = s("暂停期间植物不会枯萎，最多14天")
     static let resumeCare             = s("恢复养护")
     static let businessTravel         = s("出差/旅行")
     static let goToSettings           = s("去设置")

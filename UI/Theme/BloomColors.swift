@@ -274,9 +274,9 @@ extension Color {
     static let bloomBackgroundDark = Color(hex: "000000")
     
     /// 页面背景（自动适配深色模式）
-    static let bloomBackground = Color(uiColor: .dynamicColor(
-        light: bloomBackgroundLight,
-        dark: bloomBackgroundDark
+    static let bloomBackground = Color(uiColor: UIColor.dynamicColor(
+        light: UIColor(bloomBackgroundLight),
+        dark: UIColor(bloomBackgroundDark)
     ))
 }
 

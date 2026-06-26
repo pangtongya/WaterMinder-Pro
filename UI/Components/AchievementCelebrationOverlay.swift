@@ -81,7 +81,7 @@ struct AchievementCelebrationOverlay: View {
 
                 // 关闭按钮
                 Button(action: onDismiss) {
-                    Text(L.awesome)
+                    Text(L.amazing)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -132,5 +132,109 @@ struct AchievementCelebrationOverlay: View {
     private func particleColor(_ index: Int) -> Color {
         let colors: [Color] = [.bloomGold, .bloomPrimary, .bloomSuccess, .yellow, .orange, .pink]
         return colors[index % colors.count].opacity(Double.random(in: 0.8...1.0))
+    }
+}
+
+// MARK: - Generic Celebration Overlay
+
+/// 通用的庆祝覆盖层（用于任意庆祝场景）
+struct GenericCelebrationOverlay: View {
+    let title: String
+    let message: String
+    let iconName: String
+    let onDismiss: () -> Void
+    @State private var animateIn = false
+    
+    var body: some View {
+        ZStack {
+            // 背景遮罩
+            Color.black.opacity(animateIn ? 0.55 : 0)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 24) {
+                // 图标
+                ZStack {
+                    if iconName.count == 1 && iconName.containsEmoji {
+                        Text(iconName)
+                            .font(.system(size: 60))
+                    } else {
+                        Image(systemName: iconName)
+                            .font(.system(size: 60, weight: .bold))
+                            .foregroundStyle(Color.bloomGold)
+                    }
+                }
+                .frame(width: 120, height: 120)
+                .background(
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.bloomGold.opacity(0.2), Color.bloomPrimary.opacity(0.2)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+                .scaleEffect(animateIn ? 1.0 : 0.5)
+                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: animateIn)
+                
+                // 标题
+                VStack(spacing: 8) {
+                    Text(title)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text(message)
+                        .font(.system(size: 14))
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.white.opacity(0.75))
+                        .padding(.horizontal, 32)
+                }
+                .opacity(animateIn ? 1 : 0)
+                .offset(y: animateIn ? 0 : 20)
+                .animation(.easeOut(duration: 0.6).delay(0.2), value: animateIn)
+                
+                // 关闭按钮
+                Button(action: onDismiss) {
+                    Text(L.amazing)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.bloomPrimary, Color.bloomDeep],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .padding(.horizontal, 32)
+                .opacity(animateIn ? 1 : 0)
+                .animation(.easeOut(duration: 0.4).delay(0.4), value: animateIn)
+            }
+            .padding(.vertical, 32)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color(.systemBackground))
+            )
+            .padding(.horizontal, 40)
+        }
+        .transition(.opacity)
+        .animation(.easeOut(duration: 0.35), value: animateIn)
+        .onAppear { animateIn = true }
+    }
+}
+
+extension String {
+    var containsEmoji: Bool {
+        for scalar in unicodeScalars {
+            switch scalar.value {
+            case 0x1F600...0x1F64F, 0x1F300...0x1F5FF, 0x1F680...0x1F6FF, 0x1F700...0x1F77F, 0x1F780...0x1F7FF, 0x1F800...0x1F8FF, 0x1F900...0x1F9FF, 0x1FA00...0x1FA6F, 0x1FA70...0x1FAFF, 0x2600...0x26FF, 0x2700...0x27BF:
+                return true
+            default:
+                continue
+            }
+        }
+        return false
     }
 }

@@ -41,7 +41,7 @@ struct BackupData: Codable {
     let gardenItems: [GardenItem]
     let userProfile: UserProfile
     let achievements: [Achievement]
-    let checksum: String
+    var checksum: String
     let statistics: BackupStatistics
     let isEncrypted: Bool
 
@@ -102,9 +102,12 @@ struct BackupData: Codable {
             statistics = stats
         } else {
             let totalWaterMl = waterRecords.reduce(0) { $0 + $1.amount }
-            let growthDays = plant.map { plant in
-                Calendar.current.dateComponents([.day], from: plant.plantedAt, to: exportDate).day ?? 0
-            } ?? 0
+            let growthDays: Int
+            if let p = plant {
+                growthDays = Calendar.current.dateComponents([.day], from: p.plantedAt, to: exportDate).day ?? 0
+            } else {
+                growthDays = 0
+            }
             statistics = BackupStatistics(
                 totalWaterRecords: waterRecords.count,
                 totalGardenItems: gardenItems.count,
@@ -672,7 +675,7 @@ final class DataBackupManager: ObservableObject {
         let gardenItems: [GardenItem]
         let userProfile: UserProfile
         let achievements: [Achievement]
-        let checksum: String
+        var checksum: String
         let metadata: V1BackupMetadata
 
         struct V1BackupMetadata: Codable {

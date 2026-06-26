@@ -26,6 +26,7 @@ struct GardenView: View {
     @State private var plantPressing = false
     @State private var showWilt = false
     @State private var showGoalCelebration = false
+    @State private var showHarvestCelebration = false
     @State private var showPauseConfirm = false
     @State private var showResumeAlert = false
     @State private var isSharing = false
@@ -35,7 +36,9 @@ struct GardenView: View {
     
     private var plantFadeIn: Bool = true
     
-    var body: some View {
+    // MARK: - Main Content
+    
+    private var mainContent: some View {
         ScrollView {
             VStack(spacing: 16) {
                 // 1. 植物主视觉区 - 带进度环
@@ -54,7 +57,7 @@ struct GardenView: View {
                     .padding(.horizontal, 16)
                 
                 // 4. 成就徽章
-                if plantEngine.plant.currentStreak >= 7 {
+                if waterStore.currentStreak >= 7 {
                     streakBadge
                         .padding(.horizontal, 16)
                 }
@@ -73,107 +76,122 @@ struct GardenView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color.bloomBackground)
-        .navigationTitle("我的花园")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    sharePlantStatus()
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundStyle(Color.bloomTextSecondary)
+    }
+    
+    // MARK: - Navigation
+    
+    private var navigationBar: some View {
+        NavigationStack {
+            mainContent
+                .navigationTitle("我的花园")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            sharePlantStatus()
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        .disabled(isSharing)
+                    }
                 }
-                .disabled(isSharing)
-            }
         }
-        .onChange(of: plantEngine.lastStageUpCelebration) { _, newStage in
-            if let stage = newStage {
-                celebrateStage = stage
-                Haptics.success()
+    }
+    
+    var body: some View {
+        navigationBar
+            .onChange(of: plantEngine.lastStageUpCelebration) { _, newStage in
+                if let stage = newStage {
+                    celebrateStage = stage
+                    Haptics.success()
+                }
             }
-        }
-        .onChange(of: plantEngine.justWilted) { _, wilted in
-            if wilted {
-                showWilt = true
-                Haptics.error()
+            .onChange(of: plantEngine.justWilted) { _, wilted in
+                if wilted {
+                    showWilt = true
+                    Haptics.error()
+                }
             }
-        }
-        .onChange(of: waterStore.isGoalMetToday) { oldValue, newValue in
-            if !oldValue && newValue {
-                showGoalCelebration = true
-                Haptics.success()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    withAnimation {
-                        showGoalCelebration = false
+            .onChange(of: waterStore.isGoalMetToday) { oldValue, newValue in
+                if !oldValue && newValue {
+                    showGoalCelebration = true
+                    Haptics.success()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation {
+                            showGoalCelebration = false
+                        }
                     }
                 }
             }
-        }
-        .overlay {
+            .overlay {
+                celebrationOverlay
+            }
+            .animation(.easeInOut(duration: 0.25), value: celebrateStage)
+            .animation(.easeInOut(duration: 0.25), value: showWilt)
+            .alert(L.pauseCare, isPresented: $showPauseConfirm) {
+                Button(L.cancel, role: .cancel) { }
+                Button(L.pause, role: .destructive) {
+                    plantEngine.pauseCare()
+                    Haptics.light()
+                }
+            } message: {
+                Text(L.pauseExplanation)
+            }
+            .alert(L.resumeCare, isPresented: $showResumeAlert) {
+                Button(L.restore) {
+                    plantEngine.resumeCare()
+                    Haptics.success()
+                }
+                Button(L.cancel, role: .cancel) { }
+            } message: {
+                Text(L.confirmResumeCare)
+            }
+            .sheet(isPresented: $showHarvestSheet) {
+                HarvestView(plant: plantEngine.plant, onHarvest: performHarvest)
+            }
+            .sheet(isPresented: $isSharing) {
+                if let shareImage {
+                    ActivityViewController(activityItems: [shareImage])
+                }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView().environmentObject(storeManager)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.showPaywall)) { _ in
+                showPaywall = true
+            }
+    }
+    
+    // MARK: - Celebration Overlay
+    
+    private var celebrationOverlay: some View {
+        ZStack {
+            // 阶段升级庆祝
             if let stage = celebrateStage {
-                StageUpCelebration(stage: stage) {
-                    withAnimation { celebrateStage = nil }
-                    plantEngine.consumeStageUpCelebration()
-                }
-                .transition(.opacity)
-            }
-            if showWilt {
-                WiltCelebration {
-                    withAnimation { showWilt = false }
-                    plantEngine.consumeWilt()
-                }
-                .transition(.opacity)
-            }
-            if showGoalCelebration {
-                GoalCelebrationView {
-                    withAnimation {
-                        showGoalCelebration = false
+                GenericCelebrationOverlay(
+                    title: L.congratulations,
+                    message: L.reachedStageMsg,
+                    iconName: stage.emoji,
+                    onDismiss: {
+                        withAnimation { celebrateStage = nil }
+                        plantEngine.consumeStageUpCelebration()
                     }
-                }
+                )
+                .transition(.opacity)
+            }
+            // 目标达成庆祝
+            if showGoalCelebration {
+                GenericCelebrationOverlay(
+                    title: L.goalAchieved,
+                    message: L.keepUpGoodHabits,
+                    iconName: "🎉",
+                    onDismiss: {
+                        withAnimation { showGoalCelebration = false }
+                    }
+                )
                 .transition(.scale.combined(with: .opacity))
             }
-        }
-        .animation(.easeInOut(duration: 0.25), value: celebrateStage)
-        .animation(.easeInOut(duration: 0.25), value: showWilt)
-        .alert(L.pauseCare, isPresented: $showPauseConfirm) {
-            Button(L.cancel, role: .cancel) { }
-            Button(L.pause, role: .destructive) {
-                plantEngine.pauseCare()
-                Haptics.light()
-            }
-        } message: {
-            Text(L.pauseExplanation)
-        }
-        .alert(L.resumeCare, isPresented: $showResumeAlert) {
-            Button(L.restore) {
-                plantEngine.resumeCare()
-                Haptics.success()
-            }
-            Button(L.cancel, role: .cancel) { }
-        } message: {
-            Text(L.confirmResumeCare)
-        }
-        .alert(L.gardenFull, isPresented: $showGardenLimitAlert) {
-            Button(L.cancel, role: .cancel) { }
-            Button(L.upgradeToPro) {
-                NotificationCenter.default.post(name: AppConstants.NotificationNames.showPaywall, object: nil)
-            }
-        } message: {
-            Text(L.proGardenLimit)
-        }
-        .sheet(isPresented: $showHarvestSheet) {
-            HarvestView(plant: plantEngine.plant, onHarvest: performHarvest)
-        }
-        .sheet(isPresented: $isSharing) {
-            if let shareImage {
-                ActivityViewController(activityItems: [shareImage])
-            }
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView().environmentObject(storeManager)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: AppConstants.NotificationNames.showPaywall)) { _ in
-            showPaywall = true
         }
     }
     
@@ -205,8 +223,17 @@ struct GardenView: View {
                                 endRadius: 100
                             )
                             
-                            // 水滴动画
-                            WaterSplashOverlay(trigger: splashTrigger)
+                            // 水滴动画（使用简单的视觉效果）
+                            if splashTrigger > 0 {
+                                ForEach(0..<5, id: \.self) { i in
+                                    Image(systemName: "droplet.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(Color.bloomWater)
+                                        .opacity(0.6)
+                                        .offset(y: -50 - CGFloat(splashTrigger * 20))
+                                        .animation(.spring(response: 0.5).delay(Double(i) * 0.1), value: splashTrigger)
+                                }
+                            }
                             
                             // 植物
                             AnimatedPlantView(plant: plantEngine.plant)
@@ -277,7 +304,7 @@ struct GardenView: View {
                     statItem(
                         icon: "droplet.fill",
                         iconColor: .bloomWater,
-                        value: "\(waterStore.todayAmount)",
+                        value: "\(waterStore.todayTotal)",
                         unit: "ml",
                         label: "今日饮水"
                     )
@@ -299,7 +326,7 @@ struct GardenView: View {
                     statItem(
                         icon: "flame.fill",
                         iconColor: .orange,
-                        value: "\(plantEngine.plant.currentStreak)",
+                        value: "\(waterStore.currentStreak)",
                         unit: "天",
                         label: "连续达标"
                     )
@@ -314,8 +341,8 @@ struct GardenView: View {
                         
                         Spacer()
                         
-                        if waterStore.remainingAmount > 0 {
-                            ProgressCapsule(remaining: waterStore.remainingAmount)
+                        if waterStore.remaining > 0 {
+                            ProgressCapsule(remaining: waterStore.remaining)
                         } else {
                             Badge("已达标", style: .success)
                         }
@@ -370,7 +397,7 @@ struct GardenView: View {
     private var streakBadge: some View {
         SurfaceCard(padding: 16) {
             HStack(spacing: 12) {
-                StreakBadge(days: plantEngine.plant.currentStreak, showBadge: plantEngine.plant.currentStreak >= 30)
+                StreakBadge(days: waterStore.currentStreak, showBadge: waterStore.currentStreak >= 30)
                 
                 Spacer()
                 
@@ -407,7 +434,7 @@ struct GardenView: View {
                                 amount: record.amount,
                                 cupType: record.cupType.localizedName,
                                 time: record.timeString,
-                                icon: record.cupType.iconName
+                                icon: record.cupType.icon
                             )
                             
                             if record.id != waterStore.todayRecords.prefix(5).last?.id {
@@ -496,16 +523,15 @@ struct GardenView: View {
         case .seed: return "种子"
         case .sprout: return "发芽"
         case .seedling: return "幼苗"
-        case .growing: return "成株"
-        case .mature: return "成熟"
-        case .budding: return "含苞"
-        case .harvestable: return "可收获"
+        case .mature: return "成株"
+        case .blooming: return "含苞"
+        case .harvestable: return "盛开"
         }
     }
     
     private var growthProgress: Double {
-        let daysSincePlanting = plantEngine.plant.daysSincePlanting
-        let totalGrowthDays = plantEngine.plant.species?.totalGrowthDays ?? 30
+        let daysSincePlanting = plantEngine.plant.ageInDays
+        let totalGrowthDays = plantEngine.plant.species.growthDays.totalDays
         return min(Double(daysSincePlanting) / Double(totalGrowthDays) * 100, 100)
     }
     
@@ -514,13 +540,15 @@ struct GardenView: View {
     private func waterPlant(_ cupType: CupType) {
         splashTrigger += 1
         Task {
-            await plantEngine.water(amount: cupType.amount, cupType: cupType, waterStore: waterStore, healthManager: healthManager)
+            await plantEngine.waterPlant(cup: cupType, waterStore: waterStore, healthManager: healthManager)
         }
     }
     
     private func performHarvest() {
-        Task {
-            await plantEngine.harvest(waterStore: waterStore, healthManager: healthManager)
+        if let gardenItem = plantEngine.harvest() {
+            gardenStore.add(gardenItem)
+            // 收获成功，触发庆祝
+            showHarvestCelebration = true
         }
     }
     

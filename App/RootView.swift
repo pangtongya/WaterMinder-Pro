@@ -65,6 +65,9 @@ struct RootView: View {
             // 同步状态提示
             SyncToastView(
                 state: cloudSyncManager.syncToastState,
+                onDismiss: {
+                    cloudSyncManager.resetToastState()
+                },
                 progress: mapProgress(cloudSyncManager.syncProgress),
                 canRetry: canRetrySync,
                 showsSettings: showsSettingsButton,
@@ -76,9 +79,7 @@ struct RootView: View {
                 onOpenSettings: {
                     cloudSyncManager.openSystemSettings()
                 }
-            ) {
-                cloudSyncManager.resetToastState()
-            }
+            )
             
             // 成就解锁提示
             if let achievement = achievementStore.newlyUnlocked {
@@ -106,30 +107,30 @@ struct RootView: View {
     
     private var canRetrySync: Bool {
         if case .failed(let error) = cloudSyncManager.syncStatus {
-            return error.isRetryable
+            return error.canRetry
         }
         return false
     }
     
     private var showsSettingsButton: Bool {
         if case .failed(let error) = cloudSyncManager.syncStatus {
-            return error.requiresSettings
+            return error.showsSettingsButton
         }
         return false
     }
     
-    private func mapProgress(_ progress: CloudSyncManager.SyncProgress?) -> Double? {
-        guard let progress = progress else { return nil }
+    private func mapProgress(_ progress: CloudSyncManager.SyncProgress?) -> SyncProgressStep {
+        guard let progress = progress else { return .downloading }
         switch progress {
-        case .downloading: return 0.33
-        case .merging: return 0.66
-        case .uploading: return 1.0
+        case .downloading: return .downloading
+        case .merging: return .merging
+        case .uploading: return .uploading
         }
     }
     
     private func downloadCloudData() async {
         if cloudSyncManager.isSyncing { return }
-        await cloudSyncManager.sync()
+        await cloudSyncManager.syncAll()
     }
 }
 
@@ -143,7 +144,7 @@ struct TabContent: View {
         switch selectedTab {
         case .garden:
             NavigationStack {
-                GardenView(plantFadeIn: plantFadeIn)
+                GardenView()
             }
         case .history:
             NavigationStack {

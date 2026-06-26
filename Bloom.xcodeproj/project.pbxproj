@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		001F83D45AAF4BC9414B02B6 /* AchievementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB55BC4F2D1B2902EACC77 /* AchievementView.swift */; };
+		02A1B2C3D4E5F6A7B8C9D0E1 /* AppleTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1E2D3C4B5A6F7E8D9C0B1A2 /* AppleTabBar.swift */; };
+		03B2C3D4E5F6A7B8C9D0E1F2 /* AppleComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B3C4D5E6F7A8B9C0D1E2F3 /* AppleComponents.swift */; };
+		04C3D4E5F6A7B8C9D0E1F2A3 /* AchievementCelebrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* AchievementCelebrationOverlay.swift */; };
+		05D4E5F6A7B8C9D0E1F2A3B4 /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D5E6F7A8B9C0D1E2F3A4B5 /* SkeletonView.swift */; };
 		06DC05D5A24C17A269273C7B /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49771ADB8F2D7F7DA488B61 /* HealthSyncService.swift */; };
 		0F9D6CB03D574F0CA8E2CE2C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = ADC878723A0F789B0569E37B /* InfoPlist.strings */; };
 		160D28603B190CA5F49C3A71 /* HealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DC2B240492004662250DF8 /* HealthManager.swift */; };
@@ -109,6 +113,10 @@
 /* Begin PBXFileReference section */
 		0380932EEBD553BCB50CD5AB /* BloomColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomColors.swift; sourceTree = "<group>"; };
 		040FE84C7EB12B858E5C3068 /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
+		F1E2D3C4B5A6F7E8D9C0B1A2 /* AppleTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTabBar.swift; sourceTree = "<group>"; };
+		A2B3C4D5E6F7A8B9C0D1E2F3 /* AppleComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleComponents.swift; sourceTree = "<group>"; };
+		B3C4D5E6F7A8B9C0D1E2F3A4 /* AchievementCelebrationOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementCelebrationOverlay.swift; sourceTree = "<group>"; };
+		C4D5E6F7A8B9C0D1E2F3A4B5 /* SkeletonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
 		0A3C26ADB360224F1D94B290 /* PlantLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantLifecycleTests.swift; sourceTree = "<group>"; };
 		0E7B3AF3F25F9CAF72FBD8B0 /* LocalizationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationExtensions.swift; sourceTree = "<group>"; };
 		123F2CABE5FC968020DB84FB /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
@@ -332,6 +340,10 @@
 		993378778B5D1D7445B50635 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				B3C4D5E6F7A8B9C0D1E2F3A4 /* AchievementCelebrationOverlay.swift */,
+				A2B3C4D5E6F7A8B9C0D1E2F3 /* AppleComponents.swift */,
+				F1E2D3C4B5A6F7E8D9C0B1A2 /* AppleTabBar.swift */,
+				C4D5E6F7A8B9C0D1E2F3A4B5 /* SkeletonView.swift */,
 				F94B863D42937FC9F60F41A9 /* SyncToastView.swift */,
 			);
 			path = Components;
@@ -606,8 +618,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				F554BF5D1269C2845CD8BDC8 /* Achievement.swift in Sources */,
+				04C3D4E5F6A7B8C9D0E1F2A3 /* AchievementCelebrationOverlay.swift in Sources */,
 				5CAC5D97960AF917782C288B /* AchievementStore.swift in Sources */,
 				001F83D45AAF4BC9414B02B6 /* AchievementView.swift in Sources */,
+				03B2C3D4E5F6A7B8C9D0E1F2 /* AppleComponents.swift in Sources */,
+				02A1B2C3D4E5F6A7B8C9D0E1 /* AppleTabBar.swift in Sources */,
 				C6C5CBBFC8F603F24D90EE95 /* AdvancedStatsView.swift in Sources */,
 				B73E6F25C922589BB31EE7C2 /* AppConstants.swift in Sources */,
 				C93EF7D6C54583AE1C724431 /* BackgroundTaskManager.swift in Sources */,
@@ -647,6 +662,7 @@
 				57DD5F3B3C2EE5B407E99FA3 /* ProGatingExtensions.swift in Sources */,
 				18364177D02B353EE1738526 /* QuickRecordBar.swift in Sources */,
 				4D96A031B8662FEE778AE8F4 /* RootView.swift in Sources */,
+				05D4E5F6A7B8C9D0E1F2A3B4 /* SkeletonView.swift in Sources */,
 				39BEA3BD56AE16D37327AF16 /* SettingsView.swift in Sources */,
 				D9F7C49D5D9650769C5EA121 /* SharingManager.swift in Sources */,
 				71373977114EA039A1B4317F /* StoreManager.swift in Sources */,

@@ -47,81 +47,43 @@ struct SettingsView: View {
     @State private var selectedPermissionMode: HealthManager.PermissionMode = .readWrite
 
     var body: some View {
-        Form {
-            // 植物
-            plantSection
-
-            // 饮水目标
-            goalSection
-
-            // 提醒
-            reminderSection
-
-            // 健康 App
-            healthSection
-
-            // 外观
-            themeSection
-
-            // iCloud 同步
-            cloudSection
-
-            // 数据备份与恢复
-            backupSection
-
-            // Pro
-            proSection
-
-
-            // 成就
-            NavigationLink(destination: AchievementView().environmentObject(achievementStore)) {
-                HStack {
-                    Image(systemName: "trophy.fill")
-                        .foregroundColor(.bloomGold)
-                    Text("成就".localized)
-                    Spacer()
-                    Text("\(achievementStore.unlockedCount)/\(achievementStore.totalCount)")
-                        .foregroundColor(.secondary)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
+        ScrollView {
+            VStack(spacing: 16) {
+                // 植物设置
+                plantSection
+                
+                // 饮水目标
+                goalSection
+                
+                // 提醒设置
+                reminderSection
+                
+                // 外观主题
+                themeSection
+                
+                // 健康 App
+                healthSection
+                
+                // iCloud 同步
+                cloudSection
+                
+                // 数据备份与恢复
+                backupSection
+                
+                // Pro
+                proSection
+                
+                // 成就和高级统计
+                achievementAndStatsSection
+                
+                // 关于
+                aboutSection
             }
-
-            // 高级统计 (Pro teaser)
-            Button {
-                if userStore.isPro {
-                    showAdvancedStats = true
-                } else {
-                    showPaywall = true
-                }
-            } label: {
-                HStack {
-                    Label {
-                        Text("高级统计".localized)
-                            .foregroundColor(.bloomGold)
-                    } icon: {
-                        Image(systemName: "chart.line.uptrend.xyaxis")
-                            .foregroundColor(.bloomGold)
-                    }
-                    Spacer()
-                    if !userStore.isPro {
-                        Text("Pro".localized)
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.bloomGold)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-            // 关于
-            aboutSection
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bloomBackground)
         .navigationTitle(L.settings)
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
@@ -244,58 +206,140 @@ struct SettingsView: View {
     // MARK: - 植物设置
 
     private var plantSection: some View {
-        Section {
-            HStack {
-                Text("植物名字".localized)
-                Spacer()
-                TextField("小绿", text: nameBinding)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 120)
-            }
-
-            HStack {
-                Text("品种".localized)
-                Spacer()
-                Text(plantEngine.plant.species.localizedName)
-                    .foregroundStyle(.secondary)
-                Text(plantEngine.plant.species.symbol)
-            }
-
-            // 暂停/恢复养护
-            if plantEngine.plant.isPaused {
-                Button(role: .destructive) {
-                    showResumeAlert = true
-                } label: {
-                    HStack {
-                        Image(systemName: "play.circle.fill")
-                            .foregroundColor(.green)
-                        Text("恢复养护".localized)
+        VStack(spacing: 8) {
+            SectionHeader("我的植物".localized)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 植物名字
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "sprout",
+                            backgroundColor: Color.bloomPrimaryMuted,
+                            iconColor: Color.bloomPrimary
+                        )
+                        
+                        Text("植物名字".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
                         Spacer()
-                        Text(String(format: L.daysRemaining, plantEngine.plant.remainingPauseDays))
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            } else {
-                Button {
-                    showPauseConfirm = true
-                } label: {
-                    HStack {
-                        Image(systemName: "pause.circle.fill")
-                            .foregroundColor(.orange)
-                        Text("暂停养护".localized)
-                        Spacer()
-                        Text("出差/旅行".localized)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
+                        
+                        TextField("小绿", text: nameBinding)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 100)
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color.bloomTextSecondary)
+                        
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.bloomTextTertiary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // 可以添加编辑功能
+                    }
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 品种
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "flower-2",
+                            backgroundColor: Color.bloomWaterMuted,
+                            iconColor: Color.bloomWater
+                        )
+                        
+                        Text("品种".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        Text(plantEngine.plant.species.localizedName)
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color.bloomTextSecondary)
+                        
+                        Text(plantEngine.plant.species.symbol)
+                            .font(.system(size: 15))
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.bloomTextTertiary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 暂停/恢复养护
+                    if plantEngine.plant.isPaused {
+                        Button {
+                            showResumeAlert = true
+                            Haptics.light()
+                        } label: {
+                            HStack(spacing: 12) {
+                                IconCircle(
+                                    icon: "pause-circle",
+                                    backgroundColor: Color.bloomWarning.opacity(0.15),
+                                    iconColor: Color.bloomWarning
+                                )
+                                
+                                Text("恢复养护".localized)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(Color.bloomTextPrimary)
+                                
+                                Spacer()
+                                
+                                Text(String(format: L.daysRemaining, plantEngine.plant.remainingPauseDays))
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Color.bloomTextSecondary)
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Button {
+                            showPauseConfirm = true
+                            Haptics.light()
+                        } label: {
+                            HStack(spacing: 12) {
+                                IconCircle(
+                                    icon: "pause-circle",
+                                    backgroundColor: Color.bloomWarning.opacity(0.15),
+                                    iconColor: Color.bloomWarning
+                                )
+                                
+                                Text("暂停养护".localized)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(Color.bloomTextPrimary)
+                                
+                                Spacer()
+                                
+                                Text("出差/旅行".localized)
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Color.bloomTextSecondary)
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
-        } header: {
-            Text("我的植物".localized)
         }
     }
 
@@ -309,49 +353,119 @@ struct SettingsView: View {
     // MARK: - 目标
 
     private var goalSection: some View {
-        Section {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach([1500, 2000, 2500, 3000, 3500], id: \.self) { goal in
-                        Button("\(goal)ml") {
-                            Haptics.light()
-                            userStore.setDailyGoal(goal)
+        VStack(spacing: 8) {
+            SectionHeader("每日目标".localized)
+            
+            SurfaceCard(padding: 16) {
+                VStack(spacing: 12) {
+                    // 目标选择按钮
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach([1500, 2000, 2500, 3000, 3500], id: \.self) { goal in
+                                Button {
+                                    Haptics.light()
+                                    userStore.setDailyGoal(goal)
+                                } label: {
+                                    Text("\(goal)ml")
+                                        .font(.system(size: 13, weight: userStore.dailyGoal == goal ? .semibold : .medium))
+                                        .foregroundStyle(userStore.dailyGoal == goal ? .white : Color.bloomTextSecondary)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            userStore.dailyGoal == goal ?
+                                            Color.bloomPrimary :
+                                            Color.bloomSurfaceSecondary
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
-                        .font(.system(size: 13, weight: .medium))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(userStore.dailyGoal == goal ? Color.bloomPrimary : Color(.tertiarySystemBackground))
-                        .foregroundStyle(userStore.dailyGoal == goal ? .white : .primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
+                    
+                    // 提示文本
+                    Text("建议成人每日饮水 2000ml".localized)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.bloomTextTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.vertical, 4)
             }
-        } header: {
-            Text("每日目标".localized)
-        } footer: {
-            Text("建议成人每日饮水 2000ml".localized)
         }
     }
 
     // MARK: - 提醒
 
     private var reminderSection: some View {
-        Section {
-            Toggle("喝水提醒", isOn: reminderBinding)
-                .tint(Color.bloomPrimary)
-
-            if userStore.reminderEnabled {
-                Picker("提醒间隔", selection: intervalBinding) {
-                    ForEach([30, 60, 90, 120], id: \.self) {
-                        Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), $0)).tag($0)
+        VStack(spacing: 8) {
+            SectionHeader("提醒".localized)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 喝水提醒 Toggle
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "bell",
+                            backgroundColor: Color.bloomPrimaryMuted,
+                            iconColor: Color.bloomPrimary
+                        )
+                        
+                        Text("喝水提醒".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: reminderBinding)
+                            .labelsHidden()
+                            .tint(Color.bloomPrimary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    
+                    if userStore.reminderEnabled {
+                        Divider()
+                            .padding(.leading, 56)
+                        
+                        // 提醒间隔
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "clock",
+                                backgroundColor: Color.bloomWaterMuted,
+                                iconColor: Color.bloomWater
+                            )
+                            
+                            Text("提醒间隔".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Menu {
+                                ForEach([30, 60, 90, 120], id: \.self) { interval in
+                                    Button {
+                                        handleIntervalChange(interval)
+                                    } label: {
+                                        Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), interval))
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), userStore.reminderInterval))
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(Color.bloomTextSecondary)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(Color.bloomTextTertiary)
+                                }
+                            }
+                            .menuStyle(.borderlessButton)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
                     }
                 }
             }
-        } header: {
-            Text("提醒".localized)
-        } footer: {
-            Text("开启后，植物口渴时会提醒你来浇水".localized)
         }
     }
 
@@ -362,20 +476,16 @@ struct SettingsView: View {
         )
     }
 
-    private var intervalBinding: Binding<Int> {
-        Binding(
-            get: { userStore.reminderInterval },
-            set: { interval in
-                userStore.setReminderInterval(interval)
-                Task {
-                    await notificationManager.scheduleSmartReminder(
-                        intervalMinutes: interval,
-                        health: plantEngine.plant.health,
-                        plantName: plantEngine.plant.name
-                    )
-                }
-            }
-        )
+    private func handleIntervalChange(_ interval: Int) {
+        Haptics.light()
+        userStore.setReminderInterval(interval)
+        Task {
+            await notificationManager.scheduleSmartReminder(
+                intervalMinutes: interval,
+                health: plantEngine.plant.health,
+                plantName: plantEngine.plant.name
+            )
+        }
     }
 
     private func handleReminderToggle(_ enabled: Bool) {
@@ -400,55 +510,155 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 健康 App
+    // MARK: - 主题
 
-    private var healthSection: some View {
-        Section {
-            // 权限状态 + 连接/管理按钮
-            healthStatusRow
-
-            // 已授权时显示详细设置
-            if healthAuthorized && healthManager.authorizationStatus == .authorized {
-                healthDetailSettings
+    private var themeSection: some View {
+        VStack(spacing: 8) {
+            SectionHeader("外观".localized)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 模式选择
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "sun-moon",
+                            backgroundColor: Color.bloomFill,
+                            iconColor: Color.bloomTextSecondary
+                        )
+                        
+                        Text("模式".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        SegmentedPicker(
+                            selection: Binding(
+                                get: { userStore.theme.rawValue },
+                                set: { newValue in
+                                    if let theme = AppTheme(rawValue: newValue) {
+                                        userStore.setTheme(theme)
+                                        Haptics.light()
+                                    }
+                                }
+                            ),
+                            options: AppTheme.allCases.map { $0.rawValue }
+                        )
+                        .frame(width: 200)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 主题颜色
+                    NavigationLink(destination: ThemePickerView().environmentObject(userStore)) {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "palette",
+                                backgroundColor: Color.bloomPrimaryMuted,
+                                iconColor: Color.bloomPrimary
+                            )
+                            
+                            Text("主题颜色".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Circle()
+                                .fill(Color.bloomPrimary)
+                                .frame(width: 12, height: 12)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.bloomPrimary.opacity(0.3), lineWidth: 1.5)
+                                )
+                            
+                            Text(ThemeManager.shared.currentTheme.name)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.bloomTextTertiary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-        } header: {
-            Text(L.healthApp)
-        } footer: {
-            healthSectionFooter
         }
     }
 
-    private var healthStatusRow: some View {
-        HStack {
-            Image(systemName: "heart.fill")
-                .foregroundStyle(healthAuthorized ? .green : .red)
+    // MARK: - 健康 App
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(healthAuthorized ? NSLocalizedString("已连接健康 App", comment: "Health App connected") : L.connectHealth)
-                    .foregroundStyle(.primary)
-
-                Text(healthManager.authorizationStatus.localizedDescription)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            if !healthAuthorized {
-                Button {
-                    showHealthPermissionSheet = true
-                } label: {
-                    Text(NSLocalizedString("连接", comment: "Connect button"))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.bloomPrimary)
-                        .clipShape(Capsule())
+    private var healthSection: some View {
+        VStack(spacing: 8) {
+            SectionHeader(L.healthApp)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 权限状态
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "heart-pulse",
+                            backgroundColor: Color.bloomError.opacity(0.15),
+                            iconColor: Color.bloomError
+                        )
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(healthAuthorized ? NSLocalizedString("已连接健康 App", comment: "Health App connected") : L.connectHealth)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Text(healthManager.authorizationStatus.localizedDescription)
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        
+                        Spacer()
+                        
+                        if healthAuthorized {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(Color.bloomSuccess)
+                        } else {
+                            Button {
+                                showHealthPermissionSheet = true
+                                Haptics.light()
+                            } label: {
+                                Text(NSLocalizedString("连接", comment: "Connect button"))
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.bloomPrimary)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    
+                    // 已授权时的详细设置
+                    if healthAuthorized && healthManager.authorizationStatus == .authorized {
+                        Divider()
+                            .padding(.leading, 56)
+                        
+                        healthDetailSettings
+                    }
                 }
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+            }
+            
+            // 未授权时的说明
+            if !healthAuthorized {
+                Text(NSLocalizedString("Bloom 仅请求饮水量数据，用于将你的喝水记录同步到健康 App，并读取其他 App 记录的喝水数据", comment: "Health data usage explanation"))
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.bloomTextTertiary)
+                    .padding(.horizontal, 16)
             }
         }
     }
@@ -456,340 +666,345 @@ struct SettingsView: View {
     @ViewBuilder
     private var healthDetailSettings: some View {
         // 写入开关
-        Toggle(isOn: Binding(
-            get: { healthManager.writeEnabled },
-            set: { newValue in
-                healthManager.writeEnabled = newValue
-                Haptics.light()
-            }
-        )) {
-            HStack {
-                Image(systemName: "square.and.arrow.up")
-                    .foregroundColor(.blue)
-                    .frame(width: 22)
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                IconCircle(
+                    icon: "square.and.arrow.up",
+                    backgroundColor: Color.bloomInfo.opacity(0.15),
+                    iconColor: Color.bloomInfo,
+                    size: .small
+                )
+                
                 Text(NSLocalizedString("写入健康 App", comment: "Write to Health App"))
-            }
-        }
-        .tint(Color.bloomPrimary)
-
-        // 读取开关
-        Toggle(isOn: Binding(
-            get: { healthManager.readEnabled },
-            set: { newValue in
-                healthManager.readEnabled = newValue
-                Haptics.light()
-            }
-        )) {
-            HStack {
-                Image(systemName: "square.and.arrow.down")
-                    .foregroundColor(.green)
-                    .frame(width: 22)
-                Text(NSLocalizedString("从健康 App 读取", comment: "Read from Health App"))
-            }
-        }
-        .tint(Color.bloomPrimary)
-
-        // 同步频率（仅读取开启时显示）
-        if healthManager.readEnabled {
-            Picker(selection: Binding(
-                get: { healthSyncService.syncFrequency },
-                set: { newValue in
-                    healthSyncService.syncFrequency = newValue
-                    Haptics.light()
-                }
-            )) {
-                ForEach(HealthSyncService.SyncFrequency.allCases, id: \.self) { freq in
-                    Text(freq.localizedDescription).tag(freq)
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                        .foregroundColor(.orange)
-                        .frame(width: 22)
-                    Text(NSLocalizedString("同步频率", comment: "Sync frequency"))
-                }
-            }
-            .pickerStyle(.menu)
-        }
-
-        // 上次同步时间
-        if let lastSync = healthSyncService.lastSyncTime {
-            HStack {
-                Image(systemName: "clock")
-                    .foregroundColor(.secondary)
-                    .frame(width: 22)
-                Text(NSLocalizedString("上次同步", comment: "Last sync"))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.bloomTextPrimary)
+                
                 Spacer()
-                Text(lastSync.relativeDescription)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+                
+                Toggle("", isOn: Binding(
+                    get: { healthManager.writeEnabled },
+                    set: { newValue in
+                        healthManager.writeEnabled = newValue
+                        Haptics.light()
+                    }
+                ))
+                    .labelsHidden()
+                    .tint(Color.bloomPrimary)
             }
-        }
-
-        // 同步数据量统计
-        HStack {
-            Image(systemName: "chart.bar.fill")
-                .foregroundColor(.purple)
-                .frame(width: 22)
-            Text(NSLocalizedString("已同步数据量", comment: "Synced data count"))
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(String(format: NSLocalizedString("写入 %@ 条", comment: "Written count"),
-                            "\(healthSyncService.totalWrittenRecords)"))
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-                Text(String(format: NSLocalizedString("读取 %@ 条", comment: "Read count"),
-                            "\(healthSyncService.totalSyncedRecords)"))
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            
+            Divider()
+                .padding(.leading, 48)
+            
+            // 读取开关
+            HStack(spacing: 12) {
+                IconCircle(
+                    icon: "square.and.arrow.down",
+                    backgroundColor: Color.bloomSuccess.opacity(0.15),
+                    iconColor: Color.bloomSuccess,
+                    size: .small
+                )
+                
+                Text(NSLocalizedString("从健康 App 读取", comment: "Read from Health App"))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.bloomTextPrimary)
+                
+                Spacer()
+                
+                Toggle("", isOn: Binding(
+                    get: { healthManager.readEnabled },
+                    set: { newValue in
+                        healthManager.readEnabled = newValue
+                        Haptics.light()
+                    }
+                ))
+                    .labelsHidden()
+                    .tint(Color.bloomPrimary)
             }
-        }
-
-        // 立即同步按钮
-        if healthManager.readEnabled {
-            Button {
-                Task {
-                    await performManualSync()
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .foregroundColor(.bloomPrimary)
-                        .frame(width: 22)
-                    Text(NSLocalizedString("立即同步", comment: "Sync now"))
-                        .foregroundStyle(.primary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            
+            if healthManager.readEnabled {
+                Divider()
+                    .padding(.leading, 48)
+                
+                // 同步频率
+                HStack(spacing: 12) {
+                    IconCircle(
+                        icon: "arrow.clockwise",
+                        backgroundColor: Color.bloomWarning.opacity(0.15),
+                        iconColor: Color.bloomWarning,
+                        size: .small
+                    )
+                    
+                    Text(NSLocalizedString("同步频率", comment: "Sync frequency"))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.bloomTextPrimary)
+                    
                     Spacer()
-                    if healthSyncService.isSyncing {
+                    
+                    Menu {
+                        ForEach(HealthSyncService.SyncFrequency.allCases, id: \.self) { freq in
+                            Button {
+                                healthSyncService.syncFrequency = freq
+                                Haptics.light()
+                            } label: {
+                                Text(freq.localizedDescription)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(healthSyncService.syncFrequency.localizedDescription)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.bloomTextTertiary)
+                        }
+                    }
+                    .menuStyle(.borderlessButton)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                
+                Divider()
+                    .padding(.leading, 48)
+                
+                // 立即同步
+                Button {
+                    Task {
+                        await performManualSync()
+                    }
+                } label: {
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "arrow.triangle.2.circlepath",
+                            backgroundColor: Color.bloomPrimaryMuted,
+                            iconColor: Color.bloomPrimary,
+                            size: .small
+                        )
+                        
+                        Text(NSLocalizedString("立即同步", comment: "Sync now"))
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        if healthSyncService.isSyncing {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                }
+                .buttonStyle(.plain)
+                .disabled(healthSyncService.isSyncing)
+            }
+            
+            Divider()
+                .padding(.leading, 48)
+            
+            // 隐私说明
+            Button {
+                showHealthPrivacyInfo = true
+                Haptics.light()
+            } label: {
+                HStack(spacing: 12) {
+                    IconCircle(
+                        icon: "hand.raised.fill",
+                        backgroundColor: Color.bloomInfo.opacity(0.15),
+                        iconColor: Color.bloomInfo,
+                        size: .small
+                    )
+                    
+                    Text(NSLocalizedString("数据使用说明", comment: "Data usage explanation"))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.bloomTextPrimary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.bloomTextTertiary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
+            
+            Divider()
+                .padding(.leading, 48)
+            
+            // 清除健康数据
+            Button {
+                showDeleteHealthDataConfirm = true
+                refreshBloomDataCount()
+                Haptics.light()
+            } label: {
+                HStack(spacing: 12) {
+                    IconCircle(
+                        icon: "trash.fill",
+                        backgroundColor: Color.bloomError.opacity(0.15),
+                        iconColor: Color.bloomError,
+                        size: .small
+                    )
+                    
+                    Text(NSLocalizedString("删除 Bloom 写入的健康数据", comment: "Delete Bloom Health data"))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.bloomError)
+                    
+                    Spacer()
+                    
+                    if isClearingHealthData {
                         ProgressView()
                             .scaleEffect(0.8)
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-            .disabled(healthSyncService.isSyncing)
+            .buttonStyle(.plain)
+            .disabled(isClearingHealthData)
         }
-
-        // 同步错误提示
-        if let error = healthSyncService.lastSyncError, !healthSyncService.isSyncing {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text(error)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-                if let recovery = healthSyncService.lastSyncErrorRecovery {
-                    Text(recovery)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, 28)
-                }
-            }
-            .padding(.vertical, 4)
-        }
-
-        // 重新授权
-        Button {
-            openSettings()
-        } label: {
-            HStack {
-                Image(systemName: "gearshape.fill")
-                    .foregroundColor(.gray)
-                    .frame(width: 22)
-                Text(NSLocalizedString("在系统设置中管理权限", comment: "Manage permissions in Settings"))
-                    .foregroundStyle(.primary)
-                Spacer()
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-            }
-        }
-
-        // 隐私说明
-        Button {
-            showHealthPrivacyInfo = true
-        } label: {
-            HStack {
-                Image(systemName: "hand.raised.fill")
-                    .foregroundColor(.blue)
-                    .frame(width: 22)
-                Text(NSLocalizedString("数据使用说明", comment: "Data usage explanation"))
-                    .foregroundStyle(.primary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-            }
-        }
-
-        // 清除健康数据
-        Button(role: .destructive) {
-            showDeleteHealthDataConfirm = true
-            refreshBloomDataCount()
-        } label: {
-            HStack {
-                Image(systemName: "trash.fill")
-                    .frame(width: 22)
-                Text(NSLocalizedString("删除 Bloom 写入的健康数据", comment: "Delete Bloom Health data"))
-                    .foregroundStyle(.red)
-                Spacer()
-                if isClearingHealthData {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                }
-            }
-        }
-        .disabled(isClearingHealthData)
-    }
-
-    @ViewBuilder
-    private var healthSectionFooter: some View {
-        if !healthAuthorized {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(NSLocalizedString("Bloom 仅请求饮水量数据，用于：", comment: "Health data usage explanation"))
-                Text("• " + NSLocalizedString("将你的喝水记录同步到健康 App", comment: "Sync water records to Health"))
-                Text("• " + NSLocalizedString("从健康 App 读取其他 App 记录的喝水数据", comment: "Read water data from other apps"))
-                Button {
-                    showHealthPrivacyInfo = true
-                } label: {
-                    Text(NSLocalizedString("了解更多", comment: "Learn more"))
-                        .font(.footnote)
-                        .foregroundColor(.bloomPrimary)
-                }
-            }
-        } else {
-            Text(NSLocalizedString("喝水记录自动同步，数据仅存储在本地和健康 App 中", comment: "Health sync footer when authorized"))
-        }
-    }
-
-    // MARK: - 主题
-
-    private var themeSection: some View {
-        Section {
-            Picker("模式", selection: themeBinding) {
-                ForEach(AppTheme.allCases, id: \.self) { theme in
-                    Label(theme.rawValue, systemImage: theme.icon).tag(theme)
-                }
-            }
-            .pickerStyle(.segmented)
-            
-            // 主题颜色选择器
-            NavigationLink(destination: ThemePickerView().environmentObject(userStore)) {
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                        .foregroundColor(.bloomPrimary)
-                    Text("主题颜色".localized)
-                    Spacer()
-                    Text(ThemeManager.shared.currentTheme.name)
-                        .foregroundColor(.secondary)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
-            }
-        } header: {
-            Text("外观".localized)
-        }
-    }
-
-    private var themeBinding: Binding<AppTheme> {
-        Binding(
-            get: { userStore.theme },
-            set: { userStore.setTheme($0) }
-        )
     }
 
     // MARK: - iCloud 同步
 
     private var cloudSection: some View {
-        Section {
-            Button {
-                handleCloudSyncTap()
-            } label: {
-                HStack {
-                    Image(systemName: "icloud.fill")
-                        .foregroundStyle(cloudIconColor)
-                    Text("iCloud 同步".localized)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    syncStatusView
-                }
-            }
-            .disabled(cloudSyncManager.isSyncing)
+        VStack(spacing: 8) {
+            SectionHeader("iCloud".localized)
             
-            if let lastSync = cloudSyncManager.lastSyncDate {
-                HStack {
-                    Text("上次同步".localized)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Text(lastSync.relativeDescription)
-                        .foregroundStyle(.secondary)
-                        .font(.system(size: 13))
-                }
-            }
-            
-            if case .failed(let error) = cloudSyncManager.syncStatus {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text(error.errorDescription ?? "同步失败".localized)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    if let suggestion = error.recoverySuggestion {
-                        Text(suggestion)
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    HStack(spacing: 8) {
-                        if error.canRetry {
-                            Button {
-                                Task {
-                                    await cloudSyncManager.retryLastSync()
-                                }
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "arrow.clockwise")
-                                        .font(.system(size: 11, weight: .semibold))
-                                    Text("重试".localized)
-                                        .font(.system(size: 12, weight: .semibold))
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.bloomPrimary)
-                                .clipShape(Capsule())
-                            }
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    Button {
+                        handleCloudSyncTap()
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "cloud",
+                                backgroundColor: Color.bloomInfo.opacity(0.15),
+                                iconColor: cloudIconColor
+                            )
+                            
+                            Text("iCloud 同步".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            syncStatusView
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(cloudSyncManager.isSyncing)
+                    
+                    if let lastSync = cloudSyncManager.lastSyncDate {
+                        Divider()
+                            .padding(.leading, 56)
                         
-                        if error.showsSettingsButton {
-                            Button {
-                                cloudSyncManager.openSystemSettings()
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 11, weight: .semibold))
-                                    Text("去设置".localized)
-                                        .font(.system(size: 12, weight: .semibold))
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "clock",
+                                backgroundColor: Color.bloomFill,
+                                iconColor: Color.bloomTextSecondary,
+                                size: .small
+                            )
+                            
+                            Text("上次同步".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Text(lastSync.relativeDescription)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    
+                    if case .failed(let error) = cloudSyncManager.syncStatus {
+                        Divider()
+                            .padding(.leading, 56)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(Color.bloomWarning)
+                                    .font(.system(size: 14))
+                                
+                                Text(error.errorDescription ?? "同步失败".localized)
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Color.bloomTextSecondary)
+                            }
+                            
+                            if let suggestion = error.recoverySuggestion {
+                                Text(suggestion)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
+                            
+                            HStack(spacing: 8) {
+                                if error.canRetry {
+                                    Button {
+                                        Task {
+                                            await cloudSyncManager.retryLastSync()
+                                            Haptics.light()
+                                        }
+                                    } label: {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.clockwise")
+                                                .font(.system(size: 11, weight: .semibold))
+                                            Text("重试".localized)
+                                                .font(.system(size: 12, weight: .semibold))
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.bloomPrimary)
+                                        .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .foregroundColor(.bloomPrimary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.bloomPrimary.opacity(0.1))
-                                .clipShape(Capsule())
+                                
+                                if error.showsSettingsButton {
+                                    Button {
+                                        cloudSyncManager.openSystemSettings()
+                                        Haptics.light()
+                                    } label: {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "gearshape.fill")
+                                                .font(.system(size: 11, weight: .semibold))
+                                            Text("去设置".localized)
+                                                .font(.system(size: 12, weight: .semibold))
+                                        }
+                                        .foregroundColor(Color.bloomPrimary)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.bloomPrimary.opacity(0.1))
+                                        .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
                     }
                 }
-                .padding(.vertical, 4)
             }
-        } header: {
-            Text("iCloud".localized)
-        } footer: {
+            
             Text(cloudSectionFooter)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.bloomTextTertiary)
+                .padding(.horizontal, 16)
         }
     }
     
@@ -801,31 +1016,33 @@ struct SettingsView: View {
                         .scaleEffect(0.7)
                     Text(syncProgressText)
                         .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.bloomTextSecondary)
                 }
             } else if case .failed = cloudSyncManager.syncStatus {
                 Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundStyle(.orange)
+                    .font(.system(size: 22))
+                    .foregroundStyle(Color.bloomWarning)
             } else if cloudSyncManager.isSyncAvailable {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .font(.system(size: 22))
+                    .foregroundStyle(Color.bloomSuccess)
             } else {
                 Text("未登录".localized)
                     .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.bloomTextSecondary)
             }
         }
     }
     
     private var cloudIconColor: Color {
         if cloudSyncManager.isSyncing {
-            return .orange
+            return Color.bloomWarning
         } else if case .failed = cloudSyncManager.syncStatus {
-            return .orange
+            return Color.bloomWarning
         } else if cloudSyncManager.isSyncAvailable {
-            return .blue
+            return Color.bloomInfo
         } else {
-            return .secondary
+            return Color.bloomTextSecondary
         }
     }
     
@@ -871,117 +1088,162 @@ struct SettingsView: View {
     // MARK: - 数据备份与恢复
 
     private var backupSection: some View {
-        Section {
+        VStack(spacing: 8) {
+            SectionHeader("数据备份".localized)
+            
             // 数据概览卡片
-            dataSummaryCard
-                .listRowBackground(Color(.systemGroupedBackground))
-            // 导出按钮
-            Button {
-                Task {
-                    do {
-                        let fileURL = try await backupManager.exportAllData(
-                            waterStore: waterStore,
-                            plantEngine: plantEngine,
-                            gardenStore: gardenStore,
-                            userStore: userStore,
-                            achievementStore: achievementStore
-                        )
-                        await MainActor.run {
-                            exportedFileURL = fileURL
-                            showExportSheet = true
+            SurfaceCard(padding: 16) {
+                HStack(spacing: 0) {
+                    summaryItem(
+                        title: "喝水记录",
+                        value: "\(waterStore.records.count)",
+                        icon: "drop.fill",
+                        color: Color.bloomWater
+                    )
+                    summaryItem(
+                        title: "养成天数",
+                        value: "\(daysSincePlanted)",
+                        icon: "leaf.fill",
+                        color: Color.bloomSuccess
+                    )
+                    summaryItem(
+                        title: "成就",
+                        value: "\(achievementStore.unlockedCount)/\(achievementStore.totalCount)",
+                        icon: "trophy.fill",
+                        color: Color.bloomGold
+                    )
+                    summaryItem(
+                        title: "收藏品种",
+                        value: "\(gardenStore.items.count)",
+                        icon: "tray.full.fill",
+                        color: Color.bloomWarning
+                    )
+                }
+            }
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 导出按钮
+                    Button {
+                        Task {
+                            do {
+                                let fileURL = try await backupManager.exportAllData(
+                                    waterStore: waterStore,
+                                    plantEngine: plantEngine,
+                                    gardenStore: gardenStore,
+                                    userStore: userStore,
+                                    achievementStore: achievementStore
+                                )
+                                await MainActor.run {
+                                    exportedFileURL = fileURL
+                                    showExportSheet = true
+                                }
+                            } catch {
+                                await MainActor.run {
+                                    errorMessage = error.localizedDescription
+                                    showRestoreError = true
+                                }
+                            }
                         }
-                    } catch {
-                        await MainActor.run {
-                            errorMessage = error.localizedDescription
-                            showRestoreError = true
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "square.and.arrow.up",
+                                backgroundColor: Color.bloomInfo.opacity(0.15),
+                                iconColor: Color.bloomInfo
+                            )
+                            
+                            Text("导出数据备份".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            if backupManager.isExporting {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
                     }
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundStyle(.blue)
-                    Text("导出数据备份".localized)
-                    Spacer()
-                    if backupManager.isExporting {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.secondary)
+                    .buttonStyle(.plain)
+                    .disabled(backupManager.isExporting)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 导入按钮
+                    Button {
+                        showFilePicker = true
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "square.and.arrow.down",
+                                backgroundColor: Color.bloomSuccess.opacity(0.15),
+                                iconColor: Color.bloomSuccess
+                            )
+                            
+                            Text("从备份恢复".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            if backupManager.isImporting {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(backupManager.isImporting)
+                    
+                    if let lastBackup = backupManager.lastBackupDate {
+                        Divider()
+                            .padding(.leading, 56)
+                        
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "clock",
+                                backgroundColor: Color.bloomFill,
+                                iconColor: Color.bloomTextSecondary,
+                                size: .small
+                            )
+                            
+                            Text("上次备份".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Text(lastBackup.relativeDescription)
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
                     }
                 }
             }
-            .disabled(backupManager.isExporting)
-
-            // 导入按钮
-            Button {
-                showFilePicker = true
-            } label: {
-                HStack {
-                    Image(systemName: "square.and.arrow.down")
-                        .foregroundStyle(.green)
-                    Text("从备份恢复".localized)
-                    Spacer()
-                    if backupManager.isImporting {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .disabled(backupManager.isImporting)
-
-            // 上次备份时间
-            if let lastBackup = backupManager.lastBackupDate {
-                HStack {
-                    Text("上次备份".localized)
-                    Spacer()
-                    Text(lastBackup.relativeDescription)
-                        .foregroundStyle(.secondary)
-                        .font(.system(size: 13))
-                }
-            }
-        } header: {
-            Text("数据备份".localized)
-        } footer: {
+            
             Text("导出 JSON 文件可保存到 Files App，用于数据备份或迁移".localized)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.bloomTextTertiary)
+                .padding(.horizontal, 16)
         }
-    }
-
-    // 数据概览卡片
-    private var dataSummaryCard: some View {
-        HStack(spacing: 0) {
-            summaryItem(
-                title: "喝水记录",
-                value: "\(waterStore.records.count)",
-                icon: "drop.fill",
-                color: .bloomWater
-            )
-            summaryItem(
-                title: "养成天数",
-                value: "\(daysSincePlanted)",
-                icon: "leaf.fill",
-                color: .green
-            )
-            summaryItem(
-                title: "成就",
-                value: "\(achievementStore.unlockedCount)/\(achievementStore.totalCount)",
-                icon: "trophy.fill",
-                color: .bloomGold
-            )
-            summaryItem(
-                title: "收藏品种",
-                value: "\(gardenStore.items.count)",
-                icon: "tray.full.fill",
-                color: .orange
-            )
-        }
-        .padding(.vertical, 8)
     }
 
     private func summaryItem(title: String, value: String, icon: String, color: Color) -> some View {
@@ -991,9 +1253,10 @@ struct SettingsView: View {
                 .font(.system(size: 16))
             Text(value)
                 .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.bloomTextPrimary)
             Text(title)
                 .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.bloomTextSecondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -1005,94 +1268,248 @@ struct SettingsView: View {
     // MARK: - Pro
 
     private var proSection: some View {
-        Section {
-            if storeManager.isPro {
-                HStack {
-                    Image(systemName: "sparkles").foregroundStyle(Color.bloomGold)
-                    Text("Bloom Pro 已解锁".localized)
-                    Spacer()
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                }
-            } else {
-                Button {
-                    showPaywall = true
-                } label: {
-                    HStack {
-                        Image(systemName: "sparkles").foregroundStyle(Color.bloomGold)
-                        Text("升级 Bloom Pro".localized).foregroundStyle(.primary)
-                        Spacer()
-                        Text("解锁更多品种".localized)
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right").font(.system(size: 14)).foregroundStyle(.secondary)
+        VStack(spacing: 8) {
+            SectionHeader("Bloom Pro".localized)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    if storeManager.isPro {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "sparkles",
+                                backgroundColor: Color.bloomGoldMuted,
+                                iconColor: Color.bloomGold
+                            )
+                            
+                            Text("Bloom Pro 已解锁".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(Color.bloomSuccess)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    } else {
+                        Button {
+                            showPaywall = true
+                            Haptics.light()
+                        } label: {
+                            HStack(spacing: 12) {
+                                IconCircle(
+                                    icon: "sparkles",
+                                    backgroundColor: Color.bloomGoldMuted,
+                                    iconColor: Color.bloomGold
+                                )
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("升级 Bloom Pro".localized)
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundStyle(Color.bloomTextPrimary)
+                                    
+                                    Text("解锁更多品种".localized)
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.bloomTextSecondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.bloomTextTertiary)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
-        } header: {
-            Text("Bloom Pro".localized)
+        }
+    }
+
+    // MARK: - 成就和高级统计
+
+    private var achievementAndStatsSection: some View {
+        VStack(spacing: 8) {
+            SectionHeader("关于".localized)
+            
+            SurfaceCard(padding: 0) {
+                VStack(spacing: 0) {
+                    // 成就
+                    NavigationLink(destination: AchievementView().environmentObject(achievementStore)) {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "trophy",
+                                backgroundColor: Color.bloomGoldMuted,
+                                iconColor: Color.bloomGold
+                            )
+                            
+                            Text("成就".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Text("\(achievementStore.unlockedCount)/\(achievementStore.totalCount)")
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.bloomTextTertiary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 高级统计 (Pro teaser)
+                    Button {
+                        if userStore.isPro {
+                            showAdvancedStats = true
+                        } else {
+                            showPaywall = true
+                        }
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "bar-chart-3",
+                                backgroundColor: Color.bloomGoldMuted,
+                                iconColor: Color.bloomGold
+                            )
+                            
+                            Text("高级统计".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            if !userStore.isPro {
+                                Badge("Pro", style: .gold)
+                            }
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.bloomTextTertiary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 隐私政策
+                    Button {
+                        openURL(AppConstants.URLs.privacyPolicy)
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "hand",
+                                backgroundColor: Color.bloomInfo.opacity(0.15),
+                                iconColor: Color.bloomInfo
+                            )
+                            
+                            Text("隐私政策".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.bloomTextSecondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 版本号
+                    HStack(spacing: 12) {
+                        IconCircle(
+                            icon: "info",
+                            backgroundColor: Color.bloomFill,
+                            iconColor: Color.bloomTextSecondary
+                        )
+                        
+                        Text("版本".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.bloomTextPrimary)
+                        
+                        Spacer()
+                        
+                        Text(appVersion)
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color.bloomTextSecondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    // 恢复购买
+                    Button {
+                        Task {
+                            isRestoringPurchase = true
+                            await storeManager.restore()
+                            isRestoringPurchase = false
+                            
+                            if storeManager.isPro {
+                                showRestoreSuccess = true
+                            } else {
+                                errorMessage = "未找到已购买的记录".localized
+                                showRestoreError = true
+                            }
+                        }
+                        Haptics.light()
+                    } label: {
+                        HStack(spacing: 12) {
+                            IconCircle(
+                                icon: "arrow.clockwise",
+                                backgroundColor: Color.bloomPrimaryMuted,
+                                iconColor: Color.bloomPrimary
+                            )
+                            
+                            Text("恢复购买".localized)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(Color.bloomTextPrimary)
+                            
+                            Spacer()
+                            
+                            if isRestoringPurchase {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isRestoringPurchase)
+                }
+            }
         }
     }
 
     // MARK: - 关于
 
     private var aboutSection: some View {
-        Section {
-            HStack {
-                Text("版本".localized)
-                Spacer()
-                Text(appVersion).foregroundStyle(.secondary)
-            }
-            Button("恢复购买".localized) {
-                Task {
-                    isRestoringPurchase = true
-                    await storeManager.restore()
-                    isRestoringPurchase = false
-                    
-                    if storeManager.isPro {
-                        showRestoreSuccess = true
-                    } else {
-                        errorMessage = "未找到已购买的记录".localized
-                        showRestoreError = true
-                    }
-                }
-            }
-            .disabled(isRestoringPurchase)
-            .overlay {
-                if isRestoringPurchase {
-                    ProgressView()
-                }
-            }
-            Button {
-                openURL(AppConstants.URLs.privacyPolicy)
-            } label: {
-                HStack {
-                    Image(systemName: "hand.raised.fill")
-                        .foregroundStyle(.blue)
-                    Text("隐私政策".localized)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Button {
-                openURL(AppConstants.URLs.termsOfService)
-            } label: {
-                HStack {
-                    Image(systemName: "doc.text.fill")
-                        .foregroundStyle(.orange)
-                    Text("服务条款".localized)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                }
-            }
-        } header: {
-            Text("关于".localized)
-        }
+        EmptyView()
     }
     
     /// 从 Bundle 获取 App 版本号
@@ -1329,6 +1746,7 @@ struct HealthPermissionSheetView: View {
                                         .stroke(selectedMode == mode ? Color.bloomPrimary : Color.clear, lineWidth: 2)
                                 )
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
