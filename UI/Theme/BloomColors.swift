@@ -33,7 +33,7 @@ extension Color {
             red: Double(r) / 255,
             green: Double(g) / 255,
             blue: Double(b) / 255,
-            opacity: opacity
+            opacity: opacity * Double(a) / 255.0
         )
     }
 

@@ -273,7 +273,6 @@ struct ConfettiView: View {
         let colors: [Color] = [.bloomPrimary, .bloomGold, .bloomSuccess, .pink, .orange, .yellow, .purple, .red]
         let color = colors[index % colors.count]
         let size = CGFloat.random(in: 6...12)
-        let startX = CGFloat.random(in: 0...size)
         let delay = Double(index) * 0.05
         
         return Rectangle()

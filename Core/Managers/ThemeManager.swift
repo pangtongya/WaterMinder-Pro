@@ -222,16 +222,3 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
-
-// MARK: - EnvironmentKey 用于传递主题
-
-struct ThemeManagerKey: EnvironmentKey {
-    static let defaultValue: ThemeManager = ThemeManager.shared
-}
-
-extension EnvironmentValues {
-    var themeManager: ThemeManager {
-        get { self[ThemeManagerKey.self] }
-        set { self[ThemeManagerKey.self] = newValue }
-    }
-}

@@ -645,7 +645,7 @@ struct PaywallView: View {
     }
     
     private var buttonTitle: String {
-        guard let product = storeManager.products.first(where: { $0.id == selectedProductID }) else {
+        guard storeManager.products.first(where: { $0.id == selectedProductID }) != nil else {
             return "加载中...".localized
         }
         let isYearly = selectedProductID == BloomProduct.yearlyID

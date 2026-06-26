@@ -30,6 +30,7 @@ struct OnboardingView: View {
     @State private var showPlantAnimation = false
     @State private var contentOpacity: Double = 0
     @State private var iconScale: Double = 0.8
+    @State private var bellBounce = false
     
     // 页面总数
     private let totalPages = 4
@@ -242,7 +243,10 @@ struct OnboardingView: View {
                     Image(systemName: "bell.fill")
                         .font(.system(size: 60, weight: .light))
                         .foregroundStyle(Color.bloomWater)
-                        .symbolEffect(.bounce, options: .repeating.speed(0.5))
+                        .opacity(bellBounce ? 1 : 0.8)
+                        .scaleEffect(bellBounce ? 1.05 : 1.0)
+                        .animation(Animation.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: bellBounce)
+                        .onAppear { bellBounce = true }
                     
                     Image(systemName: "drop.fill")
                         .font(.system(size: 24, weight: .medium))
