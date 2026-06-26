@@ -544,57 +544,54 @@ struct SmallWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        ZStack {
-            WidgetPlaceholderBackground()
-            
-            VStack(spacing: 6) {
-                HStack(spacing: 8) {
-                    WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 55)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(data.plantName)
-                            .font(.system(size: 12, weight: .semibold))
-                            .lineLimit(1)
-                        Text(data.plantStage)
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
-                    
-                    Spacer()
-                }
+        VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 55)
                 
-                Spacer()
-                
-                ZStack {
-                    ProgressRingView(progress: data.progressPercentage, lineWidth: 6, size: 50)
-                    
-                    VStack(spacing: 0) {
-                        Text(data.progressPercentString)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.bloomPrimary)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                
-                Spacer()
-                
-                HStack(spacing: 2) {
-                    Text("\(data.currentIntake)")
-                        .font(.system(size: 10, weight: .bold))
-                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(data.plantName)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
+                    Text(data.plantStage)
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
                 
-                if data.isPaused {
-                    Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
-                        .font(.system(size: 8))
-                        .foregroundColor(.orange)
+                Spacer()
+            }
+            
+            Spacer()
+            
+            ZStack {
+                ProgressRingView(progress: data.progressPercentage, lineWidth: 6, size: 50)
+                
+                VStack(spacing: 0) {
+                    Text(data.progressPercentString)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.bloomPrimary)
                 }
             }
-            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .center)
+            
+            Spacer()
+            
+            HStack(spacing: 2) {
+                Text("\(data.currentIntake)")
+                    .font(.system(size: 10, weight: .bold))
+                Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+            
+            if data.isPaused {
+                Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
+                    .font(.system(size: 8))
+                    .foregroundColor(.orange)
+            }
         }
+        .padding(12)
+        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
@@ -604,69 +601,66 @@ struct MediumWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        ZStack {
-            WidgetPlaceholderBackground()
+        HStack(spacing: 12) {
+            WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 90)
             
-            HStack(spacing: 12) {
-                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 90)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(data.plantName)
+                    .font(.system(size: 15, weight: .semibold))
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(data.plantName)
-                        .font(.system(size: 15, weight: .semibold))
+                HStack(spacing: 4) {
+                    Text(data.plantStage)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
                     
-                    HStack(spacing: 4) {
-                        Text(data.plantStage)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                        
-                        if data.isPaused {
-                            Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(.orange)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 4) {
-                        Label("\(Int(data.plantHealth))%", systemImage: "leaf.fill")
+                    if data.isPaused {
+                        Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
                             .font(.system(size: 10))
-                            .foregroundColor(Color.healthColor(data.plantHealth))
-                        
-                        Spacer()
-                        
-                        Text(data.lastUpdated, style: .time)
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.orange)
                     }
                 }
                 
                 Spacer()
                 
-                VStack(spacing: 6) {
-                    ZStack {
-                        ProgressRingView(progress: data.progressPercentage, lineWidth: 8, size: 80)
-                        
-                        VStack(spacing: 1) {
-                            Text("\(data.currentIntake)")
-                                .font(.system(size: 18, weight: .bold))
-                            Text(WidgetL.ml)
-                                .font(.system(size: 9))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                HStack(spacing: 4) {
+                    Label("\(Int(data.plantHealth))%", systemImage: "leaf.fill")
                         .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.healthColor(data.plantHealth))
                     
-                    Text(data.progressPercentString)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.bloomPrimary)
+                    Spacer()
+                    
+                    Text(data.lastUpdated, style: .time)
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
                 }
             }
-            .padding(14)
+            
+            Spacer()
+            
+            VStack(spacing: 6) {
+                ZStack {
+                    ProgressRingView(progress: data.progressPercentage, lineWidth: 8, size: 80)
+                    
+                    VStack(spacing: 1) {
+                        Text("\(data.currentIntake)")
+                            .font(.system(size: 18, weight: .bold))
+                        Text(WidgetL.ml)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                
+                Text(data.progressPercentString)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.bloomPrimary)
+            }
         }
+        .padding(14)
+        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
@@ -676,83 +670,80 @@ struct LargeWidgetView: View {
     let data: WidgetData
     
     var body: some View {
-        ZStack {
-            WidgetPlaceholderBackground()
-            
-            VStack(spacing: 10) {
-                HStack {
-                    WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 110)
-                        .padding(.leading, -4)
-                    
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(data.plantName)
-                            .font(.system(size: 18, weight: .semibold))
-                        Text(data.plantStage)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                        Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                            .padding(.top, 1)
-                    }
-                    
-                    Spacer()
-                    
-                    if data.isPaused {
-                        Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.orange)
-                    }
-                }
+        VStack(spacing: 10) {
+            HStack {
+                WidgetPlantView(stage: data.plantStage, health: data.plantHealth, size: 110)
+                    .padding(.leading, -4)
                 
-                ZStack {
-                    ProgressRingView(progress: data.progressPercentage, lineWidth: 10, size: 130)
-                    
-                    VStack(spacing: 3) {
-                        Text("\(data.currentIntake)")
-                            .font(.system(size: 32, weight: .bold))
-                        Text("/ \(data.dailyGoal)\(WidgetL.ml)")
-                            .font(.system(size: 13))
-                            .foregroundColor(.secondary)
-                        Text(data.progressPercentString)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.bloomPrimary)
-                    }
-                }
-                .frame(width: 140, height: 140)
-                
-                HStack(spacing: 10) {
-                    VStack(alignment: .leading) {
-                        Text(WidgetL.plantHealth)
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                        HStack(spacing: 5) {
-                            Text("\(Int(data.plantHealth))%")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color.healthColor(data.plantHealth))
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(width: 50, height: 5)
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Color.healthColor(data.plantHealth))
-                                    .frame(width: 50 * CGFloat(data.plantHealth / 100), height: 5)
-                            }
-                        }
-                    }
-                    .padding(.leading, 6)
-                    
-                    Spacer()
-                    
-                    Text(WidgetL.drinkWaterGrow)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(data.plantName)
+                        .font(.system(size: 18, weight: .semibold))
+                    Text(data.plantStage)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%@ %@", WidgetL.updatedAt, DateFormatter.localizedString(from: data.lastUpdated, dateStyle: .none, timeStyle: .short)))
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
-                        .multilineTextAlignment(.trailing)
-                        .padding(.trailing, 6)
+                        .padding(.top, 1)
+                }
+                
+                Spacer()
+                
+                if data.isPaused {
+                    Label(WidgetL.pauseCare, systemImage: "pause.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.orange)
                 }
             }
-            .padding(14)
+            
+            ZStack {
+                ProgressRingView(progress: data.progressPercentage, lineWidth: 10, size: 130)
+                
+                VStack(spacing: 3) {
+                    Text("\(data.currentIntake)")
+                        .font(.system(size: 32, weight: .bold))
+                    Text("/ \(data.dailyGoal)\(WidgetL.ml)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    Text(data.progressPercentString)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.bloomPrimary)
+                }
+            }
+            .frame(width: 140, height: 140)
+            
+            HStack(spacing: 10) {
+                VStack(alignment: .leading) {
+                    Text(WidgetL.plantHealth)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                    HStack(spacing: 5) {
+                        Text("\(Int(data.plantHealth))%")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color.healthColor(data.plantHealth))
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 50, height: 5)
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.healthColor(data.plantHealth))
+                                .frame(width: 50 * CGFloat(data.plantHealth / 100), height: 5)
+                        }
+                    }
+                }
+                .padding(.leading, 6)
+                
+                Spacer()
+                
+                Text(WidgetL.drinkWaterGrow)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.trailing)
+                    .padding(.trailing, 6)
+            }
         }
+        .padding(14)
+        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 

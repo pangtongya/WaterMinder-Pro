@@ -199,14 +199,13 @@ struct SyncToastView: View {
     private var actionButton: some View {
         switch state {
         case .failed:
-            if !canRetry && !showsSettings {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white.opacity(0.7))
-                }
+            // 失败状态始终显示关闭按钮，让用户可以手动关闭
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.7))
             }
         default:
             EmptyView()
