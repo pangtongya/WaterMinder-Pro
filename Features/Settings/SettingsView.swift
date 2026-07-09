@@ -539,9 +539,9 @@ struct SettingsView: View {
                                     }
                                 }
                             ),
-                            options: AppTheme.allCases.map { $0.rawValue }
+                            options: AppTheme.allCases.map { $0.rawValue },
+                            fullWidth: false
                         )
-                        .frame(width: 200)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -617,7 +617,7 @@ struct SettingsView: View {
                                     .font(.system(size: 14))
                                     .foregroundStyle(Color.bloomPrimary)
                                 Text(NSLocalizedString("已连接", comment: "Connected"))
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.system(size: 13, weight: .medium))
                                     .foregroundStyle(Color.bloomPrimary)
                             }
                         } else {
@@ -1351,7 +1351,7 @@ struct SettingsView: View {
                             Spacer()
                             
                             Text("\(achievementStore.unlockedCount)/\(achievementStore.totalCount)")
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                             
                             Image(systemName: "chevron.right")
@@ -1422,9 +1422,9 @@ struct SettingsView: View {
                             
                             Spacer()
                             
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 12))
-                                .foregroundStyle(Color.bloomTextSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.bloomTextTertiary)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -1510,9 +1510,7 @@ struct SettingsView: View {
     
     /// 从 Bundle 获取 App 版本号
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(version) (\(build))"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
     // MARK: - 工具

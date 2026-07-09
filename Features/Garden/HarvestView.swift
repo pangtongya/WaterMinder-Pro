@@ -272,16 +272,16 @@ struct ConfettiView: View {
     private func confettiPiece(at index: Int, in size: CGSize) -> some View {
         let colors: [Color] = [.bloomPrimary, .bloomGold, .bloomSuccess, .pink, .orange, .yellow, .purple, .red]
         let color = colors[index % colors.count]
-        let size = CGFloat.random(in: 6...12)
+        let pieceSize = CGFloat.random(in: 6...12)
         let delay = Double(index) * 0.05
-        
+
         return Rectangle()
             .fill(color)
-            .frame(width: size, height: size * CGFloat.random(in: 0.6...1.4))
+            .frame(width: pieceSize, height: pieceSize * CGFloat.random(in: 0.6...1.4))
             .rotationEffect(.degrees(animate ? Double.random(in: 0...720) : 0))
             .position(
-                x: CGFloat.random(in: 0...UIScreen.main.bounds.width),
-                y: animate ? UIScreen.main.bounds.height + 50 : -50
+                x: CGFloat.random(in: 0...size.width),
+                y: animate ? size.height + 50 : -50
             )
             .opacity(animate ? 0 : 1)
             .animation(
@@ -309,13 +309,13 @@ struct SparkleView: View {
     
     private func sparkle(at index: Int, in size: CGSize) -> some View {
         let delay = Double(index) * 0.15
-        let size = CGFloat.random(in: 8...16)
-        
+        let sparkleSize = CGFloat.random(in: 8...16)
+
         return Image(systemName: "sparkle")
-            .font(.system(size: size, weight: .bold))
+            .font(.system(size: sparkleSize, weight: .bold))
             .foregroundStyle(Color.bloomGold)
             .position(
-                x: CGFloat.random(in: 0...UIScreen.main.bounds.width),
+                x: CGFloat.random(in: 0...size.width),
                 y: CGFloat.random(in: 100...400)
             )
             .scaleEffect(animate ? 1.2 : 0.3)

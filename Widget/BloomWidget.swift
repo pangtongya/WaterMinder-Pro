@@ -523,21 +523,6 @@ struct BloomWidgetEntryView: View {
     }
 }
 
-// MARK: - 占位符背景
-
-struct WidgetPlaceholderBackground: View {
-    var body: some View {
-        LinearGradient(
-            colors: [
-                Color(red: 0.95, green: 0.98, blue: 0.96),
-                Color(red: 0.9, green: 0.96, blue: 0.92)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-}
-
 // MARK: - 小尺寸 Widget (2x2)
 
 struct SmallWidgetView: View {
@@ -762,26 +747,23 @@ struct BloomWidget: Widget {
     }
 }
 
-// MARK: - Widget 颜色扩展（与主 App 颜色保持一致）
+// MARK: - Widget 颜色扩展（与主 App BloomColors.swift 保持一致）
 
 extension Color {
-    static let bloomPrimary = Color(red: 0.25, green: 0.75, blue: 0.55)
-    static let bloomGold = Color(red: 1.0, green: 0.85, blue: 0.2)
-    static let bloomDeep = Color(red: 0.15, green: 0.6, blue: 0.45)
-    static let bloomSuccess = Color(red: 0.3, green: 0.7, blue: 0.5)
-    static let bloomWater = Color(red: 0.3, green: 0.6, blue: 0.9)
-    static let bloomWarning = Color(red: 1.0, green: 0.75, blue: 0.2)
-    static let bloomSoil = Color(red: 0.36, green: 0.25, blue: 0.15)
-    static let bloomLeaf = Color(red: 0.3, green: 0.65, blue: 0.35)
+    static let bloomPrimary = Color(red: 52/255, green: 199/255, blue: 89/255)       // #34C759
+    static let bloomGold = Color(red: 255/255, green: 214/255, blue: 10/255)           // #FFD60A
+    static let bloomSuccess = Color(red: 52/255, green: 199/255, blue: 89/255)       // #34C759
+    static let bloomWater = Color(red: 50/255, green: 173/255, blue: 230/255)         // #32ADE6
+    static let bloomWarning = Color(red: 255/255, green: 159/255, blue: 10/255)       // #FF9F0A
+    static let bloomError = Color(red: 255/255, green: 59/255, blue: 48/255)           // #FF3B30
 
-    /// 根据健康度返回对应颜色（绿色 -> 黄褐 -> 枯褐）
+    /// 根据健康度返回对应颜色（与主 App BloomColors.swift healthColor 一致）
     static func healthColor(_ health: Double) -> Color {
         switch health {
-        case 80...100: return Color(red: 0.25, green: 0.75, blue: 0.55)
-        case 60..<80: return Color(red: 0.4, green: 0.7, blue: 0.5)
-        case 40..<60: return Color(red: 0.5, green: 0.6, blue: 0.45)
-        case 20..<40: return Color(red: 0.6, green: 0.55, blue: 0.4)
-        default: return Color(red: 0.55, green: 0.45, blue: 0.35)
+        case 80...100: return .bloomSuccess
+        case 50..<80: return .bloomWarning
+        case 25..<50: return .bloomError
+        default: return .bloomError
         }
     }
 }
@@ -807,39 +789,3 @@ enum GrowthStage: Int {
         }
     }
 }
-
-// MARK: - Live Activity / Dynamic Island 预留结构
-//
-// 以下为未来实现 Live Activity（动态岛）的预留注释结构
-// 实现时需要：
-// 1. 创建 Widget Extension 的新 Target（或在现有 Target 中添加）
-// 2. 导入 ActivityKit
-// 3. 定义 BloomWaterActivityAttributes
-// 4. 实现 Live Activity View（含动态岛紧凑/最小/扩展视图）
-// 5. 在主 App 中请求启动 Live Activity 权限
-// 6. 通过 WidgetDataManager 更新数据
-//
-// 示例结构（未来实现时取消注释并完善）：
-//
-// import ActivityKit
-//
-// struct BloomWaterActivityAttributes: ActivityAttributes {
-//     public struct ContentState: Codable, Hashable {
-//         var currentIntake: Int
-//         var dailyGoal: Int
-//         var plantHealth: Double
-//         var plantStage: String
-//         var lastUpdated: Date
-//     }
-//
-//     var plantName: String
-//     var plantSymbol: String
-// }
-//
-// struct BloomLiveActivityView: View {
-//     let context: ActivityViewContext<BloomWaterActivityAttributes>
-//
-//     var body: some View {
-//         // 实现紧凑视图、最小视图、扩展视图
-//     }
-// }

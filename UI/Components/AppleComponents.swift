@@ -210,6 +210,7 @@ struct LargeTitle: View {
 struct SegmentedPicker: View {
     @Binding var selection: String
     let options: [String]
+    var fullWidth: Bool = true
 
     var body: some View {
         HStack(spacing: 0) {
@@ -221,10 +222,12 @@ struct SegmentedPicker: View {
                     Haptics.light()
                 } label: {
                     Text(option)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(selection == option ? Color.bloomTextPrimary : Color.bloomTextSecondary)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: fullWidth ? .infinity : nil)
+                        .padding(.horizontal, fullWidth ? 0 : 12)
                         .padding(.vertical, 6)
+                        .fixedSize(horizontal: !fullWidth, vertical: false)
                         .background(
                             selection == option ?
                             Color.bloomSurface :
@@ -331,13 +334,13 @@ struct SettingsRow: View {
                             .tint(Color.bloomPrimary)
                     } else if let value = value {
                         Text(value)
-                            .font(.system(size: 14))
+                            .font(.system(size: 13))
                             .foregroundStyle(Color.bloomTextSecondary)
                     }
 
                     if showChevron {
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundStyle(Color.bloomTextTertiary)
                     }
                 }
@@ -561,7 +564,7 @@ struct StatsCard: View {
 
                 if index < stats.count - 1 {
                     Divider()
-                        .frame(height: 40)
+                        .frame(maxHeight: .infinity)
                         .background(Color.bloomDivider)
                 }
             }

@@ -18,8 +18,8 @@ struct BloomApp: App {
     @ObservedObject private var userStore = UserStore.shared
     @ObservedObject private var waterStore = WaterStore.shared
     @ObservedObject private var plantEngine = PlantEngine.shared
-    @StateObject private var gardenStore = GardenStore()
-    @StateObject private var achievementStore = AchievementStore()
+    @ObservedObject private var gardenStore = GardenStore.shared
+    @ObservedObject private var achievementStore = AchievementStore.shared
 
     // 单例 manager：用 @ObservedObject 避免 SwiftUI 错误地假设拥有它们
     @ObservedObject private var storeManager = StoreManager.shared

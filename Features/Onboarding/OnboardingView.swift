@@ -64,6 +64,9 @@ struct OnboardingView: View {
                 iconScale = 1.0
             }
         }
+        .onChange(of: currentPage) { _, newPage in
+            bellBounce = (newPage == 2)
+        }
     }
     
     // MARK: - 渐变背景
@@ -246,7 +249,6 @@ struct OnboardingView: View {
                         .opacity(bellBounce ? 1 : 0.8)
                         .scaleEffect(bellBounce ? 1.05 : 1.0)
                         .animation(Animation.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: bellBounce)
-                        .onAppear { bellBounce = true }
                     
                     Image(systemName: "drop.fill")
                         .font(.system(size: 24, weight: .medium))

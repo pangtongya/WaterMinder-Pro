@@ -87,9 +87,16 @@ struct HistoryView: View {
             VStack(alignment: .leading, spacing: 16) {
                 // 标题与 Badge
                 HStack(spacing: 8) {
-                    Badge("PRO", style: .gold)
+                    Text("PRO")
+                        .font(.system(size: 11, weight: .bold))
+                        .tracking(0.22)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.bloomGoldMuted)
+                        .foregroundStyle(Color.bloomGold)
+                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     Text(L.deepInsights)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(Color.bloomTextPrimary)
                 }
 
@@ -233,7 +240,7 @@ struct HistoryView: View {
                         ? Color.bloomSuccess.opacity(0.8)
                         : Color.bloomWater.opacity(0.7)
                 )
-                .cornerRadius(4)
+                .cornerRadius(6)
             }
             
             // 目标线（虚线）

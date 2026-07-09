@@ -215,7 +215,7 @@ struct GardenView: View {
                     lineWidth: 8,
                     size: 180,
                     backgroundColor: Color.bloomFill,
-                    foregroundColor: healthColor
+                    foregroundColor: Color.bloomPrimary
                 )
                 
                 ZStack {
@@ -281,11 +281,7 @@ struct GardenView: View {
                                 Capsule()
                                     .fill(Color.bloomSurface)
                             )
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.bloomBorder, lineWidth: 0.5)
-                            )
-                            .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                            .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 2)
                     }
                 }
                 .frame(width: 180, height: 180)
@@ -330,7 +326,7 @@ struct GardenView: View {
                             .fill(Color.bloomFill)
                         
                         RoundedRectangle(cornerRadius: 999)
-                            .fill(healthColor)
+                            .fill(Color.bloomPrimary)
                             .frame(width: geometry.size.width * (plantEngine.plant.health / 100))
                             .animation(.easeInOut(duration: 0.4), value: plantEngine.plant.health)
                     }
@@ -400,12 +396,12 @@ struct GardenView: View {
     private var quickRecordSection: some View {
         SurfaceCard(padding: 16) {
             VStack(spacing: 0) {
-                HStack(spacing: 0) {
+                HStack(spacing: 8) {
                     ForEach(CupType.allCases, id: \.self) { cup in
                         Button {
                             waterPlant(cup)
                         } label: {
-                            VStack(spacing: 6) {
+                            VStack(spacing: 4) {
                                 IconCircle(
                                     icon: cup.icon,
                                     backgroundColor: Color.bloomWaterMuted,
@@ -427,7 +423,7 @@ struct GardenView: View {
                     Spacer()
                     HStack(spacing: 6) {
                         Image(systemName: "droplets")
-                            .font(.system(size: 14))
+                            .font(.system(size: 16))
                             .foregroundStyle(Color.bloomWater)
                         
                         if waterStore.remaining > 0 {
@@ -464,7 +460,7 @@ struct GardenView: View {
                 Spacer()
                 
                 Text("\(waterStore.todayTotal) ml")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.bloomPrimary)
             }
             .padding(.bottom, 12)
@@ -543,16 +539,6 @@ struct GardenView: View {
     }
     
     // MARK: - Helper Properties
-    
-    private var healthColor: Color {
-        if plantEngine.plant.health > 70 {
-            return .bloomSuccess
-        } else if plantEngine.plant.health > 40 {
-            return .bloomWarning
-        } else {
-            return .bloomError
-        }
-    }
     
     private var healthStatusText: String {
         if plantEngine.plant.health >= 90 {

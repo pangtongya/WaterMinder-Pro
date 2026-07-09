@@ -26,12 +26,28 @@ struct CollectionView: View {
                 
                 Spacer(minLength: 100)
             }
-            .padding(.top, 8)
+            .padding(.top, 16)
         }
         .scrollIndicators(.hidden)
         .background(Color.bloomBackground)
-        .navigationTitle("收藏")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("我的花园")
+                    .font(.system(size: 32, weight: .bold))
+                    .tracking(-0.5)
+                    .foregroundStyle(Color.bloomPrimary)
+                Text("记录每一次成长")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.bloomTextSecondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
+            .background(Color.bloomBackground.opacity(0.8))
+            .background(.regularMaterial)
+        }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
                 .environmentObject(storeManager)
@@ -118,11 +134,11 @@ struct CollectionView: View {
     private func statItem(icon: String, value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(icon)
-                .font(.system(size: 24))
-                .padding(.bottom, 2)
+                .font(.system(size: 28))
             
             Text(value)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: 28, weight: .bold))
+                .tracking(-0.5)
                 .foregroundStyle(Color.bloomPrimary)
             
             Text(label)
@@ -145,7 +161,7 @@ struct CollectionView: View {
                     Spacer()
                     
                     Text("🌼")
-                        .font(.system(size: 20))
+                        .font(.system(size: 22))
                 }
                 .padding(.bottom, 12)
                 
@@ -348,8 +364,8 @@ struct CollectionView: View {
                     Text(species.symbol)
                         .font(.system(size: 22))
                 } else {
-                    Image(systemName: isProLocked ? "lock.fill" : "questionmark")
-                        .font(.system(size: 18))
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 22))
                         .foregroundStyle(Color.bloomTextTertiary)
                 }
             }
@@ -366,7 +382,7 @@ struct CollectionView: View {
                 Badge("已收集", style: .brand)
                     .padding(.top, 4)
             } else if isProLocked {
-                Badge("Pro 解锁", style: .gold)
+                Badge("Pro 解锁", style: .warning)
                     .padding(.top, 4)
             } else {
                 Badge("未收集", style: .fill)
@@ -374,11 +390,10 @@ struct CollectionView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .padding(.horizontal, 4)
+        .padding(8)
         .background(isCollected ? Color.bloomPrimary.opacity(0.06) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .opacity(isCollected || !isProLocked ? 1.0 : 0.5)
+        .opacity(isCollected ? 1.0 : 0.5)
     }
 }
 
