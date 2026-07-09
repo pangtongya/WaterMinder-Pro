@@ -60,6 +60,41 @@ extension L {
     // Plant status
     static let plantHasntWatered   = s("%@ 还没喝到水")
     static let health              = s("健康度")
+
+    // Garden limits
+    static let gardenFull               = s("花园已满")
+    static let proUnlocksGardenSlots    = s("Pro 版可解锁无限花园位")
+
+    // Wilt celebration (additional)
+    static let plantThirsty             = s("植物口渴了")
+    static let giveItWater              = s("快给它浇水吧")
+
+    // Harvest celebration
+    static let harvestSuccess           = s("收获成功！")
+    static let plantAddedToCollection   = s("植物已收入收藏")
+
+    // Health card
+    static let todayLog                 = s("今日记录")
+    static let streakDaysFormat         = s("连续 %d 天")
+    static let milestoneBadge           = s("里程碑")
+    static let remainingMlFormat        = s("还差 %d ml")
+    static let goalReachedToday         = s("今日已达标 🎉")
+    static let noRecordsYet             = s("还没有喝水记录")
+    static let tapToRecordWater         = s("点击上方按钮记录喝水")
+
+    // Health status text
+    static let healthStatusGreat        = s("状态很棒，继续保持！")
+    static let healthStatusGood         = s("状态不错，继续保持哦")
+    static let healthStatusThirsty      = s("有点口渴了，记得喝水")
+    static let healthStatusNeedsWater   = s("植物需要浇水啦！")
+
+    // Stage names (with 期 suffix)
+    static let seedStageName            = s("种子期")
+    static let sproutStageName          = s("发芽期")
+    static let seedlingStageName        = s("幼苗期")
+    static let growingStageName         = s("成长期")
+    static let bloomingStageName        = s("花期")
+    static let harvestableStageName     = s("可收获")
 }
 
 // MARK: - Statistics
@@ -338,8 +373,58 @@ extension L {
     static let unlimitedCareAllYear  = s("全年无限养护")
     static let savePercent          = s("省 %d%% 相比订阅")
     static let popular             = s("人气之选")
+    static let mostPopular         = s("最受欢迎")
     static let termsOfService        = s("服务条款")
     static let privacyPolicy         = s("隐私政策")
+
+    // Paywall additional
+    static let purchaseFailed            = s("购买失败")
+    static let proUnlockedThankYou       = s("Pro 权益已解锁，感谢您的支持！")
+    static let unlockAllPlantsDreamGarden = s("解锁全部植物，打造你的梦幻花园")
+    static let makeDrinkingAnAdventure    = s("🌱 把喝水变成一场冒险")
+    static let everySipMakesGardenBeautiful = s("每一杯水，都让你的花园更美丽")
+    static let limitedOfferSave30        = s("限时优惠 - 立省 30%")
+    static let offerRemainingFormat      = s("优惠剩余: %@")
+    static let proExclusiveFeatures      = s("Pro 专属权益")
+    static let all7PlantsTitle           = s("全部 7 种植物")
+    static let all7PlantsDesc            = s("解锁所有品种，每种都有独特的生长动画")
+    static let unlimitedGardenSpaceTitle = s("无限花园空间")
+    static let unlimitedGardenSpaceDesc   = s("免费用户最多 5 株，Pro 想养多少养多少")
+    static let deepDataInsightsDesc2     = s("喝水趋势、达标率分析、成长历程一目了然")
+    static let iCloudMultiDeviceTitle    = s("iCloud 多设备同步")
+    static let iCloudMultiDeviceDesc      = s("iPhone、iPad 数据实时同步")
+    static let allThemesTitle            = s("全部主题皮肤")
+    static let allThemesDesc             = s("多种精美主题，每天都是新感觉")
+    static let moreComingTitle           = s("更多即将推出")
+    static let moreComingDesc            = s("未来新功能 Pro 用户优先体验")
+    static let coreBadge                = s("核心")
+    static let whatUsersSay              = s("用户怎么说")
+    static let overallRating             = s("综合评分")
+    static let reviewerNameXiaoming      = s("小明")
+    static let reviewerTextXiaoming       = s("用了三个月，喝水习惯真的养成了！每天都期待看我的植物长大。")
+    static let reviewerNameHuaer         = s("花儿")
+    static let reviewerTextHuaer          = s("植物太可爱了！为了不让它枯萎，我现在每天都喝够水。")
+    static let chooseYourPlan            = s("选择你的计划")
+    static let annualMember              = s("年度会员")
+    static let lifetimeUnlock            = s("终身解锁")
+    static let dailyPriceFormat          = s("每天约 %@ 元，养成喝水好习惯")
+    static let saveVs3YearFormat         = s("比订阅 3 年节省 %d%%")
+    static let perYear                   = s("/ 年")
+    static let forever                   = s("永久")
+    static let freeTrial7Days             = s("7 天免费试用，随时可取消")
+    static let onePurchaseForever         = s("一次购买，永久有效")
+    static let startFreeTrial            = s("开始免费试用")
+    static let unlockNow                  = s("立即解锁")
+    static let subscriptionFooterText    = s("订阅自动续期，可随时在系统设置中取消。终身版一次购买永久有效。")
+    static let congratsUpgrade            = s("🎉 恭喜升级！")
+    static let allProFeaturesUnlocked    = s("Pro 权益已全部解锁")
+    static let startGrowingMore          = s("开始养更多的植物吧！")
+    static let startUsing                 = s("开始使用")
+
+    // Preview plant names
+    static let previewPlantName1          = s("小阳")
+    static let previewPlantName2          = s("小玫")
+    static let previewPlantName3          = s("小仙")
 }
 
 // MARK: - Dev / IAP
@@ -365,6 +450,29 @@ extension L {
     static let notificationExplain    = s("开启通知，它口渴时会提醒你来浇水。\n不开启也可以，但你可能会忘了它。")
     static let notNow                 = s("暂不开启")
     static let defaultPlantName       = s("小绿")  // 默认植物名
+
+    // Onboarding additional
+    static let buildHydrationHabit       = s("养成喝水好习惯")
+    static let growPlantHealthy          = s("让植物茁壮成长")
+    static let everySipPlantGrows        = s("每次喝水，你的植物都会长大一点")
+    static let startButton               = s("开始")
+    static let seedSprouted               = s("🌱 种子发芽了！")
+    static let littleSeed                 = s("🌰 一颗小种子")
+    static let everySip                   = s("每次喝水")
+    static let plantThrives              = s("植物都会茁壮成长")
+    static let keepDrinkingWatchGrow      = s("坚持喝水，看着你的植物从种子成长为美丽的花朵")
+    static let tapToWater                 = s("点击浇水试试")
+    static let nextStep                   = s("下一步")
+    static let smartReminders             = s("智能提醒")
+    static let neverForgetWater           = s("不再忘记喝水")
+    static let plantThirstyReminder       = s("植物口渴时会提醒你，让它保持生机勃勃")
+    static let startSetup                 = s("开始设置")
+    static let nameYourPlant              = s("给你的植物起个名字")
+    static let connectHealthOptional      = s("连接健康 App（可选）")
+    static let syncWaterToHealth          = s("同步喝水记录到健康 App")
+    static let usStandardShort            = s("基于美国标准：每天 8 杯 × 8oz ≈ 2400ml")
+    static let cnStandardShort            = s("基于中国卫健委建议：每日 2000ml")
+    static let startCaring                 = s("开始养护")
 }
 
 // MARK: - 分享
@@ -382,4 +490,7 @@ extension L {
     static let myGardenCollection     = s("我的花园收藏")
     static let sharedSpeciesCollected = s("种植物已收集")
     static let collectionProgressPercent = s("完成 %d%%")
+
+    // 分享卡片
+    static let shareCardTagline       = s("Bloom · 让喝水变成一场冒险")
 }

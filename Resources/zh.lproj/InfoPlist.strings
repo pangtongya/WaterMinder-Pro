@@ -7,8 +7,8 @@
 "CFBundleName" = "水滴花园";
 
 /* HealthKit 权限 */
-"NSHealthShareUsageDescription" = "读取健康 App 的饮水数据，帮你更好地照顾植物。";
-"NSHealthUpdateUsageDescription" = "把每次喝水量写入健康 App，让你的健康记录更完整。";
+"NSHealthShareUsageDescription" = "Bloom 会从健康 App 读取你的饮水数据，用于同步其他 App 的记录并帮助你的数字植物成长。我们仅访问饮水数据，绝不会上传到第三方服务器。";
+"NSHealthUpdateUsageDescription" = "Bloom 会将你记录的饮水量保存到健康 App，让你的饮水数据在所有设备上保持同步。数据仅存储在本地和 Apple 健康中。";
 
 /* 通知权限 */
 "NSUserNotificationUsageDescription" = "水滴花园会发送友善的提醒，帮助你全天保持规律喝水，让你的植物茁壮成长。";

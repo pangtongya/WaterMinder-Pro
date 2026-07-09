@@ -169,7 +169,9 @@ final class SoundManager: NSObject {
             object: audioSession,
             queue: .main
         ) { [weak self] notification in
-            self?.handleInterruption(notification)
+            Task { @MainActor in
+                self?.handleInterruption(notification)
+            }
         }
 
         routeChangeObserver = center.addObserver(
@@ -177,7 +179,9 @@ final class SoundManager: NSObject {
             object: audioSession,
             queue: .main
         ) { [weak self] notification in
-            self?.handleRouteChange(notification)
+            Task { @MainActor in
+                self?.handleRouteChange(notification)
+            }
         }
     }
 

@@ -484,3 +484,131 @@
 "Data validation failed (%@): %@" = "Data validation failed (%@): %@";
 "Backup failed (%@): %@" = "Backup failed (%@): %@";
 "Recovery failed (%@): %@" = "Recovery failed (%@): %@";
+
+// MARK: - Missing L.xxx keys
+"完成" = "Done";
+"撤销" = "Undo";
+"继续" = "Continue";
+"已连接健康 App" = "Health App Connected";
+"未决定" = "Not Determined";
+"已授权" = "Authorized";
+"已拒绝" = "Denied";
+"不支持" = "Not Supported";
+"写入健康 App" = "Write to Health App";
+"从健康 App 读取" = "Read from Health App";
+"同步频率" = "Sync Frequency";
+"实时" = "Realtime";
+"每小时" = "Hourly";
+"仅手动" = "Manual Only";
+"已同步数据量" = "Synced Data Count";
+"数据使用说明" = "Data Usage Explanation";
+"健康数据隐私" = "Health Data Privacy";
+
+// MARK: - Widget missing keys
+"Plant" = "Plant";
+"Growing" = "Growing";
+"Drink water to make it grow" = "Drink water to make it grow";
+"Today's Progress" = "Today's Progress";
+"Stage" = "Stage";
+
+// MARK: - DataBackup additional keys
+"Backup encryption failed, please retry" = "Backup encryption failed, please retry";
+"Backup decryption failed, check encryption key" = "Backup decryption failed, check encryption key";
+"Failed to save encryption key, check Keychain permissions" = "Failed to save encryption key, check Keychain permissions";
+"Data migration failed: %@" = "Data migration failed: %@";
+"Try restoring from a different backup file, or contact support" = "Try restoring from a different backup file, or contact support";
+"If you changed devices, ensure same Apple ID and iCloud Keychain sync" = "If you changed devices, ensure same Apple ID and iCloud Keychain sync";
+
+// MARK: - GardenView additional
+"Pro 版可解锁无限花园位" = "Pro unlocks unlimited garden slots";
+"植物口渴了" = "Your plant is thirsty";
+"快给它浇水吧" = "Give it some water";
+"收获成功！" = "Harvest Success!";
+"植物已收入收藏" = "Plant added to collection";
+"连续 %d 天" = "%d-day streak";
+"里程碑" = "Milestone";
+"还差 %d ml" = "%d ml to go";
+"今日已达标 🎉" = "Goal achieved today 🎉";
+"还没有喝水记录" = "No water records yet";
+"点击上方按钮记录喝水" = "Tap the button above to log water";
+"状态很棒，继续保持！" = "Great condition, keep it up!";
+"状态不错，继续保持哦" = "Good condition, keep going";
+"有点口渴了，记得喝水" = "A bit thirsty, remember to drink";
+"植物需要浇水啦！" = "Your plant needs water!";
+"种子期" = "Seed Stage";
+"发芽期" = "Sprout Stage";
+"幼苗期" = "Seedling Stage";
+"花期" = "Blooming Stage";
+"可收获" = "Harvestable";
+
+// MARK: - PaywallView additional
+"购买失败" = "Purchase Failed";
+"Pro 权益已解锁，感谢您的支持！" = "Pro features unlocked. Thank you for your support!";
+"解锁全部植物，打造你的梦幻花园" = "Unlock all plants and build your dream garden";
+"🌱 把喝水变成一场冒险" = "🌱 Turn drinking into an adventure";
+"每一杯水，都让你的花园更美丽" = "Every sip makes your garden more beautiful";
+"限时优惠 - 立省 30%" = "Limited Offer - Save 30%";
+"优惠剩余: %@" = "Offer ends in: %@";
+"Pro 专属权益" = "Pro Exclusive Features";
+"全部 7 种植物" = "All 7 Plants";
+"解锁所有品种，每种都有独特的生长动画" = "Unlock all species, each with unique growth animations";
+"无限花园空间" = "Unlimited Garden Space";
+"免费用户最多 5 株，Pro 想养多少养多少" = "Free users up to 5 plants, Pro has no limit";
+"喝水趋势、达标率分析、成长历程一目了然" = "Water trends, goal rates, and growth journey at a glance";
+"iCloud 多设备同步" = "iCloud Multi-device Sync";
+"iPhone、iPad 数据实时同步" = "Real-time sync across iPhone and iPad";
+"全部主题皮肤" = "All Theme Skins";
+"多种精美主题，每天都是新感觉" = "Various beautiful themes, fresh every day";
+"更多即将推出" = "More Coming Soon";
+"未来新功能 Pro 用户优先体验" = "Pro users get early access to future features";
+"核心" = "Core";
+"用户怎么说" = "What Users Say";
+"综合评分" = "Overall Rating";
+"小明" = "Xiao Ming";
+"用了三个月，喝水习惯真的养成了！每天都期待看我的植物长大。" = "After three months, my hydration habit is set! I look forward to seeing my plant grow every day.";
+"花儿" = "Hua'er";
+"植物太可爱了！为了不让它枯萎，我现在每天都喝够水。" = "The plant is so cute! I drink enough water every day now to keep it from wilting.";
+"选择你的计划" = "Choose Your Plan";
+"年度会员" = "Annual Member";
+"终身解锁" = "Lifetime Unlock";
+"每天约 %@ 元，养成喝水好习惯" = "About %@ per day, build good hydration habits";
+"比订阅 3 年节省 %d%%" = "Save %d%% vs 3-year subscription";
+"/ 年" = "/ year";
+"永久" = "Forever";
+"7 天免费试用，随时可取消" = "7-day free trial, cancel anytime";
+"一次购买，永久有效" = "One purchase, forever yours";
+"开始免费试用" = "Start Free Trial";
+"立即解锁" = "Unlock Now";
+"订阅自动续期，可随时在系统设置中取消。终身版一次购买永久有效。" = "Subscription auto-renews, cancel anytime in Settings. Lifetime purchase is permanent.";
+"🎉 恭喜升级！" = "🎉 Congratulations on upgrading!";
+"Pro 权益已全部解锁" = "All Pro features unlocked";
+"开始养更多的植物吧！" = "Start growing more plants!";
+"开始使用" = "Start Using";
+
+// MARK: - OnboardingView additional
+"养成喝水好习惯" = "Build Good Hydration Habits";
+"让植物茁壮成长" = "Grow Your Plant";
+"每次喝水，你的植物都会长大一点" = "With every sip, your plant grows a little";
+"开始" = "Start";
+"🌱 种子发芽了！" = "🌱 Seed Sprouted!";
+"🌰 一颗小种子" = "🌰 A Little Seed";
+"每次喝水" = "Every Sip";
+"植物都会茁壮成长" = "Your Plant Thrives";
+"坚持喝水，看着你的植物从种子成长为美丽的花朵" = "Keep drinking water, watch your plant grow from seed to beautiful flower";
+"点击浇水试试" = "Tap to Water";
+"智能提醒" = "Smart Reminders";
+"不再忘记喝水" = "Never Forget to Drink";
+"植物口渴时会提醒你，让它保持生机勃勃" = "Reminds you when your plant is thirsty, keeping it vibrant";
+"开始设置" = "Start Setup";
+"给你的植物起个名字" = "Name Your Plant";
+"连接健康 App（可选）" = "Connect Health App (Optional)";
+"基于美国标准：每天 8 杯 × 8oz ≈ 2400ml" = "Based on US standard: 8 cups × 8oz ≈ 2400ml per day";
+"基于中国卫健委建议：每日 2000ml" = "Based on China's health guidelines: 2000ml/day";
+
+// MARK: - PaywallView preview plants
+"小阳" = "Sunny";
+"小玫" = "Rosey";
+"小仙" = "Fairy";
+
+// MARK: - 分享卡片
+"Bloom · 让喝水变成一场冒险" = "Bloom · Make hydration an adventure";

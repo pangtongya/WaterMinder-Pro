@@ -235,7 +235,12 @@ final class PersistenceManager {
             self.pendingSaves[filename] = nil
         }
         pendingSaves[filename] = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: workItem)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(1.0 * 1_000_000_000))
+            if !workItem.isCancelled {
+                workItem.perform()
+            }
+        }
     }
     
     /// 带重试的写入

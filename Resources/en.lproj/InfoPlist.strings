@@ -7,8 +7,8 @@
 "CFBundleName" = "Bloom";
 
 /* HealthKit Permissions */
-"NSHealthShareUsageDescription" = "Read water intake data from Health app to help care for your plant.";
-"NSHealthUpdateUsageDescription" = "Save water intake to Health app for complete health records.";
+"NSHealthShareUsageDescription" = "Bloom reads your water intake data from HealthKit to sync records from other apps and help your digital plant grow. We only access dietary water data and never upload it to third-party servers.";
+"NSHealthUpdateUsageDescription" = "Bloom saves the water you record in the app to HealthKit so your hydration data stays in sync across all your devices. Data is only stored locally and in Apple Health.";
 
 /* Notification Permission */
-"NSUserNotificationUsageDescription" = "WaterMinder Pro sends friendly reminders so you stay hydrated throughout the day and grow a thriving plant.";
+"NSUserNotificationUsageDescription" = "Bloom sends friendly reminders to help you stay hydrated throughout the day and keep your plant thriving.";

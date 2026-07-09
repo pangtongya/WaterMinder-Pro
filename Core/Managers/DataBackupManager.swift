@@ -785,34 +785,34 @@ enum BackupError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unsupportedVersion(let version):
-            return String(format: NSLocalizedString("不支持的备份版本: %@", comment: ""), version)
+            return String(format: NSLocalizedString("Unsupported backup version: %@", comment: ""), version)
         case .fileNotFound:
-            return NSLocalizedString("备份文件未找到", comment: "")
+            return NSLocalizedString("Backup file not found", comment: "")
         case .invalidData:
-            return NSLocalizedString("备份数据格式无效", comment: "")
+            return NSLocalizedString("Invalid backup data format", comment: "")
         case .corruptedData:
-            return NSLocalizedString("备份文件已损坏（校验和验证失败），文件可能已被篡改或损坏", comment: "")
+            return NSLocalizedString("Backup file is corrupted (checksum verification failed)", comment: "")
         case .exportFailed(let message):
-            return String(format: NSLocalizedString("导出失败: %@", comment: ""), message)
+            return String(format: NSLocalizedString("Export failed: %@", comment: ""), message)
         case .importFailed(let message):
-            return String(format: NSLocalizedString("导入失败: %@", comment: ""), message)
+            return String(format: NSLocalizedString("Import failed: %@", comment: ""), message)
         case .encryptionFailed:
-            return NSLocalizedString("备份加密失败，请重试", comment: "")
+            return NSLocalizedString("Backup encryption failed, please retry", comment: "")
         case .decryptionFailed:
-            return NSLocalizedString("备份解密失败，请检查加密密钥是否正确", comment: "")
+            return NSLocalizedString("Backup decryption failed, check encryption key", comment: "")
         case .encryptionKeySaveFailed:
-            return NSLocalizedString("加密密钥保存失败，请检查 Keychain 权限", comment: "")
+            return NSLocalizedString("Failed to save encryption key, check Keychain permissions", comment: "")
         case .migrationFailed(let message):
-            return String(format: NSLocalizedString("数据迁移失败: %@", comment: ""), message)
+            return String(format: NSLocalizedString("Data migration failed: %@", comment: ""), message)
         }
     }
 
     var recoverySuggestion: String? {
         switch self {
         case .corruptedData:
-            return NSLocalizedString("建议使用其他备份文件进行恢复，或联系技术支持", comment: "")
+            return NSLocalizedString("Try restoring from a different backup file, or contact support", comment: "")
         case .decryptionFailed:
-            return NSLocalizedString("如果您更换了设备，请确保使用同一 Apple ID 登录并启用 iCloud Keychain 同步", comment: "")
+            return NSLocalizedString("If you changed devices, ensure same Apple ID and iCloud Keychain sync", comment: "")
         default:
             return nil
         }

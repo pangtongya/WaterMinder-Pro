@@ -16,7 +16,7 @@ struct SettingsView: View {
     @EnvironmentObject var cloudSyncManager: CloudSyncManager
     @EnvironmentObject var achievementStore: AchievementStore
 
-    @StateObject private var backupManager = DataBackupManager.shared
+    @ObservedObject private var backupManager = DataBackupManager.shared
     
     @State private var healthAuthorized = false
     @State private var showPaywall = false
@@ -225,11 +225,11 @@ struct SettingsView: View {
                         TextField("小绿", text: nameBinding)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
-                            .font(.system(size: 15))
+                            .font(.system(size: 13))
                             .foregroundStyle(Color.bloomTextSecondary)
                         
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundStyle(Color.bloomTextTertiary)
                     }
                     .padding(.horizontal, 16)
@@ -257,14 +257,15 @@ struct SettingsView: View {
                         Spacer()
                         
                         Text(plantEngine.plant.species.localizedName)
-                            .font(.system(size: 15))
+                            .font(.system(size: 13))
                             .foregroundStyle(Color.bloomTextSecondary)
                         
                         Text(plantEngine.plant.species.symbol)
-                            .font(.system(size: 15))
+                            .font(.system(size: 13))
+                            .accessibilityHidden(true)
                         
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundStyle(Color.bloomTextTertiary)
                     }
                     .padding(.horizontal, 16)
@@ -297,7 +298,7 @@ struct SettingsView: View {
                                     .foregroundStyle(Color.bloomTextSecondary)
                                 
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundStyle(Color.bloomTextTertiary)
                             }
                             .padding(.horizontal, 16)
@@ -327,7 +328,7 @@ struct SettingsView: View {
                                     .foregroundStyle(Color.bloomTextSecondary)
                                 
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundStyle(Color.bloomTextTertiary)
                             }
                             .padding(.horizontal, 16)
@@ -448,11 +449,11 @@ struct SettingsView: View {
                             } label: {
                                 HStack(spacing: 4) {
                                     Text(String(format: NSLocalizedString("每 %d 分钟", comment: "Every X minutes"), userStore.reminderInterval))
-                                        .font(.system(size: 15))
+                                        .font(.system(size: 13))
                                         .foregroundStyle(Color.bloomTextSecondary)
                                     
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 14, weight: .semibold))
+                                        .font(.system(size: 16, weight: .regular))
                                         .foregroundStyle(Color.bloomTextTertiary)
                                 }
                             }
@@ -540,7 +541,8 @@ struct SettingsView: View {
                                 }
                             ),
                             options: AppTheme.allCases.map { $0.rawValue },
-                            fullWidth: false
+                            fullWidth: false,
+                            fontSize: 11
                         )
                     }
                     .padding(.horizontal, 16)
@@ -573,11 +575,11 @@ struct SettingsView: View {
                                 )
                             
                             Text(ThemeManager.shared.currentTheme.name)
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(Color.bloomTextTertiary)
                         }
                         .padding(.horizontal, 16)
@@ -616,6 +618,7 @@ struct SettingsView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 14))
                                     .foregroundStyle(Color.bloomPrimary)
+                                    .accessibilityHidden(true)
                                 Text(NSLocalizedString("已连接", comment: "Connected"))
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundStyle(Color.bloomPrimary)
@@ -626,7 +629,7 @@ struct SettingsView: View {
                                 Haptics.light()
                             } label: {
                                 Text(NSLocalizedString("连接", comment: "Connect button"))
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
@@ -752,11 +755,11 @@ struct SettingsView: View {
                     } label: {
                         HStack(spacing: 4) {
                             Text(healthSyncService.syncFrequency.localizedDescription)
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(Color.bloomTextTertiary)
                         }
                     }
@@ -823,7 +826,7 @@ struct SettingsView: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundStyle(Color.bloomTextTertiary)
                 }
                 .padding(.horizontal, 16)
@@ -919,7 +922,7 @@ struct SettingsView: View {
                             Spacer()
                             
                             Text(lastSync.relativeDescription)
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                         }
                         .padding(.horizontal, 16)
@@ -935,6 +938,7 @@ struct SettingsView: View {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundStyle(Color.bloomWarning)
                                     .font(.system(size: 14))
+                                    .accessibilityHidden(true)
                                 
                                 Text(error.errorDescription ?? "同步失败".localized)
                                     .font(.system(size: 13))
@@ -1010,6 +1014,7 @@ struct SettingsView: View {
                 HStack(spacing: 6) {
                     ProgressView()
                         .scaleEffect(0.7)
+                        .accessibilityHidden(true)
                     Text(syncProgressText)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.bloomTextSecondary)
@@ -1018,10 +1023,12 @@ struct SettingsView: View {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 22))
                     .foregroundStyle(Color.bloomWarning)
+                    .accessibilityLabel("同步失败".localized)
             } else if cloudSyncManager.isSyncAvailable {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 22))
                     .foregroundStyle(Color.bloomSuccess)
+                    .accessibilityLabel(NSLocalizedString("已同步", comment: "Synced"))
             } else {
                 Text("未登录".localized)
                     .font(.system(size: 12))
@@ -1161,7 +1168,7 @@ struct SettingsView: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundStyle(Color.bloomTextTertiary)
                             }
                         }
@@ -1197,7 +1204,7 @@ struct SettingsView: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundStyle(Color.bloomTextTertiary)
                             }
                         }
@@ -1226,7 +1233,7 @@ struct SettingsView: View {
                             Spacer()
                             
                             Text(lastBackup.relativeDescription)
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                         }
                         .padding(.horizontal, 16)
@@ -1247,6 +1254,7 @@ struct SettingsView: View {
             Image(systemName: icon)
                 .foregroundColor(color)
                 .font(.system(size: 16))
+                .accessibilityHidden(true)
             Text(value)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.bloomTextPrimary)
@@ -1255,6 +1263,7 @@ struct SettingsView: View {
                 .foregroundStyle(Color.bloomTextSecondary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 
     private var daysSincePlanted: Int {
@@ -1286,6 +1295,7 @@ struct SettingsView: View {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 22))
                                 .foregroundStyle(Color.bloomSuccess)
+                                .accessibilityHidden(true)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -1314,7 +1324,7 @@ struct SettingsView: View {
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 16, weight: .regular))
                                     .foregroundStyle(Color.bloomTextTertiary)
                             }
                             .padding(.horizontal, 16)
@@ -1355,7 +1365,7 @@ struct SettingsView: View {
                                 .foregroundStyle(Color.bloomTextSecondary)
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(Color.bloomTextTertiary)
                         }
                         .padding(.horizontal, 16)
@@ -1393,7 +1403,7 @@ struct SettingsView: View {
                             }
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(Color.bloomTextTertiary)
                         }
                         .padding(.horizontal, 16)
@@ -1423,7 +1433,7 @@ struct SettingsView: View {
                             Spacer()
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: 16, weight: .regular))
                                 .foregroundStyle(Color.bloomTextTertiary)
                         }
                         .padding(.horizontal, 16)
@@ -1449,7 +1459,7 @@ struct SettingsView: View {
                         Spacer()
                         
                         Text(appVersion)
-                            .font(.system(size: 15))
+                            .font(.system(size: 13))
                             .foregroundStyle(Color.bloomTextSecondary)
                     }
                     .padding(.horizontal, 16)
@@ -1645,6 +1655,7 @@ struct HealthPermissionSheetView: View {
                     Image(systemName: "heart.text.square.fill")
                         .font(.system(size: 60))
                         .foregroundColor(.red)
+                        .accessibilityHidden(true)
                         .padding(.top, 20)
 
                     Text(NSLocalizedString("连接健康 App", comment: "Connect Health App title"))
@@ -1798,6 +1809,7 @@ struct HealthPermissionSheetView: View {
                 .font(.system(size: 24))
                 .foregroundColor(iconColor)
                 .frame(width: 40, height: 40)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
@@ -1806,6 +1818,7 @@ struct HealthPermissionSheetView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -1823,6 +1836,7 @@ struct HealthPrivacyInfoView: View {
                         Image(systemName: "hand.raised.shield")
                             .font(.system(size: 40))
                             .foregroundColor(.blue)
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(NSLocalizedString("健康数据隐私", comment: "Health data privacy"))
                                 .font(.title2)
@@ -1931,6 +1945,7 @@ struct HealthPrivacyInfoView: View {
                 Image(systemName: icon)
                     .font(.system(size: 22))
                     .foregroundColor(iconColor)
+                    .accessibilityHidden(true)
                 Text(title)
                     .font(.headline)
             }
@@ -1942,6 +1957,7 @@ struct HealthPrivacyInfoView: View {
                             .foregroundColor(.green)
                             .font(.system(size: 14))
                             .padding(.top, 2)
+                            .accessibilityHidden(true)
                         Text(item)
                             .font(.subheadline)
                             .foregroundColor(.secondary)

@@ -41,7 +41,7 @@ struct AchievementView: View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("成就进度".localized)
+                    Text(L.achievementProgress)
                         .font(.system(size: 18, weight: .semibold))
                     Text("\(achievementStore.unlockedCount) / \(achievementStore.totalCount)")
                         .font(.system(size: 24, weight: .bold))
@@ -64,6 +64,9 @@ struct AchievementView: View {
                         .font(.system(size: 14, weight: .bold))
                 }
                 .frame(width: 60, height: 60)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(L.achievementProgress)
+                .accessibilityValue("\(achievementStore.unlockedCount) / \(achievementStore.totalCount)")
             }
         }
         .padding()
@@ -155,6 +158,7 @@ struct AchievementCard: View {
                 Image(systemName: achievement.icon)
                     .font(.system(size: 24))
                     .foregroundColor(achievement.isUnlocked ? .bloomPrimary : .gray)
+                    .accessibilityHidden(true)
             }
             
             // 信息
@@ -173,6 +177,8 @@ struct AchievementCard: View {
             if !achievement.isUnlocked {
                 ProgressView(value: achievement.progressPercentage)
                     .tint(.bloomPrimary)
+                    .accessibilityLabel(achievement.title)
+                    .accessibilityValue("\(achievement.progress) / \(achievement.requirement)")
                 
                 Text("\(achievement.progress)/\(achievement.requirement)")
                     .font(.system(size: 10))
@@ -181,7 +187,8 @@ struct AchievementCard: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
-                    Text("已解锁".localized)
+                        .accessibilityHidden(true)
+                    Text(L.unlocked)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.green)
                 }
@@ -191,6 +198,7 @@ struct AchievementCard: View {
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 3, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -223,6 +231,7 @@ struct AchievementUnlockOverlay: View {
                     .scaleEffect(isVisible ? 1.0 : 0.8)
                     .opacity(isVisible ? 1 : 0)
                     .animation(.spring(response: 0.4).delay(0.2), value: isVisible)
+                    .accessibilityHidden(true)
 
                 Text(L.achievementUnlocked)
                     .font(.system(size: 24, weight: .bold))
@@ -260,7 +269,8 @@ struct AchievementUnlockOverlay: View {
         .animation(.easeInOut(duration: 0.3), value: isVisible)
         .onAppear {
             // 5 秒后自动淡出
-            DispatchQueue.main.asyncAfter(deadline: .now() + autoDismissSeconds) {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(autoDismissSeconds * 1_000_000_000))
                 dismissAnimated()
             }
         }
@@ -290,7 +300,8 @@ struct AchievementUnlockOverlay: View {
             isVisible = false
         }
         // 等待动画完成后调用实际 dismiss
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        Task {
+            try? await Task.sleep(nanoseconds: UInt64(0.3 * 1_000_000_000))
             dismiss()
         }
     }

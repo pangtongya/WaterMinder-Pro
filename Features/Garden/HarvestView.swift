@@ -112,12 +112,14 @@ struct HarvestView: View {
         }
         .onAppear {
             plantScale = 1.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(0.3 * 1_000_000_000))
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
                     showCelebration = true
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(0.5 * 1_000_000_000))
                 showConfetti = true
                 showSparkles = true
             }
@@ -232,17 +234,11 @@ struct HarvestView: View {
         .buttonStyle(HarvestButtonStyle())
     }
     
-    // TODO: 分享功能需要从外部传入 WaterStore 和 AchievementStore 实例
-    // 目前使用 placeholder，实际使用时请通过环境对象或参数传入
     private func shareHarvest() {
         isSharing = true
-        Task {
-            // TODO: 修复分享卡片生成 - 需要从外部获取 store 实例
-            // 临时使用默认值，避免编译错误
-            await MainActor.run {
-                shareImage = UIImage(systemName: "sparkles")
-                isSharing = false
-            }
+        Task { @MainActor in
+            shareImage = ShareCardRenderer.renderHarvestCard(plant: plant)
+            isSharing = false
         }
     }
 }

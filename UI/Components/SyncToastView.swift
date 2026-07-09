@@ -62,7 +62,8 @@ struct SyncToastView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .onAppear {
                         if case .success = state {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            Task {
+                                try? await Task.sleep(nanoseconds: UInt64(2 * 1_000_000_000))
                                 dismiss()
                             }
                         }
@@ -241,7 +242,8 @@ struct SyncToastView: View {
 
     private func dismiss() {
         withAnimation { isVisible = false }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+        Task {
+            try? await Task.sleep(nanoseconds: UInt64(0.35 * 1_000_000_000))
             onDismiss()
         }
     }

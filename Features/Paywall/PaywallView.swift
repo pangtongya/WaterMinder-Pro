@@ -89,14 +89,16 @@ struct PaywallView: View {
             }
             
             // 功能列表滑入动画（延迟 0.2s）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(0.2 * 1_000_000_000))
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     featuresOffset = 0
                 }
             }
             
             // 用户评价淡入动画（延迟 0.4s）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(0.4 * 1_000_000_000))
                 withAnimation(.easeOut(duration: 0.5)) {
                     reviewsOpacity = 1.0
                 }
@@ -114,17 +116,17 @@ struct PaywallView: View {
                 showLimitedOffer = false
             }
         }
-        .alert("购买失败".localized, isPresented: $showError) {
-            Button("好的".localized, role: .cancel) { }
+        .alert(L.purchaseFailed, isPresented: $showError) {
+            Button(L.ok, role: .cancel) { }
         } message: {
             Text(errorMessage)
         }
-        .alert("恢复成功".localized, isPresented: $showRestoreSuccess) {
-            Button("好的".localized) {
+        .alert(L.restoreSuccessful, isPresented: $showRestoreSuccess) {
+            Button(L.ok) {
                 dismiss()
             }
         } message: {
-            Text("Pro 权益已解锁，感谢您的支持！".localized)
+            Text(L.proUnlockedThankYou)
         }
         .overlay {
             if showSuccess {
@@ -141,11 +143,11 @@ struct PaywallView: View {
         HStack {
             // 标题（Apple Large Title 风格）
             VStack(alignment: .leading, spacing: 2) {
-                Text("升级到 Pro".localized)
+                Text(L.upgradeToPro)
                     .font(.system(size: 28, weight: .bold, design: .default))
                     .tracking(-0.5)
                     .foregroundStyle(Color.bloomTextPrimary)
-                Text("解锁全部植物，打造你的梦幻花园".localized)
+                Text(L.unlockAllPlantsDreamGarden)
                     .font(.system(size: 13))
                     .foregroundStyle(Color.bloomTextSecondary)
             }
@@ -190,11 +192,11 @@ struct PaywallView: View {
             
             // 核心价值主张
             VStack(spacing: 8) {
-                Text("🌱 把喝水变成一场冒险")
+                Text(L.makeDrinkingAnAdventure)
                     .font(.system(size: 18, weight: .bold))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color.bloomTextPrimary)
-                Text("每一杯水，都让你的花园更美丽")
+                Text(L.everySipMakesGardenBeautiful)
                     .font(.system(size: 14))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .multilineTextAlignment(.center)
@@ -208,7 +210,7 @@ struct PaywallView: View {
         let species = ["sunflower", "rose", "cactus"]
         let stages: [GrowthStage] = [.seedling, .mature, .harvestable]
         return Plant(
-            name: ["小阳", "小玫", "小仙"][index],
+            name: [L.previewPlantName1, L.previewPlantName2, L.previewPlantName3][index],
             speciesID: species[index],
             stage: stages[index],
             health: 95
@@ -224,10 +226,10 @@ struct PaywallView: View {
                 .foregroundStyle(Color.bloomWarning)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("限时优惠 - 立省 30%")
+                Text(L.limitedOfferSave30)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(Color.bloomTextPrimary)
-                Text("优惠剩余: \(formattedCountdown)")
+                Text(String(format: L.offerRemainingFormat, formattedCountdown))
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
                     .foregroundStyle(Color.bloomWarning)
             }
@@ -258,14 +260,14 @@ struct PaywallView: View {
     private var featuresSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Section Header
-            SectionHeader("Pro 专属权益")
+            SectionHeader(L.proExclusiveFeatures)
             
             SurfaceCard(padding: 16) {
                 VStack(spacing: 12) {
                     featureRow(
                         icon: "leaf.fill",
-                        title: "全部 7 种植物",
-                        desc: "解锁所有品种，每种都有独特的生长动画",
+                        title: L.all7PlantsTitle,
+                        desc: L.all7PlantsDesc,
                         highlight: true
                     )
                     
@@ -274,8 +276,8 @@ struct PaywallView: View {
                     
                     featureRow(
                         icon: "house.fill",
-                        title: "无限花园空间",
-                        desc: "免费用户最多 5 株，Pro 想养多少养多少",
+                        title: L.unlimitedGardenSpaceTitle,
+                        desc: L.unlimitedGardenSpaceDesc,
                         highlight: true
                     )
                     
@@ -284,8 +286,8 @@ struct PaywallView: View {
                     
                     featureRow(
                         icon: "chart.bar.fill",
-                        title: "深度数据洞察",
-                        desc: "喝水趋势、达标率分析、成长历程一目了然",
+                        title: L.deepDataInsights,
+                        desc: L.deepDataInsightsDesc2,
                         highlight: false
                     )
                     
@@ -294,8 +296,8 @@ struct PaywallView: View {
                     
                     featureRow(
                         icon: "icloud.fill",
-                        title: "iCloud 多设备同步",
-                        desc: "iPhone、iPad 数据实时同步",
+                        title: L.iCloudMultiDeviceTitle,
+                        desc: L.iCloudMultiDeviceDesc,
                         highlight: false
                     )
                     
@@ -304,8 +306,8 @@ struct PaywallView: View {
                     
                     featureRow(
                         icon: "moon.fill",
-                        title: "全部主题皮肤",
-                        desc: "多种精美主题，每天都是新感觉",
+                        title: L.allThemesTitle,
+                        desc: L.allThemesDesc,
                         highlight: false
                     )
                     
@@ -314,8 +316,8 @@ struct PaywallView: View {
                     
                     featureRow(
                         icon: "sparkles",
-                        title: "更多即将推出",
-                        desc: "未来新功能 Pro 用户优先体验",
+                        title: L.moreComingTitle,
+                        desc: L.moreComingDesc,
                         highlight: false
                     )
                 }
@@ -334,10 +336,10 @@ struct PaywallView: View {
             )
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(title.localized)
+                Text(title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(highlight ? Color.bloomPrimary : Color.bloomTextPrimary)
-                Text(desc.localized)
+                Text(desc)
                     .font(.system(size: 12))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -346,7 +348,7 @@ struct PaywallView: View {
             Spacer()
             
             if highlight {
-                Badge("核心", style: .brand)
+                Badge(L.coreBadge, style: .brand)
             }
         }
     }
@@ -356,13 +358,13 @@ struct PaywallView: View {
     private var reviewsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Section Header
-            SectionHeader("用户怎么说")
+            SectionHeader(L.whatUsersSay)
             
             SurfaceCard(padding: 16) {
                 VStack(spacing: 12) {
                     // 总评分
                     HStack {
-                        Text("综合评分")
+                        Text(L.overallRating)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Color.bloomTextPrimary)
                         
@@ -385,20 +387,20 @@ struct PaywallView: View {
                     // 用户评价卡片
                     VStack(spacing: 12) {
                         reviewCard(
-                            name: "小明",
+                            name: L.reviewerNameXiaoming,
                             avatar: "leaf.fill",
                             avatarColor: Color.bloomPrimary,
-                            text: "用了三个月，喝水习惯真的养成了！每天都期待看我的植物长大。",
+                            text: L.reviewerTextXiaoming,
                             rating: 5
                         )
                         
                         Divider()
                         
                         reviewCard(
-                            name: "花儿",
+                            name: L.reviewerNameHuaer,
                             avatar: "flower.fill",
                             avatarColor: Color.bloomGold,
-                            text: "植物太可爱了！为了不让它枯萎，我现在每天都喝够水。",
+                            text: L.reviewerTextHuaer,
                             rating: 5
                         )
                     }
@@ -419,7 +421,7 @@ struct PaywallView: View {
             
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    Text(name.localized)
+                    Text(name)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color.bloomTextPrimary)
                     
@@ -432,7 +434,7 @@ struct PaywallView: View {
                     }
                 }
                 
-                Text(text.localized)
+                Text(text)
                     .font(.system(size: 12))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -446,57 +448,54 @@ struct PaywallView: View {
     private var pricingSection: some View {
         VStack(spacing: 12) {
             // Section Header
-            SectionHeader("选择你的计划")
+            SectionHeader(L.chooseYourPlan)
             
             VStack(spacing: 12) {
                 // 年订阅（主推）
                 productCard(
                     productID: BloomProduct.yearlyID,
                     isSelected: selectedProductID == BloomProduct.yearlyID,
-                    badge: Badge("最受欢迎", style: .brand)
+                    badge: Badge(L.mostPopular, style: .brand)
                 )
                 
                 // 终身购买
                 productCard(
                     productID: BloomProduct.lifetimeID,
                     isSelected: selectedProductID == BloomProduct.lifetimeID,
-                    badge: Badge("最划算", style: .gold)
+                    badge: Badge(L.bestValue, style: .gold)
                 )
             }
         }
     }
     
+    @ViewBuilder
     private func productCard(productID: String, isSelected: Bool, badge: Badge? = nil) -> some View {
-        guard let product = storeManager.products.first(where: { $0.id == productID }) else {
-            return AnyView(EmptyView())
-        }
-        
-        let isYearly = productID == BloomProduct.yearlyID
-        let isLifetime = productID == BloomProduct.lifetimeID
-        
-        // 计算日均价格
-        let priceDouble = (product.price as NSDecimalNumber).doubleValue
-        let dailyPrice: String = {
-            if isYearly {
-                let daily = priceDouble / 365
-                return String(format: "%.2f", daily)
-            }
-            return ""
-        }()
-        
-        // 计算终身节省（和 3 年订阅对比）
-        let savingsPercent: Int = {
-            guard isLifetime,
-                  let yearly = storeManager.products.first(where: { $0.id == BloomProduct.yearlyID }) else {
-                return 0
-            }
-            let yearlyCost = (yearly.price as NSDecimalNumber).doubleValue * 3
-            let savings = (yearlyCost - priceDouble) / yearlyCost * 100
-            return Int(max(0, savings))
-        }()
-        
-        return AnyView(
-            Button {
+        if let product = storeManager.products.first(where: { $0.id == productID }) {
+            let isYearly = productID == BloomProduct.yearlyID
+            let isLifetime = productID == BloomProduct.lifetimeID
+
+            // 计算日均价格
+            let priceDouble = (product.price as NSDecimalNumber).doubleValue
+            let dailyPrice: String = {
+                if isYearly {
+                    let daily = priceDouble / 365
+                    return String(format: "%.2f", daily)
+                }
+                return ""
+            }()
+
+            // 计算终身节省（和 3 年订阅对比）
+            let savingsPercent: Int = {
+                guard isLifetime,
+                      let yearly = storeManager.products.first(where: { $0.id == BloomProduct.yearlyID }) else {
+                    return 0
+                }
+                let yearlyCost = (yearly.price as NSDecimalNumber).doubleValue * 3
+                let savings = (yearlyCost - priceDouble) / yearlyCost * 100
+                return Int(max(0, savings))
+            }()
+
+        Button {
                 selectedProductID = productID
                 Haptics.light()
             } label: {
@@ -508,7 +507,7 @@ struct PaywallView: View {
                             Circle()
                                 .stroke(isSelected ? Color.bloomPrimary : Color.bloomBorder, lineWidth: 2)
                                 .frame(width: 24, height: 24)
-                            
+
                             if isSelected {
                                 Circle()
                                     .fill(Color.bloomPrimary)
@@ -517,21 +516,21 @@ struct PaywallView: View {
                             }
                         }
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
-                        
+
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 6) {
-                                Text(isYearly ? "年度会员" : "终身解锁")
+                                Text(isYearly ? L.annualMember : L.lifetimeUnlock)
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundStyle(Color.bloomTextPrimary)
-                                
+
                                 if let badge = badge {
                                     badge
                                 }
                             }
-                            
+
                             // 价格说明
                             if isYearly {
-                                Text("每天约 \(dailyPrice) 元，养成喝水好习惯")
+                                Text(String(format: L.dailyPriceFormat, dailyPrice))
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.bloomTextSecondary)
                             }
@@ -539,34 +538,34 @@ struct PaywallView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "tag.fill")
                                         .font(.system(size: 10))
-                                    Text("比订阅 3 年节省 \(savingsPercent)%")
+                                    Text(String(format: L.saveVs3YearFormat, savingsPercent))
                                         .font(.system(size: 12, weight: .medium))
                                 }
                                 .foregroundStyle(Color.bloomSuccess)
                             }
                         }
-                        
+
                         Spacer()
-                        
+
                         // 价格展示（Apple 风格 rounded 字体）
                         VStack(alignment: .trailing, spacing: 2) {
                             Text(product.displayPrice)
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundStyle(Color.bloomTextPrimary)
-                            
+
                             if isYearly {
-                                Text("/ 年")
+                                Text(L.perYear)
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.bloomTextSecondary)
                             }
                             if isLifetime {
-                                Text("永久")
+                                Text(L.forever)
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.bloomTextSecondary)
                             }
                         }
                     }
-                    
+
                     // 选中状态额外展示：低风险承诺
                     if isSelected {
                         HStack(spacing: 8) {
@@ -576,8 +575,8 @@ struct PaywallView: View {
                                 iconColor: Color.bloomSuccess,
                                 size: .small
                             )
-                            
-                            Text(isYearly ? "7 天免费试用，随时可取消" : "一次购买，永久有效")
+
+                            Text(isYearly ? L.freeTrial7Days : L.onePurchaseForever)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Color.bloomSuccess)
                         }
@@ -598,7 +597,7 @@ struct PaywallView: View {
                 )
             }
             .buttonStyle(.plain)
-        )
+        }
     }
 
     // MARK: - 购买按钮（Apple 风格）
@@ -646,10 +645,10 @@ struct PaywallView: View {
     
     private var buttonTitle: String {
         guard storeManager.products.first(where: { $0.id == selectedProductID }) != nil else {
-            return "加载中...".localized
+            return L.loading
         }
         let isYearly = selectedProductID == BloomProduct.yearlyID
-        return isYearly ? "开始免费试用" : "立即解锁".localized
+        return isYearly ? L.startFreeTrial : L.unlockNow
     }
 
     // MARK: - 底部信息（Apple 风格）
@@ -666,7 +665,7 @@ struct PaywallView: View {
                     if storeManager.isPro {
                         showRestoreSuccess = true
                     } else {
-                        errorMessage = "未找到已购买的记录".localized
+                        errorMessage = L.noPurchasesFound
                         showError = true
                     }
                 }
@@ -684,7 +683,7 @@ struct PaywallView: View {
                         )
                     }
                     
-                    Text("恢复购买".localized)
+                    Text(L.restorePurchases)
                         .font(.system(size: 14))
                         .foregroundStyle(Color.bloomTextSecondary)
                 }
@@ -692,7 +691,7 @@ struct PaywallView: View {
             .disabled(isRestoring)
             
             // 法律条款（Apple 风格）
-            Text("订阅自动续期，可随时在系统设置中取消。终身版一次购买永久有效。".localized)
+            Text(L.subscriptionFooterText)
                 .font(.system(size: 10))
                 .foregroundStyle(Color.bloomTextTertiary)
                 .multilineTextAlignment(.center)
@@ -703,7 +702,7 @@ struct PaywallView: View {
                 Button {
                     openURL(AppConstants.URLs.termsOfService)
                 } label: {
-                    Text("服务条款".localized)
+                    Text(L.termsOfService)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.bloomTextSecondary)
                 }
@@ -715,7 +714,7 @@ struct PaywallView: View {
                 Button {
                     openURL(AppConstants.URLs.privacyPolicy)
                 } label: {
-                    Text("隐私政策".localized)
+                    Text(L.privacyPolicy)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.bloomTextSecondary)
                 }
@@ -757,11 +756,11 @@ struct PaywallView: View {
                 }
                 
                 VStack(spacing: 12) {
-                    Text("🎉 恭喜升级！")
+                    Text(L.congratsUpgrade)
                         .font(.system(size: 22, weight: .bold))
                         .foregroundStyle(Color.bloomTextPrimary)
                     
-                    Text("Pro 权益已全部解锁")
+                    Text(L.allProFeaturesUnlocked)
                         .font(.system(size: 16))
                         .foregroundStyle(Color.bloomTextSecondary)
                     
@@ -774,7 +773,7 @@ struct PaywallView: View {
                             size: .small
                         )
                         
-                        Text("开始养更多的植物吧！")
+                        Text(L.startGrowingMore)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(Color.bloomTextPrimary)
                     }
@@ -784,7 +783,7 @@ struct PaywallView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Text("开始使用")
+                    Text(L.startUsing)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)

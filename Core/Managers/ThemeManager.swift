@@ -58,7 +58,8 @@ final class ThemeManager: ObservableObject {
             currentTheme = theme
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + transitionDuration) { [weak self] in
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64((self?.transitionDuration ?? 0.3) * 1_000_000_000))
             self?.isTransitioning = false
         }
     }

@@ -761,8 +761,8 @@ extension Color {
     static func healthColor(_ health: Double) -> Color {
         switch health {
         case 80...100: return .bloomSuccess
-        case 50..<80: return .bloomWarning
-        case 25..<50: return .bloomError
+        case 50..<80: return .bloomPrimary
+        case 25..<50: return .bloomWarning
         default: return .bloomError
         }
     }

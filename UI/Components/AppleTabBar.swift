@@ -18,10 +18,10 @@ enum TabItem: Int, CaseIterable {
     
     var title: String {
         switch self {
-        case .garden: return "花园"
-        case .history: return "记录"
-        case .collection: return "收藏"
-        case .settings: return "设置"
+        case .garden: return NSLocalizedString("花园", comment: "Garden tab")
+        case .history: return NSLocalizedString("记录", comment: "History tab")
+        case .collection: return NSLocalizedString("收藏", comment: "Collection tab")
+        case .settings: return NSLocalizedString("设置", comment: "Settings tab")
         }
     }
     

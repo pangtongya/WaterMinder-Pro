@@ -8,7 +8,7 @@ struct RootView: View {
     @EnvironmentObject var cloudSyncManager: CloudSyncManager
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var achievementStore: AchievementStore
-    @StateObject private var networkMonitor = NetworkMonitor.shared
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     let loadingPhase: AppLoadingPhase
     

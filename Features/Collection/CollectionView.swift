@@ -135,6 +135,7 @@ struct CollectionView: View {
         VStack(spacing: 2) {
             Text(icon)
                 .font(.system(size: 28))
+                .accessibilityHidden(true)
             
             Text(value)
                 .font(.system(size: 28, weight: .bold))
@@ -146,6 +147,7 @@ struct CollectionView: View {
                 .foregroundStyle(Color.bloomTextSecondary)
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - 2. 当前植物卡片
@@ -162,6 +164,7 @@ struct CollectionView: View {
                     
                     Text("🌼")
                         .font(.system(size: 22))
+                        .accessibilityHidden(true)
                 }
                 .padding(.bottom, 12)
                 
@@ -260,6 +263,7 @@ struct CollectionView: View {
                 
                 Text(item.species.symbol)
                     .font(.system(size: 20))
+                    .accessibilityHidden(true)
             }
             .padding(.bottom, 8)
             
@@ -283,6 +287,7 @@ struct CollectionView: View {
         .padding(12)
         .background(Color.bloomSurfaceSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
     
     private var emptyHarvestSlot: some View {
@@ -290,6 +295,7 @@ struct CollectionView: View {
             Image(systemName: "plus")
                 .font(.system(size: 24, weight: .regular))
                 .foregroundStyle(Color.bloomTextTertiary)
+                .accessibilityHidden(true)
             
             Text("继续养护")
                 .font(.system(size: 11))
@@ -363,10 +369,12 @@ struct CollectionView: View {
                 if isCollected {
                     Text(species.symbol)
                         .font(.system(size: 22))
+                        .accessibilityHidden(true)
                 } else {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 22))
                         .foregroundStyle(Color.bloomTextTertiary)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(.bottom, 6)

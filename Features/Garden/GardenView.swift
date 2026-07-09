@@ -45,13 +45,13 @@ struct GardenView: View {
         } message: {
             Text(L.confirmResumeCare)
         }
-        .alert("花园已满", isPresented: $showGardenLimitAlert) {
+        .alert(L.gardenFull, isPresented: $showGardenLimitAlert) {
             Button(L.cancel, role: .cancel) { }
             Button(L.upgradeToPro) {
                 NotificationCenter.default.post(name: AppConstants.NotificationNames.showPaywall, object: nil)
             }
         } message: {
-            Text("Pro 版可解锁无限花园位")
+            Text(L.proUnlocksGardenSlots)
         }
         .sheet(isPresented: $showHarvestSheet) {
             HarvestView(plant: plantEngine.plant, onHarvest: performHarvest)
@@ -93,7 +93,7 @@ struct GardenView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color.bloomBackground)
-        .navigationTitle("我的花园")
+        .navigationTitle(L.myGarden)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -116,7 +116,8 @@ struct GardenView: View {
             if !oldValue && newValue {
                 showGoalCelebration = true
                 Haptics.success()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                Task {
+                    try? await Task.sleep(nanoseconds: UInt64(3 * 1_000_000_000))
                     withAnimation {
                         showGoalCelebration = false
                     }
@@ -144,10 +145,12 @@ struct GardenView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.bloomTextSecondary)
             }
+            .frame(minWidth: 44, minHeight: 44)
             .overlay(
                 Circle()
                     .stroke(Color.bloomBorder, lineWidth: 0.5)
             )
+            .contentShape(Rectangle())
         }
         .disabled(isSharing)
     }
@@ -170,8 +173,8 @@ struct GardenView: View {
             }
             if showWilt {
                 GenericCelebrationOverlay(
-                    title: "植物口渴了",
-                    message: "快给它浇水吧",
+                    title: L.plantThirsty,
+                    message: L.giveItWater,
                     iconName: "💧",
                     onDismiss: {
                         withAnimation { showWilt = false }
@@ -193,8 +196,8 @@ struct GardenView: View {
             }
             if showHarvestCelebration {
                 GenericCelebrationOverlay(
-                    title: "收获成功！",
-                    message: "植物已收入收藏",
+                    title: L.harvestSuccess,
+                    message: L.plantAddedToCollection,
                     iconName: "🌸",
                     onDismiss: {
                         withAnimation { showHarvestCelebration = false }
@@ -215,7 +218,8 @@ struct GardenView: View {
                     lineWidth: 8,
                     size: 180,
                     backgroundColor: Color.bloomFill,
-                    foregroundColor: Color.bloomPrimary
+                    foregroundColor: Color.bloomPrimary,
+                    accessibilityLabel: NSLocalizedString("健康度", comment: "Health progress")
                 )
                 
                 ZStack {
@@ -239,6 +243,7 @@ struct GardenView: View {
                                 .offset(y: -40 - CGFloat(splashTrigger % 10 * 8))
                                 .opacity(splashTrigger > 0 ? 1 : 0)
                                 .animation(.easeOut(duration: 0.6).delay(Double(i) * 0.08), value: splashTrigger)
+                                .accessibilityHidden(true)
                         }
                     }
                     
@@ -251,6 +256,7 @@ struct GardenView: View {
                             Image(systemName: "pause.circle.fill")
                                 .font(.system(size: 28))
                                 .foregroundStyle(.white)
+                                .accessibilityHidden(true)
                             Text(L.carePaused)
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(.white)
@@ -308,7 +314,7 @@ struct GardenView: View {
         SurfaceCard(padding: 16) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Text("健康度")
+                    Text(L.health)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color.bloomTextPrimary)
                     
@@ -332,6 +338,9 @@ struct GardenView: View {
                     }
                 }
                 .frame(height: 8)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(L.health)
+                .accessibilityValue("\(Int(plantEngine.plant.health))%")
                 
                 Text(healthStatusText)
                     .font(.system(size: 13))
@@ -340,7 +349,7 @@ struct GardenView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text("成长进度")
+                        Text(L.growthProgress)
                             .font(.system(size: 11))
                             .foregroundStyle(Color.bloomTextTertiary)
                         
@@ -363,6 +372,9 @@ struct GardenView: View {
                         }
                     }
                     .frame(height: 6)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(L.growthProgress)
+                    .accessibilityValue("\(Int(growthProgress))%")
                 }
                 .padding(.top, 12)
                 
@@ -374,8 +386,9 @@ struct GardenView: View {
                     HStack(spacing: 6) {
                         Text("🔥")
                             .font(.system(size: 16))
+                            .accessibilityHidden(true)
                         
-                        Text("连续 \(waterStore.currentStreak) 天")
+                        Text(String(format: L.streakDaysFormat, waterStore.currentStreak))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Color.bloomTextPrimary)
                     }
@@ -383,7 +396,7 @@ struct GardenView: View {
                     Spacer()
                     
                     if waterStore.currentStreak >= 7 {
-                        Badge("里程碑", style: .brand)
+                        Badge(L.milestoneBadge, style: .brand)
                     }
                 }
                 .padding(.top, 12)
@@ -425,13 +438,14 @@ struct GardenView: View {
                         Image(systemName: "droplets")
                             .font(.system(size: 16))
                             .foregroundStyle(Color.bloomWater)
+                            .accessibilityHidden(true)
                         
                         if waterStore.remaining > 0 {
-                            Text("还差 \(waterStore.remaining) ml")
+                            Text(String(format: L.remainingMlFormat, waterStore.remaining))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(Color.bloomWater)
                         } else {
-                            Text("今日已达标 🎉")
+                            Text(L.goalReachedToday)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(Color.bloomSuccess)
                         }
@@ -452,7 +466,7 @@ struct GardenView: View {
     private var todayRecordsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("今日记录")
+                Text(L.todayLog)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.bloomTextPrimary)
                     .tracking(-0.3)
@@ -478,6 +492,7 @@ struct GardenView: View {
                                     iconColor: Color.bloomWater,
                                     size: .small
                                 )
+                                .accessibilityHidden(true)
                                 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("\(record.amount)ml")
@@ -497,6 +512,7 @@ struct GardenView: View {
                             }
                             .padding(.vertical, 12)
                             .padding(.horizontal, 16)
+                            .accessibilityElement(children: .combine)
                             
                             if index < waterStore.todayRecords.count - 1 {
                                 Divider()
@@ -521,14 +537,15 @@ struct GardenView: View {
                     Image(systemName: "drop")
                         .font(.system(size: 22))
                         .foregroundStyle(Color.bloomWater)
+                        .accessibilityHidden(true)
                 }
                 
                 VStack(spacing: 4) {
-                    Text("还没有喝水记录")
+                    Text(L.noRecordsYet)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.bloomTextSecondary)
                     
-                    Text("点击上方按钮记录喝水")
+                    Text(L.tapToRecordWater)
                         .font(.system(size: 13))
                         .foregroundStyle(Color.bloomTextTertiary)
                 }
@@ -542,24 +559,24 @@ struct GardenView: View {
     
     private var healthStatusText: String {
         if plantEngine.plant.health >= 90 {
-            return "状态很棒，继续保持！"
+            return L.healthStatusGreat
         } else if plantEngine.plant.health >= 70 {
-            return "状态不错，继续保持哦"
+            return L.healthStatusGood
         } else if plantEngine.plant.health >= 40 {
-            return "有点口渴了，记得喝水"
+            return L.healthStatusThirsty
         } else {
-            return "植物需要浇水啦！"
+            return L.healthStatusNeedsWater
         }
     }
     
     private var stageName: String {
         switch plantEngine.plant.stage {
-        case .seed: return "种子期"
-        case .sprout: return "发芽期"
-        case .seedling: return "幼苗期"
-        case .mature: return "成长期"
-        case .blooming: return "花期"
-        case .harvestable: return "可收获"
+        case .seed: return L.seedStageName
+        case .sprout: return L.sproutStageName
+        case .seedling: return L.seedlingStageName
+        case .mature: return L.growingStageName
+        case .blooming: return L.bloomingStageName
+        case .harvestable: return L.harvestableStageName
         }
     }
     
@@ -591,5 +608,10 @@ struct GardenView: View {
     
     private func sharePlantStatus() {
         isSharing = true
+        let plant = plantEngine.plant
+        Task { @MainActor in
+            shareImage = ShareCardRenderer.renderHarvestCard(plant: plant)
+            isSharing = false
+        }
     }
 }

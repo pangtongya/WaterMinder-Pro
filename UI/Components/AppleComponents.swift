@@ -137,6 +137,7 @@ struct ProgressRing<Content: View>: View {
     let backgroundColor: Color
     let foregroundColor: Color
     let centerContent: Content
+    var accessibilityLabel: String
 
     init(
         progress: Double,
@@ -144,6 +145,7 @@ struct ProgressRing<Content: View>: View {
         size: CGFloat = 180,
         backgroundColor: Color = .bloomFill,
         foregroundColor: Color = .bloomPrimary,
+        accessibilityLabel: String = "",
         @ViewBuilder centerContent: () -> Content = { EmptyView() }
     ) {
         self.progress = progress
@@ -151,6 +153,7 @@ struct ProgressRing<Content: View>: View {
         self.size = size
         self.backgroundColor = backgroundColor
         self.foregroundColor = foregroundColor
+        self.accessibilityLabel = accessibilityLabel
         self.centerContent = centerContent()
     }
 
@@ -179,6 +182,9 @@ struct ProgressRing<Content: View>: View {
 
             centerContent
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue("\(Int(progress * 100))%")
     }
 }
 
@@ -211,6 +217,7 @@ struct SegmentedPicker: View {
     @Binding var selection: String
     let options: [String]
     var fullWidth: Bool = true
+    var fontSize: CGFloat = 13
 
     var body: some View {
         HStack(spacing: 0) {
@@ -222,7 +229,7 @@ struct SegmentedPicker: View {
                     Haptics.light()
                 } label: {
                     Text(option)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: fontSize, weight: .semibold))
                         .foregroundStyle(selection == option ? Color.bloomTextPrimary : Color.bloomTextSecondary)
                         .frame(maxWidth: fullWidth ? .infinity : nil)
                         .padding(.horizontal, fullWidth ? 0 : 12)
@@ -397,6 +404,9 @@ struct HealthStatusBar: View {
                 }
             }
             .frame(height: 8)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("健康度")
+            .accessibilityValue("\(Int(health))%")
         }
     }
 }
@@ -430,6 +440,9 @@ struct GrowthProgressBar: View {
                 }
             }
             .frame(height: 6)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("成长进度")
+            .accessibilityValue("\(Int(progress))%")
         }
     }
 }
@@ -447,6 +460,7 @@ struct StreakBadge: View {
         HStack(spacing: 6) {
             Text("🔥")
                 .font(.system(size: 16))
+                .accessibilityHidden(true)
 
             Text("连续 \(days) 天")
                 .font(.system(size: 13, weight: .semibold))
@@ -456,6 +470,7 @@ struct StreakBadge: View {
                 Badge("里程碑", style: .brand)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -473,6 +488,7 @@ struct WaterRecordRow: View {
                 iconColor: Color.bloomWater,
                 size: .small
             )
+            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(amount)ml")
@@ -491,6 +507,7 @@ struct WaterRecordRow: View {
                 .foregroundStyle(Color.bloomTextSecondary)
         }
         .padding(.vertical, 12)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -530,6 +547,7 @@ struct ProgressCapsule: View {
             Image(systemName: "droplets")
                 .font(.system(size: 14))
                 .foregroundStyle(Color.bloomWater)
+                .accessibilityHidden(true)
 
             Text("还差 \(remaining) ml")
                 .font(.system(size: 13, weight: .medium))
@@ -539,22 +557,28 @@ struct ProgressCapsule: View {
         .padding(.vertical, 8)
         .background(Color.bloomPrimarySubtle)
         .clipShape(Capsule())
+        .accessibilityElement(children: .combine)
     }
 }
 
 struct StatsCard: View {
     let stats: [(icon: String, value: String, label: String)]
+    var valueColors: [Color]? = nil
+    var showIcon: Bool = true
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(Array(stats.enumerated()), id: \.offset) { index, stat in
                 VStack(spacing: 4) {
-                    Text(stat.icon)
-                        .font(.system(size: 24))
+                    if showIcon {
+                        Text(stat.icon)
+                            .font(.system(size: 28))
+                            .accessibilityHidden(true)
+                    }
 
                     Text(stat.value)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.bloomTextPrimary)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(valueColors?[index] ?? Color.bloomTextPrimary)
 
                     Text(stat.label)
                         .font(.system(size: 11))

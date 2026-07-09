@@ -96,6 +96,9 @@ struct OnboardingView: View {
             }
         }
         .opacity(contentOpacity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("页面指示器")
+        .accessibilityValue("第 \(currentPage + 1) 页，共 \(totalPages) 页")
     }
     
     // MARK: - 第1页：欢迎页
@@ -115,18 +118,19 @@ struct OnboardingView: View {
                     .foregroundStyle(Color.bloomPrimary)
                     .symbolEffect(.pulse, options: .repeating.speed(0.5))
                     .scaleEffect(iconScale)
+                    .accessibilityHidden(true)
             }
             
             VStack(spacing: 16) {
-                Text("养成喝水好习惯")
+                Text(L.buildHydrationHabit)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomTextPrimary)
                 
-                Text("让植物茁壮成长")
+                Text(L.growPlantHealthy)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomPrimary)
                 
-                Text("每次喝水，你的植物都会长大一点")
+                Text(L.everySipPlantGrows)
                     .font(.system(size: 17))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .padding(.top, 8)
@@ -135,7 +139,7 @@ struct OnboardingView: View {
             Spacer()
             
             // 下一步按钮
-            nextButton(title: "开始") {
+            nextButton(title: L.startButton) {
                 withAnimation {
                     currentPage = 1
                 }
@@ -170,7 +174,7 @@ struct OnboardingView: View {
                     )
                     .frame(width: 140, height: 160)
                     
-                    Text(showPlantAnimation ? "🌱 种子发芽了！" : "🌰 一颗小种子")
+                    Text(showPlantAnimation ? L.seedSprouted : L.littleSeed)
                         .font(.system(size: 18, weight: .medium))
                         .foregroundStyle(Color.bloomTextSecondary)
                 }
@@ -178,15 +182,15 @@ struct OnboardingView: View {
             .scaleEffect(iconScale)
             
             VStack(spacing: 16) {
-                Text("每次喝水")
+                Text(L.everySip)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomTextPrimary)
                 
-                Text("植物都会茁壮成长")
+                Text(L.plantThrives)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomPrimary)
                 
-                Text("坚持喝水，看着你的植物从种子成长为美丽的花朵")
+                Text(L.keepDrinkingWatchGrow)
                     .font(.system(size: 17))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .multilineTextAlignment(.center)
@@ -205,7 +209,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "drop.fill")
                         .font(.system(size: 16, weight: .semibold))
-                    Text("点击浇水试试")
+                    Text(L.tapToWater)
                         .font(.system(size: 17, weight: .semibold))
                 }
                 .foregroundStyle(.white)
@@ -216,7 +220,7 @@ struct OnboardingView: View {
             }
             .opacity(showPlantAnimation ? 0 : 1)
             
-            nextButton(title: "下一步") {
+            nextButton(title: L.nextStep) {
                 withAnimation {
                     currentPage = 2
                     // 重置动画状态
@@ -249,25 +253,27 @@ struct OnboardingView: View {
                         .opacity(bellBounce ? 1 : 0.8)
                         .scaleEffect(bellBounce ? 1.05 : 1.0)
                         .animation(Animation.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: bellBounce)
+                        .accessibilityHidden(true)
                     
                     Image(systemName: "drop.fill")
                         .font(.system(size: 24, weight: .medium))
                         .foregroundStyle(Color.bloomPrimary)
                         .offset(y: -8)
+                        .accessibilityHidden(true)
                 }
                 .scaleEffect(iconScale)
             }
             
             VStack(spacing: 16) {
-                Text("智能提醒")
+                Text(L.smartReminders)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomTextPrimary)
                 
-                Text("不再忘记喝水")
+                Text(L.neverForgetWater)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.bloomWater)
                 
-                Text("植物口渴时会提醒你，让它保持生机勃勃")
+                Text(L.plantThirstyReminder)
                     .font(.system(size: 17))
                     .foregroundStyle(Color.bloomTextSecondary)
                     .multilineTextAlignment(.center)
@@ -276,7 +282,7 @@ struct OnboardingView: View {
             
             Spacer()
             
-            nextButton(title: "下一步") {
+            nextButton(title: L.nextStep) {
                 withAnimation {
                     currentPage = 3
                 }
@@ -300,8 +306,9 @@ struct OnboardingView: View {
                 .foregroundStyle(Color.bloomPrimary)
                 .symbolEffect(.appear, options: .repeating.speed(0.3))
                 .scaleEffect(iconScale)
+                .accessibilityHidden(true)
             
-            Text("开始设置")
+            Text(L.startSetup)
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.bloomTextPrimary)
             
@@ -309,11 +316,11 @@ struct OnboardingView: View {
             VStack(spacing: 24) {
                 // 植物命名
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("给你的植物起个名字")
+                    Text(L.nameYourPlant)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.bloomTextSecondary)
                     
-                    TextField("小绿", text: $plantName)
+                    TextField(L.defaultPlantName, text: $plantName)
                         .font(.system(size: 18, weight: .medium))
                         .padding(16)
                         .background(Color.bloomSurfaceSecondary)
@@ -327,7 +334,7 @@ struct OnboardingView: View {
                 
                 // 目标水量
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("每日喝水目标")
+                    Text(L.dailyWaterGoal)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.bloomTextSecondary)
                     
@@ -361,8 +368,8 @@ struct OnboardingView: View {
                     }
                     
                     Text(Locale.current.identifier.contains("US")
-                         ? "基于美国标准：每天 8 杯 × 8oz ≈ 2400ml"
-                         : "基于中国卫健委建议：每日 2000ml")
+                         ? L.usStandardShort
+                         : L.cnStandardShort)
                         .font(.system(size: 13))
                         .foregroundStyle(Color.bloomTextTertiary)
                 }
@@ -373,11 +380,12 @@ struct OnboardingView: View {
                         Image(systemName: "heart.fill")
                             .font(.system(size: 20))
                             .foregroundStyle(Color.bloomDanger)
+                            .accessibilityHidden(true)
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("连接健康 App（可选）")
+                            Text(L.connectHealthOptional)
                                 .font(.system(size: 16, weight: .medium))
-                            Text("同步喝水记录到健康 App")
+                            Text(L.syncWaterToHealth)
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.bloomTextSecondary)
                         }
@@ -432,7 +440,7 @@ struct OnboardingView: View {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 20, weight: .semibold))
-                Text("开始养护")
+                Text(L.startCaring)
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
             }
             .foregroundStyle(.white)

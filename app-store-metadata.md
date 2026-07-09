@@ -207,7 +207,7 @@ Free (with In-App Purchases)
 **None** - We don't collect anonymous data either
 
 ### Privacy Policy URL
-`https://pangtongya.github.io/WaterMinder-Pro/privacy-policy.html` (host the privacy-policy.html file)
+`https://pangtongya.github.io/Bloom-Website/privacy-policy.html` (host the privacy-policy.html file)
 
 ---
 

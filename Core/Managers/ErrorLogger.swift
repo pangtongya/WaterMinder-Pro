@@ -128,7 +128,7 @@ final class ErrorLogger {
         file: String = #file,
         function: String = #function,
         line: Int = #line,
-        block: @MainActor () throws -> Void
+        block: @MainActor @escaping () throws -> Void
     ) {
         Task { @MainActor in
             do {

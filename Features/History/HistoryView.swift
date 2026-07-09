@@ -32,11 +32,15 @@ struct HistoryView: View {
             VStack(spacing: 12) {
                 // 统计摘要卡片
                 SurfaceCard {
-                    StatsCard(stats: [
-                        ("🔥", "\(waterStore.currentStreak)", NSLocalizedString("当前连胜", comment: "Current streak")),
-                        ("🏆", "\(waterStore.longestStreak)", NSLocalizedString("最长连胜", comment: "Longest streak")),
-                        ("💧", "\(waterStore.weekAverage)", NSLocalizedString("周均 ml", comment: "Weekly avg ml"))
-                    ])
+                    StatsCard(
+                        stats: [
+                            ("", "\(waterStore.currentStreak)", NSLocalizedString("当前连胜", comment: "Current streak")),
+                            ("", "\(waterStore.longestStreak)", NSLocalizedString("最长连胜", comment: "Longest streak")),
+                            ("", "\(waterStore.weekAverage)", NSLocalizedString("周均 ml", comment: "Weekly avg ml"))
+                        ],
+                        valueColors: [.bloomTextPrimary, .bloomTextPrimary, .bloomWater],
+                        showIcon: false
+                    )
                 }
                 .padding(.horizontal, 16)
 
@@ -94,7 +98,7 @@ struct HistoryView: View {
                         .padding(.vertical, 2)
                         .background(Color.bloomGoldMuted)
                         .foregroundStyle(Color.bloomGold)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     Text(L.deepInsights)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(Color.bloomTextPrimary)
@@ -105,7 +109,7 @@ struct HistoryView: View {
                     insightRow(
                         label: NSLocalizedString("达标率", comment: "Achievement rate"),
                         value: "\(achievementRate)%",
-                        color: achievementRate >= 60 ? .bloomSuccess : .bloomWarning,
+                        color: .bloomPrimary,
                         detail: NSLocalizedString("近30天", comment: "Last 30 days")
                     )
 
@@ -114,7 +118,7 @@ struct HistoryView: View {
                     insightRow(
                         label: NSLocalizedString("平均完成度", comment: "Average completion"),
                         value: "\(avgCompletionPercent)%",
-                        color: avgCompletionPercent >= 70 ? .bloomSuccess : .bloomWater,
+                        color: .bloomWater,
                         detail: NSLocalizedString("日均", comment: "Daily average")
                     )
 
@@ -123,7 +127,7 @@ struct HistoryView: View {
                     insightRow(
                         label: NSLocalizedString("本期最佳", comment: "Best day of the period"),
                         value: "\(bestDayAmount)ml",
-                        color: .bloomGold,
+                        color: .bloomPrimary,
                         detail: bestDayLabel
                     )
                 }
@@ -175,6 +179,7 @@ struct HistoryView: View {
                     .foregroundStyle(Color.bloomTextTertiary)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - 统计计算
@@ -241,6 +246,8 @@ struct HistoryView: View {
                         : Color.bloomWater.opacity(0.7)
                 )
                 .cornerRadius(6)
+                .accessibilityLabel(item.date.formatted(date: .abbreviated, time: .omitted))
+                .accessibilityValue("\(item.amount)ml")
             }
             
             // 目标线（虚线）
@@ -250,7 +257,7 @@ struct HistoryView: View {
                 .annotation(position: .top, alignment: .trailing) {
                     Text(NSLocalizedString("目标 \(goal)", comment: "Goal"))
                         .font(.system(size: 11))
-                        .foregroundStyle(Color.bloomWarning)
+                        .foregroundStyle(Color.bloomGold)
                         .padding(.trailing, 4)
                 }
         }
@@ -267,5 +274,6 @@ struct HistoryView: View {
             }
         }
         .chartYScale(domain: 0...Int(Double(goal) * 1.5))
+        .accessibilityLabel(period.label)
     }
 }

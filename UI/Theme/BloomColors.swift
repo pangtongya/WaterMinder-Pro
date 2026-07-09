@@ -81,12 +81,12 @@ extension Color {
     )
 
     static let bloomTextSecondary = Color.dynamic(
-        light: Color(hex: "8E8E93"),
+        light: Color(hex: "6E6E73"),
         dark: Color(hex: "98989D")
     )
 
     static let bloomTextTertiary = Color.dynamic(
-        light: Color(hex: "AEAEB2"),
+        light: Color(hex: "8A8A8E"),
         dark: Color(hex: "636366")
     )
 
